@@ -12,6 +12,43 @@ LOG = sys.stderr
 
 PatricUser = None
 
+def pretty_print_POST(req):
+    """
+    printed and may differ from the actual request.
+    """
+    print('{}\n{}\n{}\n\n{}'.format(
+        '-----------START-----------',
+        req.method + ' ' + req.url,
+        '\n'.join('{}: {}'.format(k, v) for k, v in req.headers.items()),
+        req.body,
+    ))
+
+def chunker(seq, size):
+    return (seq[pos:pos + size] for pos in range(0, len(seq), size))
+
+def genome_id_feature_gen(genome_ids, limit=2500000):
+    for gids in chunker(genome_ids, 10):
+        selectors = ["eq(feature_type,CDS)","eq(annotation,PATRIC)","in(genome_id,({}))".format(','.join(gids))]
+        genomes = "and({})".format(','.join(selectors))   
+        limit = "limit({})".format(limit)
+        select = "sort(+genome_id,+sequence_id,+start)"
+        base = "https://www.patricbrc.org/api/genome_feature/"
+        query = "&".join([genomes, limit, select])
+        headers = {"accept":"application/protein+fasta", "content-type": "application/rqlquery+x-www-form-urlencoded"}
+
+        #Stream the request so that we don't have to load it all into memory
+        r = requests.post(url=base, data=query, headers=headers, stream=True) 
+        #r = requests.Request('POST', url=base, headers=headers, data=query)
+        #prepared = r.prepare()
+        #pretty_print_POST(prepared)
+        #exit()
+        if r.encoding is None:
+            r.encoding = "utf-8"
+        if not r.ok:
+            logging.warning("Error in API request \n")
+        for line in r.iter_lines(decode_unicode=True):
+            yield line
+
 def createTSVGet(api_url=None):
     if api_url == None:
         api_url="https://www.patricbrc.org/api/"
