@@ -7,8 +7,8 @@ if __name__ == "__main__":
     #if you want to support multiple genomes for alignment you should make this json payload an nargs+ parameter
     parser.add_argument('--jfile',
             help='json file for job {"reference_genome_id": "1310806.3", \
-                    "output_file": "rnaseq_baumanii_1505311", \
-                    "recipe": ["FASTQC","TRIM","ALIGN"], "output_path": "/anwarren@patricbrc.org/home/test",\
+                    "output_file": "baumanii_1505311_systems", \
+                    "recipe": ["PATHWAYS","SUBSYSTEMS","FAMILIES"], "output_path": "/anwarren@patricbrc.org/home/test",\
                     }', required=True)
     parser.add_argument('--sstring', help='json server string specifying api {"data_api":"url"}', required=True, default=None)
     #parser.add_argument('-L', help='csv list of library names for comparison', required=False)
