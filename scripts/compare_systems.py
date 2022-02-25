@@ -5,7 +5,9 @@ from compare_systems_lib import run_compare_systems
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     #if you want to support multiple genomes for alignment you should make this json payload an nargs+ parameter
-    parser.add_argument('--jfile',help='json file for job', required=True)
+    parser.add_argument('--jfile',help='json file for job: \
+            {"output_file":<output_filename>, "output_path": /anwarren@patricbrc.org/home/test, \
+            "recipe": ["PATHWAYS","SUBSYSTEMS","FAMILIES"', required=True)
     # parser.add_argument('--sstring', help='json server string specifying api {"data_api":"url"}', required=True, default=None)
     parser.add_argument('-o', help='output directory. Defaults to current directory.', required=False, default=None)
     if len(sys.argv) ==1:
