@@ -104,21 +104,26 @@ def getGenomeIdsNamesByName(name, limit='10', Session=None):
         LOG.write(ret.url+"\n")
     return(ret.text.replace('"', ''))
 
-def getGenomeGroupIds(genomeGroupName, Session):
+def getGenomeGroupIds(genomeGroupName, Session, genomeGroupPath=False):
     LOG.write("getGenomeGroupIds(%s), PatricUser=%s\n"%(genomeGroupName, PatricUser))
-    genomeGroupSpecifier = PatricUser+"/home/Genome Groups/"+genomeGroupName
-    genomeGroupSpecifier = "/"+urllib.parse.quote(genomeGroupSpecifier)
-    genomeGroupSpecifier = genomeGroupSpecifier.replace("/", "%2f")
+    if genomeGroupPath: #genomeGroupName is assumed to be a full path
+        group_path = urllib.parse.quote(genomeGroupName)
+        genomeGroupSpecifier = group_path.replace("/", "%2f")
+    else: #assume the genome group is in /home/Genome Groups"
+        genomeGroupSpecifier = PatricUser+"/home/Genome Groups/"+genomeGroupName
+        genomeGroupSpecifier = "/"+urllib.parse.quote(genomeGroupSpecifier)
+        genomeGroupSpecifier = genomeGroupSpecifier.replace("/", "%2f")
     query = "in(genome_id,GenomeGroup("+genomeGroupSpecifier+"))"
     query += "&select(genome_id)"
     query += "&limit(10000)"
     if Debug:
         LOG.write("requesting group %s for user %s\n"%(genomeGroupName, PatricUser))
         LOG.write("query =  %s\n"%(query))
+    Base_url = "https://www.patricbrc.org/api/"
     ret = Session.get(Base_url+"genome/", params=query)
     if Debug:
         LOG.write(ret.url+"\n")
-    return(ret.text.replace('"', '').split("\n"))[1:-1]
+    return ret.text
 
 def getNamesForGenomeIds(genomeIds, Session):
 #    return getDataForGenomes(genomeIdSet, ["genome_id", "genome_name"])
