@@ -15,8 +15,49 @@ from contextlib import closing
 from multiprocessing import Process
 
 import requests
+import pandas as pd
 
 from bvbrc_api import authenticateByEnv,getGenomeGroupIds 
+
+def chunker(seq, size):
+    return (seq[pos:pos + size] for pos in range(0, len(seq), size))
+
+def run_families(genome_ids, output_file, output_dir, session):
+    base_query = "https://www.patricbrc.org/api/genome_feature/?in(genome_id,("
+    end_query = "))&limit(20000000)&http_accept=text/tsv"
+    query = base_query + ",".join(genome_ids) + end_query
+    print("GenomeFeatures Query:\n{0}".format(query))
+    req = session.get(query)
+    feature_df = pd.read_csv(query,sep="\t")
+    base_query2 = "https://www.patricbrc.org/api/genome_feature/?in(feature_id,("
+    end_query2 = "))&limit(20000000)&http_accept=text/tsv"
+    print_query = True
+    proteinfams_file = os.path.join(output_dir,output_file+"_proteinfams.tsv")
+    if os.path.exists(proteinfams_file):
+        os.remove(proteinfams_file)
+    for fids in chunker(feature_df.feature_id.tolist(), 10):
+        query2 = base_query2 + ",".join(fids) + end_query2
+        if print_query:
+            print("ProteinFamilies Query:\n{0}".format(query2))
+            print_query = False
+        req2 = session.get(query2)
+        with open(proteinfams_file,"a") as o:
+            o.write(req2.text)
+    
+
+def run_subsystems(genome_ids, output_file, output_dir, session):
+    
+    # json(facet,{"stat":{"type":"field","field":"superclass","limit":-1,"facet":{"subsystem_count":"unique(subsystem_id)","class":{"type":"field","field":"class","limit":-1,"facet":{"subsystem_count":"unique(subsystem_id)","gene_count":"unique(feature_id)","subclass":{"type":"field","field":"subclass","limit":-1,"facet":{"subsystem_count":"unique(subsystem_id)","gene_count":"unique(feature_id)"}}}}}}}):  
+
+    # query 
+    base_query = "https://www.patricbrc.org/api/subsystem/?in(genome_id,("
+    end_query = "))&limit(200000000)&http_accept=text/tsv"
+    query = base_query + ",".join(genome_ids) + end_query
+    print("Subsystems Query:\n{0}".format(query))
+    req = session.get(query)
+    subsystems_file = os.path.join(output_dir,output_file+"_subsystems.tsv")
+    with open(subsystems_file,"w") as o:
+        o.write(req.text)
 
 def run_pathways(genome_ids,output_file,output_dir, session):
     
@@ -62,6 +103,6 @@ def run_compare_systems(job_data, output_dir):
         genome_ids = genome_ids + genome_group_ids
         genome_ids = list(set(genome_ids))
 
-    run_pathways(genome_ids,output_file,output_dir,s)
-    #run_subsystems(genome_ids,output_dir)
-    #run_families(genome_ids,output_dir)
+    #run_pathways(genome_ids,output_file,output_dir,s)
+    #run_subsystems(genome_ids,output_file,output_dir,s)
+    run_families(genome_ids,output_file,output_dir,s)
