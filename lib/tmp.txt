@@ -1,0 +1,23 @@
+feature_id            PATRIC.562.79202.CP073719.CDS.3611.6025.fwd
+public                                                       True
+refseq_locus_tag                                      J6O05_00020
+subclass            Resistance to antibiotics and toxic compounds
+role_id                        DNA_gyrase_subunit_B_(EC_5.99.1.3)
+genome_id                                               562.79202
+taxon_id                                                      562
+gene                                                         gyrB
+subsystem_name               Antibiotic targets in DNA processing
+role_name                      DNA gyrase subunit B (EC 5.99.1.3)
+active                                                     active
+subsystem_id                 Antibiotic_targets_in_DNA_processing
+superclass                    STRESS RESPONSE, DEFENSE, VIRULENCE
+owner                                        PATRIC@patricbrc.org
+product                        DNA gyrase subunit B (EC 5.99.1.3)
+class                      Stress Response, Defense and Virulence
+patric_id                                     fig|562.79202.peg.4
+genome_name                          Escherichia coli strain CX12
+id                           bb0cb567-d5e1-4a22-b832-dfa68c895127
+_version_                                     1712255742285709300
+date_inserted                            2021-09-29T16:52:04.537Z
+date_modified                            2021-09-29T16:52:04.537Z
+Name: 0, dtype: object
