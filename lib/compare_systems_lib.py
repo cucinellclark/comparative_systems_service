@@ -27,7 +27,6 @@ def run_families(genome_ids, output_file, output_dir, session):
     end_query = "))&limit(20000000)&http_accept=text/tsv"
     query = base_query + ",".join(genome_ids) + end_query
     print("GenomeFeatures Query:\n{0}".format(query))
-    req = session.get(query)
     feature_df = pd.read_csv(query,sep="\t")
     base_query2 = "https://www.patricbrc.org/api/genome_feature/?in(feature_id,("
     end_query2 = "))&limit(20000000)&http_accept=text/tsv"
@@ -35,14 +34,18 @@ def run_families(genome_ids, output_file, output_dir, session):
     proteinfams_file = os.path.join(output_dir,output_file+"_proteinfams.tsv")
     if os.path.exists(proteinfams_file):
         os.remove(proteinfams_file)
+    proteinfams_list = []
     for fids in chunker(feature_df.feature_id.tolist(), 10):
         query2 = base_query2 + ",".join(fids) + end_query2
-        if print_query:
+        if print_query: #print first query
             print("ProteinFamilies Query:\n{0}".format(query2))
             print_query = False
-        req2 = session.get(query2)
-        with open(proteinfams_file,"a") as o:
-            o.write(req2.text)
+        tmp_df = pd.read_csv(query2,sep="\t")
+        proteinfams_list.append(tmp_df)
+    # TODO: remove feature_df to save memory???
+    # TODO: check the results from concat are correct
+    proteinfams_df = pd.concat(proteinfams_list)
+    proteinfams_df.to_csv(proteinfams_file, header=True, sep="\t")
     
 
 def run_subsystems(genome_ids, output_file, output_dir, session):
@@ -54,10 +57,9 @@ def run_subsystems(genome_ids, output_file, output_dir, session):
     end_query = "))&limit(200000000)&http_accept=text/tsv"
     query = base_query + ",".join(genome_ids) + end_query
     print("Subsystems Query:\n{0}".format(query))
-    req = session.get(query)
+    subsystems_df = pd.read_csv(query,sep="\t")
     subsystems_file = os.path.join(output_dir,output_file+"_subsystems.tsv")
-    with open(subsystems_file,"w") as o:
-        o.write(req.text)
+    subsystems_df.to_csv(subsystems_file, header=True, sep="\t")
 
 def run_pathways(genome_ids,output_file,output_dir, session):
     
@@ -66,10 +68,9 @@ def run_pathways(genome_ids,output_file,output_dir, session):
     end_query = "))&eq(annotation,PATRIC)&limit(200000000)&http_accept=text/tsv" 
     query = base_query + ",".join(genome_ids) + end_query
     print("Pathways Query:\n{0}".format(query))
-    req = session.get(query)
+    pathway_df = pd.read_csv(query,sep="\t")
     pathways_file = os.path.join(output_dir,output_file+"_pathways.tsv")
-    with open(pathways_file,"w") as o:
-        o.write(req.text)
+    pathway_df.to_csv(pathways_file, header=True, sep="\t")
 
 def get_genome_group_ids(group_list,s):
     genome_group_ids = []
@@ -103,6 +104,7 @@ def run_compare_systems(job_data, output_dir):
         genome_ids = genome_ids + genome_group_ids
         genome_ids = list(set(genome_ids))
 
-    #run_pathways(genome_ids,output_file,output_dir,s)
-    #run_subsystems(genome_ids,output_file,output_dir,s)
-    run_families(genome_ids,output_file,output_dir,s)
+    # TODO: add chunking
+    run_pathways(genome_ids,output_file,output_dir,s)
+    run_subsystems(genome_ids,output_file,output_dir,s)
+    #run_families(genome_ids,output_file,output_dir,s)
