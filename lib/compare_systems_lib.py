@@ -64,55 +64,65 @@ def run_families(genome_ids, output_file, output_dir, session):
     plfam_list = [] 
     pgfam_list = []
     figfam_list = []
-    for genome_id in proteinfams_df['genome_id']:
+    for genome_id in proteinfams_df['genome_id'].unique():
+        print("---{0}".format(genome_id))    
+    
         genome_df = proteinfams_df.loc[proteinfams_df['genome_id'] == genome_id]
-        
+
         plfam_table = genome_df.drop(['genome_name','accession','patric_id','refseq_locus_tag',
                                     'alt_locus_tag','feature_id','annotation','feature_type',
                                     'start','end','strand','figfam_id','pgfam_id','protein_id',
-                                    'na_length','gene','go'], axis=1) 
+                                    'aa_length','na_length','gene','go'], axis=1) 
         pgfam_table = genome_df.drop(['genome_name','accession','patric_id','refseq_locus_tag',
                                     'alt_locus_tag','feature_id','annotation','feature_type',
                                     'start','end','strand','figfam_id','plfam_id','protein_id',
-                                    'na_length','gene','go'], axis=1)
+                                    'aa_length','na_length','gene','go'], axis=1)
+        '''
         figfam_table = genome_df.drop(['genome_name','accession','patric_id','refseq_locus_tag',
                                     'alt_locus_tag','feature_id','annotation','feature_type',
                                     'start','end','strand','plfam_id','pgfam_id','protein_id',
-                                    'na_length','gene','go'], axis=1)
-
-        # TODO: check if removing duplicates needed
-    
+                                    'aa_length','na_length','gene','go'], axis=1)
+        '''
+        # TODO: different product field for same pl/pg_fam id
+        plfam_table = plfam_table.drop(['product'],axis=1)
+        pgfam_table = pgfam_table.drop(['product'],axis=1)
+        ###
 
         # TODO: floor or ceiling or decimal for mean and stddev stats
+        # TODO: need to check the stats calculationgs: min and max are having issues
         # plfam_stats 
         plfam_table['genome_count'] = [1]*plfam_table.shape[0] 
         plfam_table['min_aa_length'] = [0]*plfam_table.shape[0] 
         plfam_table['max_aa_length'] = [0]*plfam_table.shape[0] 
         plfam_table['mean_aa_length'] = [0]*plfam_table.shape[0] 
         plfam_table['stddev_aa_length'] = [0]*plfam_table.shape[0] 
+        # TODO: fix product
+        plfam_table['product'] = ['PRODUCT DESCRIPTION']*plfam_table.shape[0]
 
         for plfam_id in plfam_table['plfam_id']:
-            tmp_df = plfam_table.loc[plfam_table['plfam_id'] == plfam_id]
-            plfam_df.loc[plfam_table['plfam_id'] == plfam_id,'min_aa_length'] = np.min(tmp_df['aa_length'])
-            plfam_df.loc[plfam_table['plfam_id'] == plfam_id,'max_aa_length'] = np.max(tmp_df['aa_length'])
-            plfam_df.loc[plfam_table['plfam_id'] == plfam_id,'mean_aa_length'] = np.mean(tmp_df['aa_length'])
-            plfam_df.loc[plfam_table['plfam_id'] == plfam_id,'max_aa_length'] = np.std(tmp_df['aa_length'])
-        
+            tmp_df = genome_df.loc[genome_df['plfam_id'] == plfam_id]
+            plfam_table.loc[plfam_table['plfam_id'] == plfam_id,'min_aa_length'] = np.min(tmp_df['aa_length'])
+            plfam_table.loc[plfam_table['plfam_id'] == plfam_id,'max_aa_length'] = np.max(tmp_df['aa_length'])
+            plfam_table.loc[plfam_table['plfam_id'] == plfam_id,'mean_aa_length'] = np.mean(tmp_df['aa_length'])
+            plfam_table.loc[plfam_table['plfam_id'] == plfam_id,'max_aa_length'] = np.std(tmp_df['aa_length'])
         # pgfam_stats 
         pgfam_table['genome_count'] = [1]*pgfam_table.shape[0] 
         pgfam_table['min_aa_length'] = [0]*pgfam_table.shape[0] 
         pgfam_table['max_aa_length'] = [0]*pgfam_table.shape[0] 
         pgfam_table['mean_aa_length'] = [0]*pgfam_table.shape[0] 
         pgfam_table['stddev_aa_length'] = [0]*pgfam_table.shape[0] 
-
+        # TODO: fix product
+        pgfam_table['product'] = ['PRODUCT DESCRIPTION']*pgfam_table.shape[0]
+        '''
         for pgfam_id in pgfam_table['pgfam_id']:
-            tmp_df = pgfam_table.loc[pgfam_table['pgfam_id'] == pgfam_id]
-            pgfam_df.loc[pgfam_table['pgfam_id'] == pgfam_id,'min_aa_length'] = np.min(tmp_df['aa_length'])
-            pgfam_df.loc[pgfam_table['pgfam_id'] == pgfam_id,'max_aa_length'] = np.max(tmp_df['aa_length'])
-            pgfam_df.loc[pgfam_table['pgfam_id'] == pgfam_id,'mean_aa_length'] = np.mean(tmp_df['aa_length'])
-            pgfam_df.loc[pgfam_table['pgfam_id'] == pgfam_id,'max_aa_length'] = np.std(tmp_df['aa_length'])
-
+            tmp_df = genome_df.loc[genome_df['pgfam_id'] == pgfam_id]
+            pgfam_table.loc[pgfam_table['pgfam_id'] == pgfam_id,'min_aa_length'] = np.min(tmp_df['aa_length'])
+            pgfam_table.loc[pgfam_table['pgfam_id'] == pgfam_id,'max_aa_length'] = np.max(tmp_df['aa_length'])
+            pgfam_table.loc[pgfam_table['pgfam_id'] == pgfam_id,'mean_aa_length'] = np.mean(tmp_df['aa_length'])
+            pgfam_table.loc[pgfam_table['pgfam_id'] == pgfam_id,'max_aa_length'] = np.std(tmp_df['aa_length'])
+        '''
         # figfam_stats 
+        '''
         figfam_table['genome_count'] = [1]*figfam_table.shape[0] 
         figfam_table['min_aa_length'] = [0]*figfam_table.shape[0] 
         figfam_table['max_aa_length'] = [0]*figfam_table.shape[0] 
@@ -121,13 +131,31 @@ def run_families(genome_ids, output_file, output_dir, session):
 
         for figfam_id in figfam_table['figfam_id']:
             tmp_df = figfam_table.loc[figfam_table['figfam_id'] == figfam_id]
-            figfam_df.loc[figfam_table['figfam_id'] == figfam_id,'min_aa_length'] = np.min(tmp_df['aa_length'])
-            figfam_df.loc[figfam_table['figfam_id'] == figfam_id,'max_aa_length'] = np.max(tmp_df['aa_length'])
-            figfam_df.loc[figfam_table['figfam_id'] == figfam_id,'mean_aa_length'] = np.mean(tmp_df['aa_length'])
-            figfam_df.loc[figfam_table['figfam_id'] == figfam_id,'max_aa_length'] = np.std(tmp_df['aa_length'])
+            figfam_table.loc[figfam_table['figfam_id'] == figfam_id,'min_aa_length'] = np.min(tmp_df['aa_length'])
+            figfam_table.loc[figfam_table['figfam_id'] == figfam_id,'max_aa_length'] = np.max(tmp_df['aa_length'])
+            figfam_table.loc[figfam_table['figfam_id'] == figfam_id,'mean_aa_length'] = np.mean(tmp_df['aa_length'])
+            figfam_table.loc[figfam_table['figfam_id'] == figfam_id,'max_aa_length'] = np.std(tmp_df['aa_length'])
+        '''
 
+
+        plfam_list.append(plfam_table)
+        pgfam_list.append(pgfam_table)
+        #figfam_list.append(figfam_table)
     # TODO: across genome stats adjustments
 
+    # write out tables
+    plfam_output = pd.concat(plfam_list)
+    pgfam_output = pd.concat(pgfam_list)
+    #figfam_output = pd.concat(figfam_list)
+    plfam_summary_file = proteinfams_file.replace(".tsv","_plfam_summary.tsv")
+    pgfam_summary_file = proteinfams_file.replace(".tsv","_pgfam_summary.tsv")
+    #figfam_summary_file = proteinfams_file.replace(".tsv","_figfam_summary.tsv")
+
+    plfam_output.to_csv(plfam_summary_file,sep="\t",index=False)
+    pgfam_output.to_csv(pgfam_summary_file,sep="\t",index=False)
+    #figfam_output.to_csv(figfam_summary_file,sep="\t",index=False)
+
+    print("ProteinFamilies Complete")
 
 def run_subsystems(genome_ids, output_file, output_dir, session):
     
@@ -211,17 +239,17 @@ def run_pathways(genome_ids,output_file,output_dir, session):
     end_query = "))&eq(annotation,PATRIC)&limit(200000000)&http_accept=text/tsv" 
     query = base_query + ",".join(genome_ids) + end_query
     print("Pathways Query:\n{0}".format(query))
-    #pathway_df = pd.read_csv(query,sep="\t")
+    pathway_df = pd.read_csv(query,sep="\t")
     pathways_file = os.path.join(output_dir,output_file+"_pathways.tsv")
-    #pathway_df.to_csv(pathways_file, header=True, sep="\t")
+    pathway_df.to_csv(pathways_file, header=True, sep="\t", index=False)
 
     # TODO: create alt_locus_tag query
 
     #TODO: remove, reading in file for testing
-    pathway_df = pd.read_csv(pathways_file,sep="\t",index_col=0)
+    #pathway_df = pd.read_csv(pathways_file,sep="\t")
     pathways_list = []
-    ecNum_list = []
-    genes_list = []
+    ecnum_list = []
+    #genes_list = []
     for genome_id in pathway_df['genome_id'].unique(): 
         print('---{0}'.format(genome_id))
         genome_df = pathway_df.loc[pathway_df['genome_id'] == genome_id]
@@ -233,15 +261,16 @@ def run_pathways(genome_ids,output_file,output_dir, session):
         ec_table = genome_df.drop(['pathway_ec','genome_name','accession','genome_ec','product','feature_id',
                                     'gene','public','patric_id','sequence_id','taxon_id','refseq_locus_tag',
                                     'owner','id','_version_','date_inserted','date_modified'], axis=1)
+        '''
         # TODO: add alt_locus_tag column
         genes_table = genome_df.drop(['pathway_ec','genome_ec','public','sequence_id','feature_id',
                                         'taxon_id','owner','id','_version_','date_inserted','date_modified'], axis=1)
-        
-        #pathway_table = pathway_table.drop_duplicates()
-        #ec_table = ec_table.drop_duplicates()
+        '''
+        pathway_table = pathway_table.drop_duplicates()
+        ec_table = ec_table.drop_duplicates()
         # TODO: change NaN to empty?
         # TODO: check number of rows after solving multi-ec_num issue
-        genes_table = genes_table.drop_duplicates()
+        #genes_table = genes_table.drop_duplicates()
 
         # TODO: different descriptions and other fields for multiple ec numbers
         '''
@@ -255,7 +284,6 @@ def run_pathways(genome_ids,output_file,output_dir, session):
         '''
 
         # add pathway stats columns 
-        '''
         pathway_table['genome_count'] = [1]*pathway_table.shape[0]
         pathway_table['gene_count'] = [0]*pathway_table.shape[0]
         pathway_table['ec_count'] = [0]*pathway_table.shape[0]
@@ -266,21 +294,17 @@ def run_pathways(genome_ids,output_file,output_dir, session):
             pathway_table.loc[pathway_table['ec_count'] == pathway_id,'ec_count'] = len(tmp_df['ec_number'].unique())
             # TODO: genome_count
             # TODO: genome_ec
-        '''
 
         # add ec_number stats columns
         # TODO: remove: for testing, only keep one row per ec_number
         ### here
-        replace_df = pd.DataFrame() 
-        curr_nums = []
+        keep_rows = []
+        ec_list = []
         for i in range(0,ec_table.shape[0]):
-            if not ec_table.iloc[i]['ec_number'] in curr_nums:
-                curr_nums.append(ec_table.iloc[i]['ec_number'])
-                replace_df = pd.concat([replace_df,ec_table.iloc[i]])
-            
-        ec_table = replace_df
-        print(ec_table.shape)
-        return
+            if not ec_table.iloc[i]['ec_number'] in ec_list:
+                ec_list.append(ec_table.iloc[i]['ec_number'])
+                keep_rows.append(i)
+        ec_table = ec_table.iloc[keep_rows]
         ###
         ec_table['genome_count'] = [1]*ec_table.shape[0]
         ec_table['gene_count'] = [0]*ec_table.shape[0]
@@ -289,16 +313,27 @@ def run_pathways(genome_ids,output_file,output_dir, session):
         for ec_number in ec_table['ec_number']:
             tmp_df = genome_df.loc[genome_df['ec_number'] == ec_number]
             ec_table.loc[ec_table['ec_number'] == ec_number,'gene_count'] = len(tmp_df['feature_id'].unique()) 
-            ec_table.loc[ec_table['ec_number'] == ec_number,'gene_count'] = len(tmp_df['gene'].unique()) 
+            ec_table.loc[ec_table['ec_number'] == ec_number,'ec_count'] = len(tmp_df['ec_number'].unique()) 
             # TODO: genome_count
             # TODO: genome_ec
 
         # TODO: genes table stats
 
-    ###facets
-    table_dict = {}
-    # pathways table: pathway_id, pathway_name, pathway_call, annotation 
-     
+        # append to lists
+        pathways_list.append(pathway_table)
+        ecnum_list.append(ec_table)
+
+    # write out tables
+    pathway_output = pd.concat(pathways_list)
+    pathway_summary_file = pathways_file.replace(".tsv","_pathway_summary.tsv")
+    ec_output = pd.concat(ecnum_list)
+    ec_summary_file = pathways_file.replace(".tsv","_ec_summary.tsv")
+    # TODO: genes_output
+
+    pathway_output.to_csv(pathway_summary_file,sep="\t",index=False)
+    ec_output.to_csv(ec_summary_file,sep="\t",index=False)
+    # TODO: write genes summary file
+    print("Pathways Complete")
 
 def get_genome_group_ids(group_list,session):
     genome_group_ids = []
@@ -336,6 +371,7 @@ def run_compare_systems(job_data, output_dir):
         genome_ids = list(set(genome_ids))
 
     # TODO: add chunking
+    # TODO: add recipe
     #run_pathways(genome_ids,output_file,output_dir,s)
     #run_subsystems(genome_ids,output_file,output_dir,s)
     run_families(genome_ids,output_file,output_dir,s)
