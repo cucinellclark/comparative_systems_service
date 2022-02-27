@@ -1,0 +1,25 @@
+Unnamed: 0                                                     0
+ec_number                                                2.7.7.7
+pathway_ec                                         00230_2.7.7.7
+genome_name                         Escherichia coli strain CX08
+genome_id                                              562.80446
+annotation                                                PATRIC
+accession                                               CP073718
+genome_ec                                      562.80446_2.7.7.7
+ec_description                       DNA-directed DNA polymerase
+pathway_class                              Nucleotide Metabolism
+product             DNA polymerase III beta subunit (EC 2.7.7.7)
+pathway_id                                                   230
+gene                                                        dnaN
+public                                                      True
+pathway_name                                   Purine metabolism
+patric_id                                    fig|562.80446.peg.2
+sequence_id                                   562.80446.con.0001
+taxon_id                                                     562
+refseq_locus_tag                                     J6O57_00010
+feature_id           PATRIC.562.80446.CP073718.CDS.1409.2509.fwd
+owner                                       PATRIC@patricbrc.org
+id                          0cfd9365-a5e2-4bc7-9382-1cf867fdd49a
+_version_                                    1715075932552691700
+date_inserted                           2021-10-30T19:57:47.562Z
+date_modified                           2021-10-30T19:57:47.562Z
