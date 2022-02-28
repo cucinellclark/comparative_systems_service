@@ -202,6 +202,10 @@ def run_subsystems(genome_ids, output_file, output_dir, session):
                     #    key = build_key([superclass,clss,subclass,name]) #TODO: might not need 
                     #    key_set.add(key)
 
+    subsystems_overview_file = subsystems_file.replace('.tsv','_overview.json')
+    with open(subsystems_overview_file,'w') as o:
+        json.dump(overview_dict,o)
+
     # faceting for subsystems table
 
     st_list = [] #subsystem table list
@@ -226,11 +230,15 @@ def run_subsystems(genome_ids, output_file, output_dir, session):
             genome_table.loc[genome_table['subsystem_id'] == sub_id,'gene_count'] = len(tmp_df['gene'])
             genome_table.loc[genome_table['subsystem_id'] == sub_id,'role_count'] = len(tmp_df['role_id'])
             # TODO: genome count calculation
+        
+        # TODO: genes tab table
 
         st_list.append(genome_table)    
 
+    # TODO: genes table
     subsystems_table = pd.concat(st_list)
-    subsystems_table.to_csv("test.txt",sep="\t")
+    subsystems_table_output_file = subsystems_file.replace('.tsv','_summary.tsv')
+    subsystems_table.to_csv(subsystems_table_output_file,sep="\t",index=False)
 
 def run_pathways(genome_ids,output_file,output_dir, session):
     
@@ -373,5 +381,5 @@ def run_compare_systems(job_data, output_dir):
     # TODO: add chunking
     # TODO: add recipe
     #run_pathways(genome_ids,output_file,output_dir,s)
-    #run_subsystems(genome_ids,output_file,output_dir,s)
-    run_families(genome_ids,output_file,output_dir,s)
+    run_subsystems(genome_ids,output_file,output_dir,s)
+    #run_families(genome_ids,output_file,output_dir,s)
