@@ -32,6 +32,15 @@ def build_key(component_list):
     #key_parts = [x.lower() for x in mod_list]
     return ":".join(mod_list)
 
+# Returns the entry with the maximum occurences in a pandas dataframe column
+# df: pandas dataframe
+# col: column name
+def get_maximum_value(df, col):
+    # value counts returns an ordered list, descending
+    col_counts = df[col].value_counts() 
+    max_label = col_counts[0].index
+    return max_label
+
 def run_families(genome_ids, output_file, output_dir, session):
     base_query = "https://www.patricbrc.org/api/genome_feature/?in(genome_id,("
     end_query = "))&limit(20000000)&http_accept=text/tsv"
@@ -83,6 +92,8 @@ def run_families(genome_ids, output_file, output_dir, session):
                                     'start','end','strand','plfam_id','pgfam_id','protein_id',
                                     'aa_length','na_length','gene','go'], axis=1)
         '''
+        import pdb
+        pdb.set_trace()
         # TODO: different product field for same pl/pg_fam id
         plfam_table = plfam_table.drop(['product'],axis=1)
         pgfam_table = pgfam_table.drop(['product'],axis=1)
@@ -257,39 +268,30 @@ def run_pathways(genome_ids,output_file,output_dir, session):
     #pathway_df = pd.read_csv(pathways_file,sep="\t")
     pathways_list = []
     ecnum_list = []
-    #genes_list = []
-    for genome_id in pathway_df['genome_id'].unique(): 
-        print('---{0}'.format(genome_id))
+    genes_list = []
+    for genome_id in genome_ids: 
+        genome_id = float(genome_id)
+        print('---Faceting GenomeId: {0}---'.format(genome_id))
         genome_df = pathway_df.loc[pathway_df['genome_id'] == genome_id]
+
         pathway_table = genome_df.drop(['pathway_ec','genome_name','accession','genome_ec',
                                         'product','gene','public','patric_id','sequence_id','ec_number',
                                         'feature_id','taxon_id','ec_description','refseq_locus_tag','owner',
                                         'id','_version_','date_inserted','date_modified'], axis=1)
+
         # TODO: add index column
         ec_table = genome_df.drop(['pathway_ec','genome_name','accession','genome_ec','product','feature_id',
                                     'gene','public','patric_id','sequence_id','taxon_id','refseq_locus_tag',
                                     'owner','id','_version_','date_inserted','date_modified'], axis=1)
-        '''
         # TODO: add alt_locus_tag column
         genes_table = genome_df.drop(['pathway_ec','genome_ec','public','sequence_id','feature_id',
                                         'taxon_id','owner','id','_version_','date_inserted','date_modified'], axis=1)
-        '''
+
         pathway_table = pathway_table.drop_duplicates()
         ec_table = ec_table.drop_duplicates()
-        # TODO: change NaN to empty?
-        # TODO: check number of rows after solving multi-ec_num issue
-        #genes_table = genes_table.drop_duplicates()
-
-        # TODO: different descriptions and other fields for multiple ec numbers
-        '''
-        for ec_num in ec_table['ec_number'].unique():
-            if ec_num == "2.7.7.7":
-                continue
-            tmp = ec_table.loc[ec_table['ec_number'] == ec_num]
-            if tmp.shape[0] > 1:
-                print(tmp.head())
-                return
-        '''
+        genes_table = genes_table.drop_duplicates()
+        # TODO: other fillna?
+        genes_table.gene = genes_table.gene.fillna('')
 
         # add pathway stats columns 
         pathway_table['genome_count'] = [1]*pathway_table.shape[0]
@@ -299,13 +301,11 @@ def run_pathways(genome_ids,output_file,output_dir, session):
         for pathway_id in pathway_table['pathway_id']:
             tmp_df = genome_df.loc[genome_df['pathway_id'] == pathway_id]
             pathway_table.loc[pathway_table['pathway_id'] == pathway_id,'gene_count'] = len(tmp_df['feature_id'].unique())
-            pathway_table.loc[pathway_table['ec_count'] == pathway_id,'ec_count'] = len(tmp_df['ec_number'].unique())
-            # TODO: genome_count
-            # TODO: genome_ec
+            pathway_table.loc[pathway_table['pathway_id'] == pathway_id,'ec_count'] = len(tmp_df['ec_number'].unique())
+            pathway_table.loc[pathway_table['pathway_id'] == pathway_id,'genome_ec'] = len(tmp_df['ec_number'].unique())
 
-        # add ec_number stats columns
-        # TODO: remove: for testing, only keep one row per ec_number
-        ### here
+        # get first ec_number entry data for ec_number duplicates
+        # pathway_id is not duplicated for each ec_number
         keep_rows = []
         ec_list = []
         for i in range(0,ec_table.shape[0]):
@@ -313,7 +313,8 @@ def run_pathways(genome_ids,output_file,output_dir, session):
                 ec_list.append(ec_table.iloc[i]['ec_number'])
                 keep_rows.append(i)
         ec_table = ec_table.iloc[keep_rows]
-        ###
+
+        # add ec_number stats columns
         ec_table['genome_count'] = [1]*ec_table.shape[0]
         ec_table['gene_count'] = [0]*ec_table.shape[0]
         ec_table['ec_count'] = [0]*ec_table.shape[0]
@@ -322,24 +323,60 @@ def run_pathways(genome_ids,output_file,output_dir, session):
             tmp_df = genome_df.loc[genome_df['ec_number'] == ec_number]
             ec_table.loc[ec_table['ec_number'] == ec_number,'gene_count'] = len(tmp_df['feature_id'].unique()) 
             ec_table.loc[ec_table['ec_number'] == ec_number,'ec_count'] = len(tmp_df['ec_number'].unique()) 
-            # TODO: genome_count
-            # TODO: genome_ec
+            ec_table.loc[ec_table['ec_number'] == ec_number,'genome_ec'] = len(tmp_df['ec_number'].unique())
 
-        # TODO: genes table stats
+        # get first gene entry data for gene duplicates
+        # pathway_id is not duplicated for each gene
+        keep_rows = []
+        g_list = []
+        for i in range(0,genes_table.shape[0]):
+            if not genes_table.iloc[i]['gene'] in g_list:
+                g_list.append(genes_table.iloc[i]['gene'])
+                keep_rows.append(i)
+        genes_table = genes_table.iloc[keep_rows]
 
+        # genes table stats
+        genes_table['genome_count'] = [1]*genes_table.shape[0]
+        genes_table['gene_count'] = [0]*genes_table.shape[0]
+        genes_table['ec_count'] = [0]*genes_table.shape[0]
+        genes_table['genome_ec'] = [0]*genes_table.shape[0]
+        genes_table['alt_locus_tag'] = ['TMP_Alt_LOCUS']*genes_table.shape[0]
+        for gene in genes_table['gene']:
+            tmp_df = genome_df.loc[genome_df['gene'] == gene]
+            genes_table.loc[genes_table['gene'] == gene,'gene_count'] = len(tmp_df['feature_id'].unique())
+            genes_table.loc[genes_table['gene'] == gene,'ec_count'] = len(tmp_df['ec_number'].unique())
+            genes_table.loc[genes_table['gene'] == gene,'genome_ec'] = len(tmp_df['ec_number'].unique())
+        
         # append to lists
         pathways_list.append(pathway_table)
         ecnum_list.append(ec_table)
+        genes_list.append(genes_table)
 
-    # write out tables
+    # concatenate tables and do final calculations: genome_count, genome_ec
+    # counting is done per-genome, multi-genome calculation adjustments are done on the front end
     pathway_output = pd.concat(pathways_list)
-    pathway_summary_file = pathways_file.replace(".tsv","_pathway_summary.tsv")
     ec_output = pd.concat(ecnum_list)
-    ec_summary_file = pathways_file.replace(".tsv","_ec_summary.tsv")
+    genes_output = pd.concat(genes_list)
+
+    output_json = {}
+    output_json['pathway'] = pathway_output.to_csv(index=False,sep='\t')
+    output_json['ecnumber'] = ec_output.to_csv(index=False,sep='\t')
+    output_json['genes'] = genes_output.to_csv(index=False,sep='\t')
+    output_json['genome_ids'] = genome_ids
+
+    output_json_file = pathways_file.replace('.tsv','_tables.json')
+    with open(output_json_file,"w") as o:
+        o.write(json.dumps(output_json))
+
+    # TODO: change to json file
+    #return
+    # write out tables
+    #pathway_summary_file = pathways_file.replace(".tsv","_pathway_summary.tsv")
+    #ec_summary_file = pathways_file.replace(".tsv","_ec_summary.tsv")
     # TODO: genes_output
 
-    pathway_output.to_csv(pathway_summary_file,sep="\t",index=False)
-    ec_output.to_csv(ec_summary_file,sep="\t",index=False)
+    #pathway_output.to_csv(pathway_summary_file,sep="\t",index=False)
+    #ec_output.to_csv(ec_summary_file,sep="\t",index=False)
     # TODO: write genes summary file
     print("Pathways Complete")
 
@@ -368,8 +405,8 @@ def run_compare_systems(job_data, output_dir):
     output_file = job_data["output_file"]
 
 
-    print("run_systems: job_data = {0}".format(job_data)) 
-    print("run_systems: output_dir = {0}".format(output_dir)) 
+    print("Run ComparativeSystems:\njob_data = {0}".format(job_data)) 
+    print("output_dir = {0}".format(output_dir)) 
     
     genome_ids = job_data["genome_ids"]
     if len(job_data["genome_groups"]) > 0:
@@ -380,6 +417,6 @@ def run_compare_systems(job_data, output_dir):
 
     # TODO: add chunking
     # TODO: add recipe
-    #run_pathways(genome_ids,output_file,output_dir,s)
-    run_subsystems(genome_ids,output_file,output_dir,s)
+    run_pathways(genome_ids,output_file,output_dir,s)
+    #run_subsystems(genome_ids,output_file,output_dir,s)
     #run_families(genome_ids,output_file,output_dir,s)
