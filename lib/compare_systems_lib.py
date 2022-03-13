@@ -18,7 +18,7 @@ import requests
 import pandas as pd
 import numpy as np
 
-from bvbrc_api import authenticateByEnv,getGenomeGroupIds 
+from bvbrc_api import authenticateByEnv,getGenomeGroupIds,get_feature_df 
 
 def chunker(seq, size):
     return (seq[pos:pos + size] for pos in range(0, len(seq), size))
@@ -42,16 +42,21 @@ def get_maximum_value(df, col):
     return max_label
 
 def run_families(genome_ids, output_file, output_dir, session):
-    base_query = "https://www.patricbrc.org/api/genome_feature/?in(genome_id,("
-    end_query = "))&limit(20000000)&http_accept=text/tsv"
-    query = base_query + ",".join(genome_ids) + end_query
-    print("GenomeFeatures Query:\n{0}".format(query))
+    #base_query = "https://www.patricbrc.org/api/genome_feature/?in(genome_id,("
+    #end_query = "))&limit(-1)&http_accept=text/tsv"
+    #query = base_query + ",".join(genome_ids) + end_query
+    #print("GenomeFeatures Query:\n{0}".format(query))
     #feature_df = pd.read_csv(query,sep="\t")
+    feature_list = []
+    for tmp_df in get_feature_df(genome_ids, limit=2500000):
+        feature_list.append(tmp_df)
+
+    #feature_df = pd.DataFrame(feature_list,columns=header)
+    #feature_df = pd.concat(feature_list)
+    '''
     base_query2 = "https://www.patricbrc.org/api/genome_feature/?in(feature_id,("
     end_query2 = "))&limit(20000000)&http_accept=text/tsv"
     print_query = True
-    proteinfams_file = os.path.join(output_dir,output_file+"_proteinfams.tsv")
-    '''
     if os.path.exists(proteinfams_file):
         os.remove(proteinfams_file)
     proteinfams_list = []
@@ -62,21 +67,23 @@ def run_families(genome_ids, output_file, output_dir, session):
             print_query = False
         tmp_df = pd.read_csv(query2,sep="\t")
         proteinfams_list.append(tmp_df)
+    '''
     # TODO: remove feature_df to save memory???
     # TODO: check the results from concat are correct
-    proteinfams_df = pd.concat(proteinfams_list)
-    proteinfams_df.to_csv(proteinfams_file, header=True, sep="\t")
-    '''
+    proteinfams_df = pd.concat(feature_list)
+    proteinfams_file = os.path.join(output_dir,output_file+"_proteinfams.tsv")
+    proteinfams_df.to_csv(proteinfams_file, index=False, header=True, sep="\t")
     # TODO: remove, used for testing
-    proteinfams_df = pd.read_csv(proteinfams_file,sep="\t",index_col=0)
+    #proteinfams_df = pd.read_csv(proteinfams_file,sep="\t")
     
     plfam_list = [] 
     pgfam_list = []
     figfam_list = []
-    for genome_id in proteinfams_df['genome_id'].unique():
+    genome_ids = [562.86167,562.80446]
+    for genome_id in genome_ids:
         print("---{0}".format(genome_id))    
     
-        genome_df = proteinfams_df.loc[proteinfams_df['genome_id'] == genome_id]
+        genome_df = proteinfams_df.loc[proteinfams_df['genome_id'] == float(genome_id)]
 
         plfam_table = genome_df.drop(['genome_name','accession','patric_id','refseq_locus_tag',
                                     'alt_locus_tag','feature_id','annotation','feature_type',
@@ -86,85 +93,99 @@ def run_families(genome_ids, output_file, output_dir, session):
                                     'alt_locus_tag','feature_id','annotation','feature_type',
                                     'start','end','strand','figfam_id','plfam_id','protein_id',
                                     'aa_length','na_length','gene','go'], axis=1)
+        
         '''
         figfam_table = genome_df.drop(['genome_name','accession','patric_id','refseq_locus_tag',
                                     'alt_locus_tag','feature_id','annotation','feature_type',
                                     'start','end','strand','plfam_id','pgfam_id','protein_id',
                                     'aa_length','na_length','gene','go'], axis=1)
         '''
-        import pdb
-        pdb.set_trace()
-        # TODO: different product field for same pl/pg_fam id
-        plfam_table = plfam_table.drop(['product'],axis=1)
-        pgfam_table = pgfam_table.drop(['product'],axis=1)
-        ###
 
-        # TODO: floor or ceiling or decimal for mean and stddev stats
-        # TODO: need to check the stats calculationgs: min and max are having issues
+        #TODO: leading to some incorrect results: unique genes per genome
+        keep_rows = []
+        plfam_id_list = []
+        for i in range(0,plfam_table.shape[0]):
+            if not plfam_table.iloc[i]['plfam_id'] in plfam_id_list:
+                plfam_id_list.append(plfam_table.iloc[i]['plfam_id'])
+                keep_rows.append(i)
+        plfam_table = plfam_table.iloc[keep_rows]
+
+        keep_rows = []
+        pgfam_id_list = []
+        for i in range(0,pgfam_table.shape[0]):
+            if not pgfam_table.iloc[i]['pgfam_id'] in pgfam_id_list:
+                pgfam_id_list.append(pgfam_table.iloc[i]['pgfam_id'])
+                keep_rows.append(i)
+        pgfam_table = pgfam_table.iloc[keep_rows]
+
         # plfam_stats 
+        plfam_table['feature_count'] = [0]*plfam_table.shape[0]
         plfam_table['genome_count'] = [1]*plfam_table.shape[0] 
-        plfam_table['min_aa_length'] = [0]*plfam_table.shape[0] 
-        plfam_table['max_aa_length'] = [0]*plfam_table.shape[0] 
-        plfam_table['mean_aa_length'] = [0]*plfam_table.shape[0] 
-        plfam_table['stddev_aa_length'] = [0]*plfam_table.shape[0] 
-        # TODO: fix product
-        plfam_table['product'] = ['PRODUCT DESCRIPTION']*plfam_table.shape[0]
-
+        plfam_table['aa_length_min'] = [0]*plfam_table.shape[0] 
+        plfam_table['aa_length_max'] = [0]*plfam_table.shape[0] 
+        plfam_table['aa_length_mean'] = [0]*plfam_table.shape[0] 
+        plfam_table['aa_length_std'] = [0]*plfam_table.shape[0] 
         for plfam_id in plfam_table['plfam_id']:
             tmp_df = genome_df.loc[genome_df['plfam_id'] == plfam_id]
-            plfam_table.loc[plfam_table['plfam_id'] == plfam_id,'min_aa_length'] = np.min(tmp_df['aa_length'])
-            plfam_table.loc[plfam_table['plfam_id'] == plfam_id,'max_aa_length'] = np.max(tmp_df['aa_length'])
-            plfam_table.loc[plfam_table['plfam_id'] == plfam_id,'mean_aa_length'] = np.mean(tmp_df['aa_length'])
-            plfam_table.loc[plfam_table['plfam_id'] == plfam_id,'max_aa_length'] = np.std(tmp_df['aa_length'])
+            plfam_table.loc[plfam_table['plfam_id'] == plfam_id,'aa_length_min'] = np.min(tmp_df['aa_length'])
+            plfam_table.loc[plfam_table['plfam_id'] == plfam_id,'aa_length_max'] = np.max(tmp_df['aa_length'])
+            plfam_table.loc[plfam_table['plfam_id'] == plfam_id,'aa_length_mean'] = np.mean(tmp_df['aa_length'])
+            plfam_table.loc[plfam_table['plfam_id'] == plfam_id,'aa_length_std'] = np.std(tmp_df['aa_length'])
+            plfam_table.loc[plfam_table['plfam_id'] == plfam_id,'feature_count'] = len(tmp_df['feature_id'])
+
         # pgfam_stats 
+        pgfam_table['feature_count'] = [0]*pgfam_table.shape[0] 
         pgfam_table['genome_count'] = [1]*pgfam_table.shape[0] 
-        pgfam_table['min_aa_length'] = [0]*pgfam_table.shape[0] 
-        pgfam_table['max_aa_length'] = [0]*pgfam_table.shape[0] 
-        pgfam_table['mean_aa_length'] = [0]*pgfam_table.shape[0] 
-        pgfam_table['stddev_aa_length'] = [0]*pgfam_table.shape[0] 
-        # TODO: fix product
-        pgfam_table['product'] = ['PRODUCT DESCRIPTION']*pgfam_table.shape[0]
-        '''
+        pgfam_table['aa_length_min'] = [0]*pgfam_table.shape[0] 
+        pgfam_table['aa_length_max'] = [0]*pgfam_table.shape[0] 
+        pgfam_table['aa_length_mean'] = [0]*pgfam_table.shape[0] 
+        pgfam_table['aa_length_std'] = [0]*pgfam_table.shape[0] 
         for pgfam_id in pgfam_table['pgfam_id']:
             tmp_df = genome_df.loc[genome_df['pgfam_id'] == pgfam_id]
-            pgfam_table.loc[pgfam_table['pgfam_id'] == pgfam_id,'min_aa_length'] = np.min(tmp_df['aa_length'])
-            pgfam_table.loc[pgfam_table['pgfam_id'] == pgfam_id,'max_aa_length'] = np.max(tmp_df['aa_length'])
-            pgfam_table.loc[pgfam_table['pgfam_id'] == pgfam_id,'mean_aa_length'] = np.mean(tmp_df['aa_length'])
-            pgfam_table.loc[pgfam_table['pgfam_id'] == pgfam_id,'max_aa_length'] = np.std(tmp_df['aa_length'])
-        '''
+            pgfam_table.loc[pgfam_table['pgfam_id'] == pgfam_id,'aa_length_min'] = np.min(tmp_df['aa_length'])
+            pgfam_table.loc[pgfam_table['pgfam_id'] == pgfam_id,'aa_length_max'] = np.max(tmp_df['aa_length'])
+            pgfam_table.loc[pgfam_table['pgfam_id'] == pgfam_id,'aa_length_mean'] = np.mean(tmp_df['aa_length'])
+            pgfam_table.loc[pgfam_table['pgfam_id'] == pgfam_id,'aa_length_std'] = np.std(tmp_df['aa_length'])
+            pgfam_table.loc[pgfam_table['pgfam_id'] == pgfam_id,'feature_count'] = len(tmp_df['feature_id'])
+
+
         # figfam_stats 
         '''
+        figfam_table['feature_count'] = [0]*figfam_table.shape[0] 
         figfam_table['genome_count'] = [1]*figfam_table.shape[0] 
-        figfam_table['min_aa_length'] = [0]*figfam_table.shape[0] 
-        figfam_table['max_aa_length'] = [0]*figfam_table.shape[0] 
-        figfam_table['mean_aa_length'] = [0]*figfam_table.shape[0] 
-        figfam_table['stddev_aa_length'] = [0]*figfam_table.shape[0] 
+        figfam_table['aa_length_min'] = [0]*figfam_table.shape[0] 
+        figfam_table['aa_length_max'] = [0]*figfam_table.shape[0] 
+        figfam_table['aa_length_mean'] = [0]*figfam_table.shape[0] 
+        figfam_table['aa_length_std'] = [0]*figfam_table.shape[0] 
 
         for figfam_id in figfam_table['figfam_id']:
             tmp_df = figfam_table.loc[figfam_table['figfam_id'] == figfam_id]
-            figfam_table.loc[figfam_table['figfam_id'] == figfam_id,'min_aa_length'] = np.min(tmp_df['aa_length'])
-            figfam_table.loc[figfam_table['figfam_id'] == figfam_id,'max_aa_length'] = np.max(tmp_df['aa_length'])
-            figfam_table.loc[figfam_table['figfam_id'] == figfam_id,'mean_aa_length'] = np.mean(tmp_df['aa_length'])
-            figfam_table.loc[figfam_table['figfam_id'] == figfam_id,'max_aa_length'] = np.std(tmp_df['aa_length'])
+            figfam_table.loc[figfam_table['figfam_id'] == figfam_id,'aa_length_min'] = np.min(tmp_df['aa_length'])
+            figfam_table.loc[figfam_table['figfam_id'] == figfam_id,'aa_length_max'] = np.max(tmp_df['aa_length'])
+            figfam_table.loc[figfam_table['figfam_id'] == figfam_id,'aa_length_mean'] = np.mean(tmp_df['aa_length'])
+            figfam_table.loc[figfam_table['figfam_id'] == figfam_id,'aa_length_std'] = np.std(tmp_df['aa_length'])
+            figfam_table.loc[figfam_table['figfam_id'] == figfam_id,'feature_count'] = len(tmp_df['feature_id'])
         '''
-
 
         plfam_list.append(plfam_table)
         pgfam_list.append(pgfam_table)
         #figfam_list.append(figfam_table)
-    # TODO: across genome stats adjustments
 
     # write out tables
+    # counting is done per-genome, multi-genome calculation adjustments are done on the front end
     plfam_output = pd.concat(plfam_list)
     pgfam_output = pd.concat(pgfam_list)
     #figfam_output = pd.concat(figfam_list)
-    plfam_summary_file = proteinfams_file.replace(".tsv","_plfam_summary.tsv")
-    pgfam_summary_file = proteinfams_file.replace(".tsv","_pgfam_summary.tsv")
-    #figfam_summary_file = proteinfams_file.replace(".tsv","_figfam_summary.tsv")
 
-    plfam_output.to_csv(plfam_summary_file,sep="\t",index=False)
-    pgfam_output.to_csv(pgfam_summary_file,sep="\t",index=False)
-    #figfam_output.to_csv(figfam_summary_file,sep="\t",index=False)
+    output_json = {}
+    output_json['plfam'] = plfam_output.to_csv(index=False,sep='\t')
+    output_json['pgfam'] = pgfam_output.to_csv(index=False,sep='\t')
+    #output_json['figfam'] = genes_output.to_csv(index=False,sep='\t')
+    output_json['genome_ids'] = genome_ids
+
+    output_json_file = proteinfams_file.replace('.tsv','_tables_testing.json')
+    with open(output_json_file,"w") as o:
+        o.write(json.dumps(output_json))
 
     print("ProteinFamilies Complete")
 
@@ -417,6 +438,6 @@ def run_compare_systems(job_data, output_dir):
 
     # TODO: add chunking
     # TODO: add recipe
-    run_pathways(genome_ids,output_file,output_dir,s)
+    #run_pathways(genome_ids,output_file,output_dir,s)
     #run_subsystems(genome_ids,output_file,output_dir,s)
-    #run_families(genome_ids,output_file,output_dir,s)
+    run_families(genome_ids,output_file,output_dir,s)

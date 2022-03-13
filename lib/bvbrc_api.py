@@ -4,6 +4,7 @@ import re
 import requests
 import urllib.request, urllib.parse, urllib.error
 import json
+import pandas as pd
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
@@ -48,6 +49,24 @@ def genome_id_feature_gen(genome_ids, limit=2500000):
             logging.warning("Error in API request \n")
         for line in r.iter_lines(decode_unicode=True):
             yield line
+
+### This is a generator function
+# will return a list of tables
+def get_feature_df(genome_ids, limit=2500000):
+    for gids in chunker(genome_ids, 2):
+        query = f"https://www.patricbrc.org/api/genome_feature/?in(genome_id,({','.join(gids)}))&eq(annotation,PATRIC)&limit({limit})&http_accept=text/tsv"
+        print('query = {0}'.format(query))
+        
+        pathway_df = pd.read_csv(query,sep='\t')
+        yield pathway_df
+
+def get_subsystems_df(genome_ids,limit=250000):
+    for gids in chunker(genome_ids, 2):
+        subsystem_query = f"https://patricbrc.org/api/subsystem/?in(genome_id,({','.join(gids)}))&limit(10000000)&http_accept=text/tsv"
+        print('query = {0}'.format(subsystem_query))
+
+        subsystem_df = pd.read_csv(subsystem_query,sep='\t')
+        yield subsystem_df
 
 def createTSVGet(api_url=None):
     if api_url == None:
