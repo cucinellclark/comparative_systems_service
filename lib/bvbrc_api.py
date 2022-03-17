@@ -2,6 +2,7 @@ import os
 import sys
 import re
 import requests
+import io
 import urllib.request, urllib.parse, urllib.error
 import json
 import pandas as pd
@@ -52,20 +53,59 @@ def genome_id_feature_gen(genome_ids, limit=2500000):
 
 ### This is a generator function
 # will return a list of tables
+# sort needed for http_download
 def get_feature_df(genome_ids, limit=2500000):
-    for gids in chunker(genome_ids, 2):
-        query = f"https://www.patricbrc.org/api/genome_feature/?in(genome_id,({','.join(gids)}))&eq(annotation,PATRIC)&limit({limit})&http_accept=text/tsv"
-        print('query = {0}'.format(query))
-        
-        pathway_df = pd.read_csv(query,sep='\t')
+    for gids in chunker(genome_ids, 20):
+        batch=""
+        genomes = "in(genome_id,({0}))".format(','.join(gids))
+        limit = "limit({0})".format(limit)
+        select = "sort(+feature_id)&eq(annotation,PATRIC)"
+        base = "https://www.patricbrc.org/api/genome_feature/?http_download=true"
+        query = "&".join([genomes,limit,select]) 
+        headers = {"accept":"text/tsv", "content-type":"application/rqlquery+x-www-form-urlencoded"}
+        #query = requests.get(f"https://www.patricbrc.org/api/genome_feature/?in(genome_id,({','.join(gids)}))&eq(annotation,PATRIC)&limit({limit})&sort(+genome_id)&http_download=true&http_accept=text/tsv")
+
+        print('Query = {0}\nHeaders = {1}'.format(base+'&'+query,headers))
+        with requests.post(url=base, data=query, headers=headers) as r:
+            if r.encoding is None:
+                r.encoding = "utf-8"
+            if not r.ok:
+                logging.warning("Error in API request \n")
+            batch_count=0
+            for line in r.iter_lines(decode_unicode=True):
+                line = line+'\n'
+                batch+=line
+                batch_count+=1        
+        pathway_df = pd.read_csv(io.StringIO(batch),sep='\t')
         yield pathway_df
 
-def get_subsystems_df(genome_ids,limit=250000):
-    for gids in chunker(genome_ids, 2):
-        subsystem_query = f"https://patricbrc.org/api/subsystem/?in(genome_id,({','.join(gids)}))&limit(10000000)&http_accept=text/tsv"
-        print('query = {0}'.format(subsystem_query))
+### This is a generator function
+# will return a list of tables
+# sort needed for http_download
+def get_subsystems_df(genome_ids,limit=2500000):
+    for gids in chunker(genome_ids, 20):
+        batch=""
+        genomes = "in(genome_id,({0}))".format(','.join(gids))
+        limit = "limit({0})".format(limit)
+        select = "sort(+id)"
+        base = "https://www.patricbrc.org/api/subsystem/?http_download=true"
+        query = "&".join([genomes,limit,select])
+        headers = {"accept":"text/tsv", "content-type":"application/rqlquery+x-www-form-urlencoded"}
+        #subsystem_query = requests.get(f"https://patricbrc.org/api/subsystem/?in(genome_id,({','.join(gids)}))&limit({limit})&sort(+genome_id)&http_accept=text/tsv")
+        #subsystem_df = pd.read_table(io.StringIO(subsystem_query.text),sep='\t')
 
-        subsystem_df = pd.read_csv(subsystem_query,sep='\t')
+        print('Query = {0}\nHeaders = {1}'.format(base+'&'+query,headers))
+        with requests.post(url=base, data=query, headers=headers) as r:
+            if r.encoding is None:
+                r.encoding = "utf-8"
+            if not r.ok:
+                logging.warning("Error in API request \n")
+            batch_count=0
+            for line in r.iter_lines(decode_unicode=True):
+                line = line+'\n'
+                batch+=line
+                batch_count+=1
+        subsystem_df = pd.read_csv(io.StringIO(batch),sep='\t')
         yield subsystem_df
 
 def createTSVGet(api_url=None):

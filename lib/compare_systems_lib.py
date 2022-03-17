@@ -18,7 +18,7 @@ import requests
 import pandas as pd
 import numpy as np
 
-from bvbrc_api import authenticateByEnv,getGenomeGroupIds,get_feature_df 
+from bvbrc_api import authenticateByEnv,getGenomeGroupIds,get_feature_df,get_subsystems_df
 
 def chunker(seq, size):
     return (seq[pos:pos + size] for pos in range(0, len(seq), size))
@@ -51,26 +51,33 @@ def run_families(genome_ids, output_file, output_dir, session):
     for tmp_df in get_feature_df(genome_ids, limit=2500000):
         feature_list.append(tmp_df)
 
-    #feature_df = pd.DataFrame(feature_list,columns=header)
-    #feature_df = pd.concat(feature_list)
-    '''
-    base_query2 = "https://www.patricbrc.org/api/genome_feature/?in(feature_id,("
-    end_query2 = "))&limit(20000000)&http_accept=text/tsv"
-    print_query = True
-    if os.path.exists(proteinfams_file):
-        os.remove(proteinfams_file)
-    proteinfams_list = []
-    for fids in chunker(feature_df.feature_id.tolist(), 10):
-        query2 = base_query2 + ",".join(fids) + end_query2
-        if print_query: #print first query
-            print("ProteinFamilies Query:\n{0}".format(query2))
-            print_query = False
-        tmp_df = pd.read_csv(query2,sep="\t")
-        proteinfams_list.append(tmp_df)
-    '''
-    # TODO: remove feature_df to save memory???
-    # TODO: check the results from concat are correct
     proteinfams_df = pd.concat(feature_list)
+    # change column names
+    column_map = {
+        'Genome': 'genome_name',
+        'Genome ID': 'genome_id',
+        'Accession': 'accession',
+        'BRC ID': 'patric_id',
+        'RefSeq Locus Tag': 'refseq_locus_tag',
+        'Alt Locus Tag': 'alt_locus_tag',
+        'Feature ID': 'feature_id',
+        'Annotation': 'annotation',
+        'Feature Type': 'feature_type',
+        'Start': 'start',
+        'End': 'end',
+        'Length': 'length',
+        'Strand': 'strand',
+        'FIGfam ID': 'figfam_id',
+        'PATRIC genus-specific families (PLfams)': 'plfam_id',
+        'PATRIC cross-genus families (PGfams)': 'pgfam_id',
+        'Protein ID': 'protein_id',
+        'AA Length': 'aa_length',
+        'Gene Symbol': 'gene',
+        'Product': 'product',
+        'GO': 'go'
+    }
+    proteinfams_df.rename(columns=column_map, inplace=True)
+
     proteinfams_file = os.path.join(output_dir,output_file+"_proteinfams.tsv")
     proteinfams_df.to_csv(proteinfams_file, index=False, header=True, sep="\t")
     # TODO: remove, used for testing
@@ -79,26 +86,26 @@ def run_families(genome_ids, output_file, output_dir, session):
     plfam_list = [] 
     pgfam_list = []
     figfam_list = []
-    genome_ids = [562.86167,562.80446]
+    # TODO: remove
     for genome_id in genome_ids:
         print("---{0}".format(genome_id))    
-    
+
         genome_df = proteinfams_df.loc[proteinfams_df['genome_id'] == float(genome_id)]
 
         plfam_table = genome_df.drop(['genome_name','accession','patric_id','refseq_locus_tag',
                                     'alt_locus_tag','feature_id','annotation','feature_type',
                                     'start','end','strand','figfam_id','pgfam_id','protein_id',
-                                    'aa_length','na_length','gene','go'], axis=1) 
+                                    'aa_length','gene','go'], axis=1) 
         pgfam_table = genome_df.drop(['genome_name','accession','patric_id','refseq_locus_tag',
                                     'alt_locus_tag','feature_id','annotation','feature_type',
                                     'start','end','strand','figfam_id','plfam_id','protein_id',
-                                    'aa_length','na_length','gene','go'], axis=1)
+                                    'aa_length','gene','go'], axis=1)
         
         '''
         figfam_table = genome_df.drop(['genome_name','accession','patric_id','refseq_locus_tag',
                                     'alt_locus_tag','feature_id','annotation','feature_type',
                                     'start','end','strand','plfam_id','pgfam_id','protein_id',
-                                    'aa_length','na_length','gene','go'], axis=1)
+                                    'aa_length','gene','go'], axis=1)
         '''
 
         #TODO: leading to some incorrect results: unique genes per genome
@@ -121,6 +128,7 @@ def run_families(genome_ids, output_file, output_dir, session):
         # plfam_stats 
         plfam_table['feature_count'] = [0]*plfam_table.shape[0]
         plfam_table['genome_count'] = [1]*plfam_table.shape[0] 
+        plfam_table['genomes'] = [0]*plfam_table.shape[0]
         plfam_table['aa_length_min'] = [0]*plfam_table.shape[0] 
         plfam_table['aa_length_max'] = [0]*plfam_table.shape[0] 
         plfam_table['aa_length_mean'] = [0]*plfam_table.shape[0] 
@@ -132,10 +140,12 @@ def run_families(genome_ids, output_file, output_dir, session):
             plfam_table.loc[plfam_table['plfam_id'] == plfam_id,'aa_length_mean'] = np.mean(tmp_df['aa_length'])
             plfam_table.loc[plfam_table['plfam_id'] == plfam_id,'aa_length_std'] = np.std(tmp_df['aa_length'])
             plfam_table.loc[plfam_table['plfam_id'] == plfam_id,'feature_count'] = len(tmp_df['feature_id'])
+            plfam_table.loc[plfam_table['plfam_id'] == plfam_id,'genomes'] = format(len(tmp_df['feature_id']),'#04x').replace('0x','')
 
         # pgfam_stats 
         pgfam_table['feature_count'] = [0]*pgfam_table.shape[0] 
         pgfam_table['genome_count'] = [1]*pgfam_table.shape[0] 
+        pgfam_table['genomes'] = [0]*pgfam_table.shape[0]
         pgfam_table['aa_length_min'] = [0]*pgfam_table.shape[0] 
         pgfam_table['aa_length_max'] = [0]*pgfam_table.shape[0] 
         pgfam_table['aa_length_mean'] = [0]*pgfam_table.shape[0] 
@@ -147,12 +157,14 @@ def run_families(genome_ids, output_file, output_dir, session):
             pgfam_table.loc[pgfam_table['pgfam_id'] == pgfam_id,'aa_length_mean'] = np.mean(tmp_df['aa_length'])
             pgfam_table.loc[pgfam_table['pgfam_id'] == pgfam_id,'aa_length_std'] = np.std(tmp_df['aa_length'])
             pgfam_table.loc[pgfam_table['pgfam_id'] == pgfam_id,'feature_count'] = len(tmp_df['feature_id'])
+            pgfam_table.loc[pgfam_table['pgfam_id'] == pgfam_id,'genomes'] = format(len(tmp_df['feature_id']),'#04x').replace('0x','')
 
 
         # figfam_stats 
         '''
         figfam_table['feature_count'] = [0]*figfam_table.shape[0] 
         figfam_table['genome_count'] = [1]*figfam_table.shape[0] 
+        figfam_table['genomes'] = [0]*figfam_table.shape[0]
         figfam_table['aa_length_min'] = [0]*figfam_table.shape[0] 
         figfam_table['aa_length_max'] = [0]*figfam_table.shape[0] 
         figfam_table['aa_length_mean'] = [0]*figfam_table.shape[0] 
@@ -165,6 +177,7 @@ def run_families(genome_ids, output_file, output_dir, session):
             figfam_table.loc[figfam_table['figfam_id'] == figfam_id,'aa_length_mean'] = np.mean(tmp_df['aa_length'])
             figfam_table.loc[figfam_table['figfam_id'] == figfam_id,'aa_length_std'] = np.std(tmp_df['aa_length'])
             figfam_table.loc[figfam_table['figfam_id'] == figfam_id,'feature_count'] = len(tmp_df['feature_id'])
+            figfam_table.loc[figfam_table['figfam_id'] == figfam_id,'genomes'] = format(len(tmp_df['feature_id']),'#04x').replace('0x','')
         '''
 
         plfam_list.append(plfam_table)
@@ -183,7 +196,7 @@ def run_families(genome_ids, output_file, output_dir, session):
     #output_json['figfam'] = genes_output.to_csv(index=False,sep='\t')
     output_json['genome_ids'] = genome_ids
 
-    output_json_file = proteinfams_file.replace('.tsv','_tables_testing.json')
+    output_json_file = proteinfams_file.replace('.tsv','_tables.json')
     with open(output_json_file,"w") as o:
         o.write(json.dumps(output_json))
 
@@ -192,6 +205,14 @@ def run_families(genome_ids, output_file, output_dir, session):
 def run_subsystems(genome_ids, output_file, output_dir, session):
     
     # json(facet,{"stat":{"type":"field","field":"superclass","limit":-1,"facet":{"subsystem_count":"unique(subsystem_id)","class":{"type":"field","field":"class","limit":-1,"facet":{"subsystem_count":"unique(subsystem_id)","gene_count":"unique(feature_id)","subclass":{"type":"field","field":"subclass","limit":-1,"facet":{"subsystem_count":"unique(subsystem_id)","gene_count":"unique(feature_id)"}}}}}}}):  
+
+    # TODO: testing bvbrc_api get_subsystem_df
+    table_list = []
+    for table in get_subsystems_df(genome_ids): 
+        table_list.append(table)
+    import pdb
+    pdb.set_trace()
+    sys.exit()
 
     # query 
     base_query = "https://www.patricbrc.org/api/subsystem/?in(genome_id,("
