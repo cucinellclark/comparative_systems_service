@@ -108,6 +108,34 @@ def get_subsystems_df(genome_ids,limit=2500000):
         subsystem_df = pd.read_csv(io.StringIO(batch),sep='\t')
         yield subsystem_df
 
+def get_pathway_df(genome_ids,limit=2500000):
+    for gids in chunker(genome_ids, 20):
+        batch=""
+        genomes = "in(genome_id,({0}))".format(','.join(gids))
+        limit = "limit({0})".format(limit)
+        select = "eq(annotation,PATRIC)&sort(+id)"
+        base = "https://www.patricbrc.org/api/pathway/?http_download=true"
+        query = "&".join([genomes,limit,select])
+        headers = {"accept":"text/tsv", "content-type":"application/rqlquery+x-www-form-urlencoded"}
+
+        print('Query = {0}\nHeaders = {1}'.format(base+'&'+query,headers))
+        with requests.post(url=base, data=query, headers=headers) as r:
+            if r.encoding is None:
+                r.encoding = "utf-8"
+            if not r.ok:
+                logging.warning("Error in API request \n")
+            batch_count=0
+            for line in r.iter_lines(decode_unicode=True):
+                line = line+'\n'
+                batch+=line
+                batch_count+=1 
+        pathway_df = pd.read_csv(io.StringIO(batch),sep='\t')
+        yield pathway_df
+
+#def get_genome_df(genome_ids,limit=2500000):
+#    for gids in chunker(genome_ids,10):
+#        
+
 def createTSVGet(api_url=None):
     if api_url == None:
         api_url="https://www.patricbrc.org/api/"
