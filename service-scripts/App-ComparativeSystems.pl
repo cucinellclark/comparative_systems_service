@@ -15,7 +15,9 @@ use IPC::Run qw(run);
 use Cwd;
 use Clone;
 
+print 'start';
 my $script = Bio::KBase::AppService::AppScript->new(\&process_compsystems, \&preflight);
+print 'after';
 
 my $rc = $script->run(\@ARGV);
 
@@ -77,7 +79,7 @@ sub process_compsystems
 
     my $parallel = $ENV{P3_ALLOCATED_CPU};
 
-    my @cmd = ("python3","compare_systems.py","-o",$work_dir,"--jfile", $jdesc);
+    my @cmd = ("compare_systems.py","-o",$work_dir,"--jfile", $jdesc);
 
     warn Dumper (\@cmd, $params_to_app);
 
@@ -96,6 +98,7 @@ sub process_compsystems
     my @files = sort {$a cmp $b } grep { -f "$work_dir/$_" } readdir(D);
 
     my $output = 1;
+    my $output_dir = "$params->{output_path}/.$params->{output_file}";
     for my $file (@files)
     {
         for my $suf (@output_suffixes)
@@ -103,10 +106,9 @@ sub process_compsystems
             if ($file =~ $suf->[0])
             {
                 $output = 0;
-                my $path = "$output_folder/$file";
                 my $type = $suf->[1];
 
-                $app->workspace->save_file_to_file("$work_dir/$file", {}, "$output_folder/$file", $type, 1, 
+                $app->workspace->save_file_to_file("$work_dir/$file", {}, "$output_dir/$file", $type, 1, 
                                                     (-s "$work_dir/$file" > 10_000 ? 1 : 0), #use shock for larger files
                                                     $token);                                                   
             }
