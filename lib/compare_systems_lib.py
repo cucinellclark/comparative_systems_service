@@ -305,6 +305,8 @@ def run_pathways(genome_ids,output_file,output_dir, session):
     for tmp_df in get_pathway_df(genome_ids, limit=2500000):
         pathway_list.append(tmp_df)
     pathway_df = pd.concat(pathway_list)
+    # convert pathway_id to string and pad with leading zeros
+    pathway_df['pathway_id'] = pathway_df['pathway_id'].apply(lambda x: '{0:0>5}'.format(x)) 
     pathway_df.to_csv(pathways_file,sep='\t',index=False)
 
     #TODO: remove, reading in file for testing

@@ -9,15 +9,14 @@ use strict;
 use Data::Dumper;
 use File::Basename;
 use File::Slurp;
+use File::Temp;
 use LWP::UserAgent;
 use JSON::XS;
 use IPC::Run qw(run);
 use Cwd;
 use Clone;
 
-print 'start';
 my $script = Bio::KBase::AppService::AppScript->new(\&process_compsystems, \&preflight);
-print 'after';
 
 my $rc = $script->run(\@ARGV);
 
@@ -55,7 +54,8 @@ sub process_compsystems
 
     # TODO: may not need a staging directory
     
-    my $cwd = getcwd();
+    # my $cwd = getcwd();
+    my $cwd = File::Temp->newdir( CLEANUP => 1 ); 
     my $work_dir = "$cwd/work";
     my $stage_dir = "$cwd/stage";
 

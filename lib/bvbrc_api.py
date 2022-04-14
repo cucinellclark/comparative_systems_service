@@ -76,6 +76,7 @@ def get_feature_df(genome_ids, limit=2500000):
                 line = line+'\n'
                 batch+=line
                 batch_count+=1        
+        # TODO: set column data types
         pathway_df = pd.read_csv(io.StringIO(batch),sep='\t')
         yield pathway_df
 
@@ -105,6 +106,7 @@ def get_subsystems_df(genome_ids,limit=2500000):
                 line = line+'\n'
                 batch+=line
                 batch_count+=1
+        # TODO: set column data types
         subsystem_df = pd.read_csv(io.StringIO(batch),sep='\t')
         yield subsystem_df
 
@@ -112,10 +114,10 @@ def get_pathway_df(genome_ids,limit=2500000):
     for gids in chunker(genome_ids, 20):
         batch=""
         genomes = "in(genome_id,({0}))".format(','.join(gids))
-        limit = "limit({0})".format(limit)
+        limit_str = "limit({0})".format(limit)
         select = "eq(annotation,PATRIC)&sort(+id)"
         base = "https://www.patricbrc.org/api/pathway/?http_download=true"
-        query = "&".join([genomes,limit,select])
+        query = "&".join([genomes,limit_str,select])
         headers = {"accept":"text/tsv", "content-type":"application/rqlquery+x-www-form-urlencoded"}
 
         print('Query = {0}\nHeaders = {1}'.format(base+'&'+query,headers))
@@ -129,6 +131,7 @@ def get_pathway_df(genome_ids,limit=2500000):
                 line = line+'\n'
                 batch+=line
                 batch_count+=1 
+        # TODO: set column data types
         pathway_df = pd.read_csv(io.StringIO(batch),sep='\t')
         yield pathway_df
 
