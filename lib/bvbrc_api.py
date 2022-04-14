@@ -2,8 +2,10 @@ import os
 import sys
 import re
 import requests
+import io
 import urllib.request, urllib.parse, urllib.error
 import json
+import pandas as pd
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
@@ -48,6 +50,94 @@ def genome_id_feature_gen(genome_ids, limit=2500000):
             logging.warning("Error in API request \n")
         for line in r.iter_lines(decode_unicode=True):
             yield line
+
+### This is a generator function
+# will return a list of tables
+# sort needed for http_download
+def get_feature_df(genome_ids, limit=2500000):
+    for gids in chunker(genome_ids, 20):
+        batch=""
+        genomes = "in(genome_id,({0}))".format(','.join(gids))
+        limit = "limit({0})".format(limit)
+        select = "sort(+feature_id)&eq(annotation,PATRIC)"
+        base = "https://www.patricbrc.org/api/genome_feature/?http_download=true"
+        query = "&".join([genomes,limit,select]) 
+        headers = {"accept":"text/tsv", "content-type":"application/rqlquery+x-www-form-urlencoded"}
+        #query = requests.get(f"https://www.patricbrc.org/api/genome_feature/?in(genome_id,({','.join(gids)}))&eq(annotation,PATRIC)&limit({limit})&sort(+genome_id)&http_download=true&http_accept=text/tsv")
+
+        print('Query = {0}\nHeaders = {1}'.format(base+'&'+query,headers))
+        with requests.post(url=base, data=query, headers=headers) as r:
+            if r.encoding is None:
+                r.encoding = "utf-8"
+            if not r.ok:
+                logging.warning("Error in API request \n")
+            batch_count=0
+            for line in r.iter_lines(decode_unicode=True):
+                line = line+'\n'
+                batch+=line
+                batch_count+=1        
+        # TODO: set column data types
+        pathway_df = pd.read_csv(io.StringIO(batch),sep='\t')
+        yield pathway_df
+
+### This is a generator function
+# will return a list of tables
+# sort needed for http_download
+def get_subsystems_df(genome_ids,limit=2500000):
+    for gids in chunker(genome_ids, 20):
+        batch=""
+        genomes = "in(genome_id,({0}))".format(','.join(gids))
+        limit = "limit({0})".format(limit)
+        select = "sort(+id)"
+        base = "https://www.patricbrc.org/api/subsystem/?http_download=true"
+        query = "&".join([genomes,limit,select])
+        headers = {"accept":"text/tsv", "content-type":"application/rqlquery+x-www-form-urlencoded"}
+        #subsystem_query = requests.get(f"https://patricbrc.org/api/subsystem/?in(genome_id,({','.join(gids)}))&limit({limit})&sort(+genome_id)&http_accept=text/tsv")
+        #subsystem_df = pd.read_table(io.StringIO(subsystem_query.text),sep='\t')
+
+        print('Query = {0}\nHeaders = {1}'.format(base+'&'+query,headers))
+        with requests.post(url=base, data=query, headers=headers) as r:
+            if r.encoding is None:
+                r.encoding = "utf-8"
+            if not r.ok:
+                logging.warning("Error in API request \n")
+            batch_count=0
+            for line in r.iter_lines(decode_unicode=True):
+                line = line+'\n'
+                batch+=line
+                batch_count+=1
+        # TODO: set column data types
+        subsystem_df = pd.read_csv(io.StringIO(batch),sep='\t')
+        yield subsystem_df
+
+def get_pathway_df(genome_ids,limit=2500000):
+    for gids in chunker(genome_ids, 20):
+        batch=""
+        genomes = "in(genome_id,({0}))".format(','.join(gids))
+        limit_str = "limit({0})".format(limit)
+        select = "eq(annotation,PATRIC)&sort(+id)"
+        base = "https://www.patricbrc.org/api/pathway/?http_download=true"
+        query = "&".join([genomes,limit_str,select])
+        headers = {"accept":"text/tsv", "content-type":"application/rqlquery+x-www-form-urlencoded"}
+
+        print('Query = {0}\nHeaders = {1}'.format(base+'&'+query,headers))
+        with requests.post(url=base, data=query, headers=headers) as r:
+            if r.encoding is None:
+                r.encoding = "utf-8"
+            if not r.ok:
+                logging.warning("Error in API request \n")
+            batch_count=0
+            for line in r.iter_lines(decode_unicode=True):
+                line = line+'\n'
+                batch+=line
+                batch_count+=1 
+        # TODO: set column data types
+        pathway_df = pd.read_csv(io.StringIO(batch),sep='\t')
+        yield pathway_df
+
+#def get_genome_df(genome_ids,limit=2500000):
+#    for gids in chunker(genome_ids,10):
+#        
 
 def createTSVGet(api_url=None):
     if api_url == None:
@@ -104,21 +194,26 @@ def getGenomeIdsNamesByName(name, limit='10', Session=None):
         LOG.write(ret.url+"\n")
     return(ret.text.replace('"', ''))
 
-def getGenomeGroupIds(genomeGroupName, Session):
+def getGenomeGroupIds(genomeGroupName, Session, genomeGroupPath=False):
     LOG.write("getGenomeGroupIds(%s), PatricUser=%s\n"%(genomeGroupName, PatricUser))
-    genomeGroupSpecifier = PatricUser+"/home/Genome Groups/"+genomeGroupName
-    genomeGroupSpecifier = "/"+urllib.parse.quote(genomeGroupSpecifier)
-    genomeGroupSpecifier = genomeGroupSpecifier.replace("/", "%2f")
+    if genomeGroupPath: #genomeGroupName is assumed to be a full path
+        group_path = urllib.parse.quote(genomeGroupName)
+        genomeGroupSpecifier = group_path.replace("/", "%2f")
+    else: #assume the genome group is in /home/Genome Groups"
+        genomeGroupSpecifier = PatricUser+"/home/Genome Groups/"+genomeGroupName
+        genomeGroupSpecifier = "/"+urllib.parse.quote(genomeGroupSpecifier)
+        genomeGroupSpecifier = genomeGroupSpecifier.replace("/", "%2f")
     query = "in(genome_id,GenomeGroup("+genomeGroupSpecifier+"))"
     query += "&select(genome_id)"
     query += "&limit(10000)"
     if Debug:
         LOG.write("requesting group %s for user %s\n"%(genomeGroupName, PatricUser))
         LOG.write("query =  %s\n"%(query))
+    Base_url = "https://www.patricbrc.org/api/"
     ret = Session.get(Base_url+"genome/", params=query)
     if Debug:
         LOG.write(ret.url+"\n")
-    return(ret.text.replace('"', '').split("\n"))[1:-1]
+    return ret.text
 
 def getNamesForGenomeIds(genomeIds, Session):
 #    return getDataForGenomes(genomeIdSet, ["genome_id", "genome_name"])

@@ -24,10 +24,18 @@
       "type": "wsid"
     },
     {
-        "id": "recipe",
-        "label": "Recipe",
+        "id": "genome_ids",
+        "label": "Genome Ids",
         "allow_multiple": true,
-        "required": 1,
+        "required": 0,
+        "default": [],
+        "type": "list"
+    },
+    {
+        "id": "genome_groups",
+        "label": "Genome Groups",
+        "allow_multiple": true,
+        "required": 0,
         "default": [],
         "type": "list"
     }
