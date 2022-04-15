@@ -79,7 +79,7 @@ sub process_compsystems
 
     my $parallel = $ENV{P3_ALLOCATED_CPU};
 
-    my @cmd = ("compare_systems.py","-o",$work_dir,"--jfile", $jdesc);
+    my @cmd = ("compare_systems","-o",$work_dir,"--jfile", $jdesc);
 
     warn Dumper (\@cmd, $params_to_app);
 
