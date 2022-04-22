@@ -18,7 +18,7 @@ import requests
 import pandas as pd
 import numpy as np
 
-from bvbrc_api import authenticateByEnv,getGenomeGroupIds,get_feature_df,get_subsystems_df,get_pathway_df
+from bvbrc_api import authenticateByEnv,getGenomeGroupIds,getFeatureDf,getSubsystemsDf,getPathwayDf
 
 def chunker(seq, size):
     return (seq[pos:pos + size] for pos in range(0, len(seq), size))
@@ -48,10 +48,7 @@ def run_families(genome_ids, output_file, output_dir, session):
     #print("GenomeFeatures Query:\n{0}".format(query))
     #feature_df = pd.read_csv(query,sep="\t")
     feature_list = []
-    for tmp_df in get_feature_df(genome_ids, limit=2500000):
-        feature_list.append(tmp_df)
-
-    proteinfams_df = pd.concat(feature_list)
+    proteinfams_df = getFeatureDf(genome_ids, limit=2500000)
     # change column names
     column_map = {
         'Genome': 'genome_name',
@@ -211,9 +208,7 @@ def run_subsystems(genome_ids, output_file, output_dir, session):
     # json(facet,{"stat":{"type":"field","field":"superclass","limit":-1,"facet":{"subsystem_count":"unique(subsystem_id)","class":{"type":"field","field":"class","limit":-1,"facet":{"subsystem_count":"unique(subsystem_id)","gene_count":"unique(feature_id)","subclass":{"type":"field","field":"subclass","limit":-1,"facet":{"subsystem_count":"unique(subsystem_id)","gene_count":"unique(feature_id)"}}}}}}}):  
 
     # TODO: testing bvbrc_api get_subsystem_df
-    table_list = []
-    for table in get_subsystems_df(genome_ids): 
-        table_list.append(table)
+    subsystem_df = getSubsystemsDf(genome_ids) 
     import pdb
     pdb.set_trace()
     sys.exit()
@@ -302,9 +297,7 @@ def run_pathways(genome_ids,output_file,output_dir, session):
     pathways_file = os.path.join(output_dir,output_file+'_pathways.tsv')
     # TODO: create alt_locus_tag query
     pathway_list = []
-    for tmp_df in get_pathway_df(genome_ids, limit=2500000):
-        pathway_list.append(tmp_df)
-    pathway_df = pd.concat(pathway_list)
+    pathway_df = getPathwayDf(genome_ids, limit=2500000)
     # convert pathway_id to string and pad with leading zeros
     pathway_df['pathway_id'] = pathway_df['pathway_id'].apply(lambda x: '{0:0>5}'.format(x)) 
     pathway_df.to_csv(pathways_file,sep='\t',index=False)
@@ -382,9 +375,7 @@ def run_pathways(genome_ids,output_file,output_dir, session):
 
     # Get gene data
     feature_list = []
-    for tmp_df in get_feature_df(genome_ids, limit=2500000):
-        feature_list.append(tmp_df)
-    gene_df = pd.concat(feature_list)
+    gene_df = getFeatureDf(genome_ids, limit=2500000)
     # change column names
     column_map = {
         'Genome': 'genome_name',
@@ -478,11 +469,8 @@ def run_pathways(genome_ids,output_file,output_dir, session):
 def get_genome_group_ids(group_list,session):
     genome_group_ids = []
     for genome_group in group_list:
-        list_text = getGenomeGroupIds(genome_group,session,genomeGroupPath=True).strip('][').split(',')
-        # ['{"genome_id":"562.79202"}', '{"genome_id":"562.80445"}', '{"genome_id":"562.80446"}']
-        for genome_entry in list_text:
-            genome_entry = genome_entry.strip('}{').split(":")
-            genome_group_ids.append(genome_entry[1].strip('\"'))
+        genome_id_list = getGenomeGroupIds(genome_group,session,genomeGroupPath=True)
+        genome_group_ids = genome_group_ids + genome_id_list
     return genome_group_ids
 
 # TODO:
@@ -512,6 +500,7 @@ def run_compare_systems(job_data, output_dir):
 
     # TODO: add chunking
     # TODO: add recipe
+    # TODO: add multithreading
     run_pathways(genome_ids,output_file,output_dir,s)
     #run_subsystems(genome_ids,output_file,output_dir,s)
     run_families(genome_ids,output_file,output_dir,s)
