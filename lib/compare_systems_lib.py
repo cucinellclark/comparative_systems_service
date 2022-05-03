@@ -48,7 +48,7 @@ def run_families(genome_ids, output_file, output_dir, session):
     #print("GenomeFeatures Query:\n{0}".format(query))
     #feature_df = pd.read_csv(query,sep="\t")
     feature_list = []
-    proteinfams_df = getFeatureDf(genome_ids, limit=2500000)
+    proteinfams_df = getFeatureDf(genome_ids,session, limit=2500000)
     # change column names
     column_map = {
         'Genome': 'genome_name',
@@ -82,7 +82,6 @@ def run_families(genome_ids, output_file, output_dir, session):
     
     plfam_list = [] 
     pgfam_list = []
-    #figfam_list = []
     for genome_id in genome_ids:
         print("---{0}".format(genome_id))    
 
@@ -96,12 +95,7 @@ def run_families(genome_ids, output_file, output_dir, session):
                                     'alt_locus_tag','feature_id','annotation','feature_type',
                                     'start','end','strand','figfam_id','plfam_id','protein_id',
                                     'aa_length','gene','go'], axis=1)
-        '''
-        figfam_table = genome_df.drop(['genome_name','accession','patric_id','refseq_locus_tag',
-                                    'alt_locus_tag','feature_id','annotation','feature_type',
-                                    'start','end','strand','plfam_id','pgfam_id','protein_id',
-                                    'aa_length','gene','go'], axis=1)
-        '''
+
         # Get unique family ids, first row for information 
         keep_rows = []
         plfam_id_list = []
@@ -118,15 +112,6 @@ def run_families(genome_ids, output_file, output_dir, session):
                 pgfam_id_list.append(pgfam_table.iloc[i]['pgfam_id'])
                 keep_rows.append(i)
         pgfam_table = pgfam_table.iloc[keep_rows]
-
-        '''
-        keep_rows = []
-        figfam_id_list = []
-        for i in range(0,figfam_table.shape[0]):
-            if not figfam_table.iloc[i]['figfam_id'] in figfam_id_list:
-                figfam_id_list.append(figfam_table.iloc[i]['figfam_id'])
-                keep_rows.append(i)
-        '''
 
         # plfam_stats 
         plfam_table['feature_count'] = [0]*plfam_table.shape[0]
@@ -163,24 +148,6 @@ def run_families(genome_ids, output_file, output_dir, session):
             pgfam_table.loc[pgfam_table['pgfam_id'] == pgfam_id,'genomes'] = format(len(tmp_df['feature_id']),'#04x').replace('0x','')
 
 
-        # figfam_stats 
-        '''
-        figfam_table['feature_count'] = [0]*figfam_table.shape[0] 
-        figfam_table['genome_count'] = [1]*figfam_table.shape[0] 
-        figfam_table['genomes'] = [0]*figfam_table.shape[0]
-        figfam_table['aa_length_min'] = [0]*figfam_table.shape[0] 
-        figfam_table['aa_length_max'] = [0]*figfam_table.shape[0] 
-        figfam_table['aa_length_mean'] = [0]*figfam_table.shape[0] 
-        figfam_table['aa_length_std'] = [0]*figfam_table.shape[0] 
-        for figfam_id in figfam_table['figfam_id']:
-            tmp_df = figfam_table.loc[figfam_table['figfam_id'] == figfam_id]
-            figfam_table.loc[figfam_table['figfam_id'] == figfam_id,'aa_length_min'] = np.min(tmp_df['aa_length'])
-            figfam_table.loc[figfam_table['figfam_id'] == figfam_id,'aa_length_max'] = np.max(tmp_df['aa_length'])
-            figfam_table.loc[figfam_table['figfam_id'] == figfam_id,'aa_length_mean'] = np.mean(tmp_df['aa_length'])
-            figfam_table.loc[figfam_table['figfam_id'] == figfam_id,'aa_length_std'] = np.std(tmp_df['aa_length'])
-            figfam_table.loc[figfam_table['figfam_id'] == figfam_id,'feature_count'] = len(tmp_df['feature_id'])
-            figfam_table.loc[figfam_table['figfam_id'] == figfam_id,'genomes'] = format(len(tmp_df['feature_id']),'#04x').replace('0x','')
-        '''
         plfam_list.append(plfam_table)
         pgfam_list.append(pgfam_table)
         #figfam_list.append(figfam_table)
@@ -189,12 +156,10 @@ def run_families(genome_ids, output_file, output_dir, session):
     # counting is done per-genome, multi-genome calculation adjustments are done on the front end
     plfam_output = pd.concat(plfam_list)
     pgfam_output = pd.concat(pgfam_list)
-    #figfam_output = pd.concat(figfam_list)
-
+    
     output_json = {}
     output_json['plfam'] = plfam_output.to_csv(index=False,sep='\t')
     output_json['pgfam'] = pgfam_output.to_csv(index=False,sep='\t')
-    #output_json['figfam'] = genes_output.to_csv(index=False,sep='\t')
     output_json['genome_ids'] = genome_ids
 
     output_json_file = proteinfams_file.replace('.tsv','_tables.json')
@@ -208,7 +173,7 @@ def run_subsystems(genome_ids, output_file, output_dir, session):
     # json(facet,{"stat":{"type":"field","field":"superclass","limit":-1,"facet":{"subsystem_count":"unique(subsystem_id)","class":{"type":"field","field":"class","limit":-1,"facet":{"subsystem_count":"unique(subsystem_id)","gene_count":"unique(feature_id)","subclass":{"type":"field","field":"subclass","limit":-1,"facet":{"subsystem_count":"unique(subsystem_id)","gene_count":"unique(feature_id)"}}}}}}}):  
 
     # TODO: testing bvbrc_api get_subsystem_df
-    subsystem_df = getSubsystemsDf(genome_ids) 
+    subsystem_df = getSubsystemsDf(genome_ids,session) 
     import pdb
     pdb.set_trace()
     sys.exit()
@@ -297,7 +262,7 @@ def run_pathways(genome_ids,output_file,output_dir, session):
     pathways_file = os.path.join(output_dir,output_file+'_pathways.tsv')
     # TODO: create alt_locus_tag query
     pathway_list = []
-    pathway_df = getPathwayDf(genome_ids, limit=2500000)
+    pathway_df = getPathwayDf(genome_ids,session, limit=2500000)
     # convert pathway_id to string and pad with leading zeros
     pathway_df['pathway_id'] = pathway_df['pathway_id'].apply(lambda x: '{0:0>5}'.format(x)) 
     pathway_df.to_csv(pathways_file,sep='\t',index=False)
@@ -375,7 +340,7 @@ def run_pathways(genome_ids,output_file,output_dir, session):
 
     # Get gene data
     feature_list = []
-    gene_df = getFeatureDf(genome_ids, limit=2500000)
+    gene_df = getFeatureDf(genome_ids,session, limit=2500000)
     # change column names
     column_map = {
         'Genome': 'genome_name',
@@ -494,6 +459,9 @@ def run_compare_systems(job_data, output_dir):
     genome_ids = job_data["genome_ids"]
     if len(job_data["genome_groups"]) > 0:
         genome_group_ids = get_genome_group_ids(job_data["genome_groups"],s)
+        if len(genome_group_ids) == 0:
+            sys.stderr.write('FAILED to get genome ids for genome groups: exiting')
+            sys.exit(-1)
         # make ids unique 
         genome_ids = genome_ids + genome_group_ids
         genome_ids = list(set(genome_ids))
