@@ -84,9 +84,7 @@ def run_families(genome_ids, output_file, output_dir, session):
     pgfam_list = []
     for genome_id in genome_ids:
         print("---{0}".format(genome_id))    
-        print("proteinfams_df['genome_id'] = {0}".format(proteinfams_df['genome_id']))
-        print("float(genome_id) = {0}".format(str(float(genome_id))))
-        genome_df = proteinfams_df.loc[proteinfams_df['genome_id'] == float(genome_id)]
+        genome_df = proteinfams_df.loc[proteinfams_df['genome_id'] == genome_id]
 
         plfam_table = genome_df.drop(['genome_name','accession','patric_id','refseq_locus_tag',
                                     'alt_locus_tag','feature_id','annotation','feature_type',
@@ -264,6 +262,8 @@ def run_pathways(genome_ids,output_file,output_dir, session):
     # TODO: create alt_locus_tag query
     pathway_list = []
     pathway_df = getPathwayDf(genome_ids,session, limit=2500000)
+    # TODO:
+    # - move this to p3_core/lib/bvbrc_api.py
     # convert pathway_id to string and pad with leading zeros
     pathway_df['pathway_id'] = pathway_df['pathway_id'].apply(lambda x: '{0:0>5}'.format(x)) 
     pathway_df.to_csv(pathways_file,sep='\t',index=False)
@@ -273,6 +273,8 @@ def run_pathways(genome_ids,output_file,output_dir, session):
     pathways_list = []
     ecnum_list = []
     genes_info_dict = {} # key is patric_id
+    # TODO:
+    # - make sure to check genome_id type issue 
     for genome_id in genome_ids: 
         genome_id = float(genome_id)
         print('---Faceting GenomeId: {0}---'.format(genome_id))
@@ -368,6 +370,8 @@ def run_pathways(genome_ids,output_file,output_dir, session):
     }
     gene_df.rename(columns=column_map, inplace=True)
     # Parse gene data
+    # TODO:
+    # - make sure to check genome_id type issue 
     genes_list = []
     for genome_id in genome_ids:
         genome_id = float(genome_id)
