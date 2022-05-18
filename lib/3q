@@ -84,8 +84,7 @@ def run_families(genome_ids, output_file, output_dir, session):
     pgfam_list = []
     for genome_id in genome_ids:
         print("---{0}".format(genome_id))    
-        print("proteinfams_df['genome_id'] = {0}".format(proteinfams_df['genome_id']))
-        print("float(genome_id) = {0}".format(str(float(genome_id))))
+
         genome_df = proteinfams_df.loc[proteinfams_df['genome_id'] == float(genome_id)]
 
         plfam_table = genome_df.drop(['genome_name','accession','patric_id','refseq_locus_tag',
