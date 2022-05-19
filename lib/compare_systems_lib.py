@@ -277,7 +277,6 @@ def run_pathways(genome_ids,output_file,output_dir, session):
     # TODO:
     # - make sure to check genome_id type issue 
     for genome_id in genome_ids: 
-        genome_id = float(genome_id)
         print('---Faceting GenomeId: {0}---'.format(genome_id))
         genome_df = pathway_df.loc[pathway_df['genome_id'] == genome_id]
         '''
@@ -475,6 +474,6 @@ def run_compare_systems(job_data, output_dir):
     # TODO: add chunking
     # TODO: add recipe
     # TODO: add multithreading
-    #run_pathways(genome_ids,output_file,output_dir,s)
+    run_pathways(genome_ids,output_file,output_dir,s)
     #run_subsystems(genome_ids,output_file,output_dir,s)
     run_families(genome_ids,output_file,output_dir,s)
