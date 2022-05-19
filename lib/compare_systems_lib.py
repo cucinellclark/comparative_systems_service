@@ -84,8 +84,7 @@ def run_families(genome_ids, output_file, output_dir, session):
     pgfam_list = []
     for genome_id in genome_ids:
         print("---{0}".format(genome_id))    
-
-        genome_df = proteinfams_df.loc[proteinfams_df['genome_id'] == float(genome_id)]
+        genome_df = proteinfams_df.loc[proteinfams_df['genome_id'] == genome_id]
 
         plfam_table = genome_df.drop(['genome_name','accession','patric_id','refseq_locus_tag',
                                     'alt_locus_tag','feature_id','annotation','feature_type',
@@ -128,6 +127,7 @@ def run_families(genome_ids, output_file, output_dir, session):
             plfam_table.loc[plfam_table['plfam_id'] == plfam_id,'aa_length_mean'] = np.mean(tmp_df['aa_length'])
             plfam_table.loc[plfam_table['plfam_id'] == plfam_id,'aa_length_std'] = np.std(tmp_df['aa_length'])
             plfam_table.loc[plfam_table['plfam_id'] == plfam_id,'feature_count'] = len(tmp_df['feature_id'])
+            # genomes used in Heatmap viewer
             plfam_table.loc[plfam_table['plfam_id'] == plfam_id,'genomes'] = format(len(tmp_df['feature_id']),'#04x').replace('0x','')
 
         # pgfam_stats 
@@ -174,9 +174,6 @@ def run_subsystems(genome_ids, output_file, output_dir, session):
 
     # TODO: testing bvbrc_api get_subsystem_df
     subsystem_df = getSubsystemsDf(genome_ids,session) 
-    import pdb
-    pdb.set_trace()
-    sys.exit()
 
     # query 
     base_query = "https://www.patricbrc.org/api/subsystem/?in(genome_id,("
@@ -263,6 +260,8 @@ def run_pathways(genome_ids,output_file,output_dir, session):
     # TODO: create alt_locus_tag query
     pathway_list = []
     pathway_df = getPathwayDf(genome_ids,session, limit=2500000)
+    # TODO:
+    # - move this to p3_core/lib/bvbrc_api.py
     # convert pathway_id to string and pad with leading zeros
     pathway_df['pathway_id'] = pathway_df['pathway_id'].apply(lambda x: '{0:0>5}'.format(x)) 
     pathway_df.to_csv(pathways_file,sep='\t',index=False)
@@ -272,8 +271,9 @@ def run_pathways(genome_ids,output_file,output_dir, session):
     pathways_list = []
     ecnum_list = []
     genes_info_dict = {} # key is patric_id
+    # TODO:
+    # - make sure to check genome_id type issue 
     for genome_id in genome_ids: 
-        genome_id = float(genome_id)
         print('---Faceting GenomeId: {0}---'.format(genome_id))
         genome_df = pathway_df.loc[pathway_df['genome_id'] == genome_id]
         '''
@@ -367,9 +367,10 @@ def run_pathways(genome_ids,output_file,output_dir, session):
     }
     gene_df.rename(columns=column_map, inplace=True)
     # Parse gene data
+    # TODO:
+    # - make sure to check genome_id type issue 
     genes_list = []
     for genome_id in genome_ids:
-        genome_id = float(genome_id)
         print('---Faceting GenomeId Genes Table: {0}---'.format(genome_id))
         genome_df = gene_df.loc[gene_df['genome_id'] == genome_id]
         
