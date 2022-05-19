@@ -374,7 +374,6 @@ def run_pathways(genome_ids,output_file,output_dir, session):
     # - make sure to check genome_id type issue 
     genes_list = []
     for genome_id in genome_ids:
-        genome_id = float(genome_id)
         print('---Faceting GenomeId Genes Table: {0}---'.format(genome_id))
         genome_df = gene_df.loc[gene_df['genome_id'] == genome_id]
         
