@@ -127,6 +127,7 @@ def run_families(genome_ids, output_file, output_dir, session):
             plfam_table.loc[plfam_table['plfam_id'] == plfam_id,'aa_length_mean'] = np.mean(tmp_df['aa_length'])
             plfam_table.loc[plfam_table['plfam_id'] == plfam_id,'aa_length_std'] = np.std(tmp_df['aa_length'])
             plfam_table.loc[plfam_table['plfam_id'] == plfam_id,'feature_count'] = len(tmp_df['feature_id'])
+            # genomes used in Heatmap viewer
             plfam_table.loc[plfam_table['plfam_id'] == plfam_id,'genomes'] = format(len(tmp_df['feature_id']),'#04x').replace('0x','')
 
         # pgfam_stats 
