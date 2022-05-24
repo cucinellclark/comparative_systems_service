@@ -176,16 +176,16 @@ def run_subsystems(genome_ids, output_file, output_dir, session):
     subsystem_df = getSubsystemsDf(genome_ids,session) 
 
     # query 
-    base_query = "https://www.patricbrc.org/api/subsystem/?in(genome_id,("
-    end_query = "))&limit(200000000)&http_accept=text/tsv"
-    query = base_query + ",".join(genome_ids) + end_query
-    print("Subsystems Query:\n{0}".format(query))
+    #base_query = "https://www.patricbrc.org/api/subsystem/?in(genome_id,("
+    #end_query = "))&limit(200000000)&http_accept=text/tsv"
+    #query = base_query + ",".join(genome_ids) + end_query
+    #print("Subsystems Query:\n{0}".format(query))
     #subsystems_df = pd.read_csv(query,sep="\t")
     subsystems_file = os.path.join(output_dir,output_file+"_subsystems.tsv")
     #subsystems_df.to_csv(subsystems_file, header=True, sep="\t")
 
     # TODO: remove, used for testing
-    subsystems_df = pd.read_csv(subsystems_file, sep="\t", index_col=0)
+    #subsystems_df = pd.read_csv(subsystems_file, sep="\t", index_col=0)
 
     # TODO: combine fact dictionaries later
 
@@ -216,43 +216,48 @@ def run_subsystems(genome_ids, output_file, output_dir, session):
                     #    key = build_key([superclass,clss,subclass,name]) #TODO: might not need 
                     #    key_set.add(key)
 
-    subsystems_overview_file = subsystems_file.replace('.tsv','_overview.json')
-    with open(subsystems_overview_file,'w') as o:
-        json.dump(overview_dict,o)
+    #subsystems_overview_file = subsystems_file.replace('.tsv','_overview.json')
+    #with open(subsystems_overview_file,'w') as o:
+    #    json.dump(overview_dict,o)
 
     # faceting for subsystems table
 
-    st_list = [] #subsystem table list
-    # get stats on a per-genome basis
-    # use unique subsystems_ids to create subsystem table for each genome
-    for genome_id in subsystems_df['genome_id'].unique(): 
-        print('---{0}'.format(genome_id))
-        genome_df = subsystems_df.loc[subsystems_df['genome_id'] == genome_id]
-        genome_table = genome_df.drop(['feature_id','public','refseq_locus_tag','role_id','genome_id','taxon_id','gene','role_name','owner','product','patric_id','genome_name','id','_version_','date_inserted','date_modified'], axis=1)
-        genome_table = genome_table.drop_duplicates()
+    if False:
+        st_list = [] #subsystem table list
+        # get stats on a per-genome basis
+        # use unique subsystems_ids to create subsystem table for each genome
+        for genome_id in subsystems_df['genome_id'].unique(): 
+            print('---{0}'.format(genome_id))
+            genome_df = subsystems_df.loc[subsystems_df['genome_id'] == genome_id]
+            genome_table = genome_df.drop(['feature_id','public','refseq_locus_tag','role_id','genome_id','taxon_id','gene','role_name','owner','product','patric_id','genome_name','id','_version_','date_inserted','date_modified'], axis=1)
+            genome_table = genome_table.drop_duplicates()
+            
+            # TODO: what is genome_count? Seems like it is always 1
+            genome_table['genome_count'] = [1]*genome_table.shape[0]
+            genome_table['gene_count'] = [0]*genome_table.shape[0]
+            genome_table['role_count'] = [0]*genome_table.shape[0]
         
-        # TODO: what is genome_count? Seems like it is always 1
-        genome_table['genome_count'] = [1]*genome_table.shape[0]
-        genome_table['gene_count'] = [0]*genome_table.shape[0]
-        genome_table['role_count'] = [0]*genome_table.shape[0]
-    
-        genome_table['genome_id'] = [genome_id]*genome_table.shape[0]
-        
-        # add stats columns 
-        for sub_id in genome_table['subsystem_id']:
-            tmp_df = genome_df.loc[genome_df['subsystem_id'] == sub_id] 
-            genome_table.loc[genome_table['subsystem_id'] == sub_id,'gene_count'] = len(tmp_df['gene'])
-            genome_table.loc[genome_table['subsystem_id'] == sub_id,'role_count'] = len(tmp_df['role_id'])
-            # TODO: genome count calculation
-        
-        # TODO: genes tab table
+            genome_table['genome_id'] = [genome_id]*genome_table.shape[0]
+            
+            # add stats columns 
+            for sub_id in genome_table['subsystem_id']:
+                tmp_df = genome_df.loc[genome_df['subsystem_id'] == sub_id] 
+                genome_table.loc[genome_table['subsystem_id'] == sub_id,'gene_count'] = len(tmp_df['gene'])
+                genome_table.loc[genome_table['subsystem_id'] == sub_id,'role_count'] = len(tmp_df['role_id'])
+                # TODO: genome count calculation
+            
+            # TODO: genes tab table
 
-        st_list.append(genome_table)    
+            st_list.append(genome_table)    
 
     # TODO: genes table
-    subsystems_table = pd.concat(st_list)
-    subsystems_table_output_file = subsystems_file.replace('.tsv','_summary.tsv')
-    subsystems_table.to_csv(subsystems_table_output_file,sep="\t",index=False)
+    #subsystems_table = pd.concat(st_list)
+    #subsystems_table_output_file = subsystems_file.replace('.tsv','_summary.tsv')
+    #subsystems_table.to_csv(subsystems_table_output_file,sep="\t",index=False)
+
+    output_json = {}
+    output_json['genome_ids'] = genome_ids
+    output_json['overview'] = overview_dict 
 
 def run_pathways(genome_ids,output_file,output_dir, session):
     
