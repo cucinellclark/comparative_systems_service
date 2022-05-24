@@ -182,7 +182,7 @@ def run_subsystems(genome_ids, output_file, output_dir, session):
     #print("Subsystems Query:\n{0}".format(query))
     #subsystems_df = pd.read_csv(query,sep="\t")
     subsystems_file = os.path.join(output_dir,output_file+"_subsystems.tsv")
-    #subsystems_df.to_csv(subsystems_file, header=True, sep="\t")
+    subsystems_df.to_csv(subsystems_file, header=True, sep="\t")
 
     # TODO: remove, used for testing
     #subsystems_df = pd.read_csv(subsystems_file, sep="\t", index_col=0)
