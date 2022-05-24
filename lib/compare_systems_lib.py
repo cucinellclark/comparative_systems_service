@@ -187,8 +187,6 @@ def run_subsystems(genome_ids, output_file, output_dir, session):
     # TODO: remove, used for testing
     #subsystems_df = pd.read_csv(subsystems_file, sep="\t", index_col=0)
 
-    # TODO: combine fact dictionaries later
-
     # faceting for subsystems overview
     overview_dict = {}
     key_set = set()
@@ -196,6 +194,7 @@ def run_subsystems(genome_ids, output_file, output_dir, session):
         genome_df = subsystems_df.loc[subsystems_df['genome_id'] == genome_id]
         overview_dict[genome_id] = {}
         overview_dict[genome_id]["superclass_counts"] = len(genome_df['superclass'].unique())
+        # TODO: check that this is correct for each level
         overview_dict[genome_id]["gene_counts"] = len(genome_df['gene'].unique())
         for superclass in genome_df['superclass'].unique():
             superclass_df = subsystems_df.loc[subsystems_df['superclass'] == superclass]
