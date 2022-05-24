@@ -470,6 +470,6 @@ def run_compare_systems(job_data, output_dir):
     # TODO: add chunking
     # TODO: add recipe
     # TODO: add multithreading
-    run_pathways(genome_ids,output_file,output_dir,s)
-    #run_subsystems(genome_ids,output_file,output_dir,s)
-    run_families(genome_ids,output_file,output_dir,s)
+    #run_pathways(genome_ids,output_file,output_dir,s)
+    run_subsystems(genome_ids,output_file,output_dir,s)
+    #run_families(genome_ids,output_file,output_dir,s)
