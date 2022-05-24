@@ -255,9 +255,13 @@ def run_subsystems(genome_ids, output_file, output_dir, session):
     #subsystems_table_output_file = subsystems_file.replace('.tsv','_summary.tsv')
     #subsystems_table.to_csv(subsystems_table_output_file,sep="\t",index=False)
 
+    output_json_file = subsystems_file.replace('.tsv','_tables.json')
+    
     output_json = {}
     output_json['genome_ids'] = genome_ids
     output_json['overview'] = overview_dict 
+    with open(output_json_file,'w') as o:
+        o.write(json.dumps(output_json))
 
 def run_pathways(genome_ids,output_file,output_dir, session):
     
