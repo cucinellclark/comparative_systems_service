@@ -172,8 +172,12 @@ def run_subsystems(genome_ids, output_file, output_dir, session):
     
     # json(facet,{"stat":{"type":"field","field":"superclass","limit":-1,"facet":{"subsystem_count":"unique(subsystem_id)","class":{"type":"field","field":"class","limit":-1,"facet":{"subsystem_count":"unique(subsystem_id)","gene_count":"unique(feature_id)","subclass":{"type":"field","field":"subclass","limit":-1,"facet":{"subsystem_count":"unique(subsystem_id)","gene_count":"unique(feature_id)"}}}}}}}):  
 
-    # TODO: testing bvbrc_api get_subsystem_df
     subsystems_df = getSubsystemsDf(genome_ids,session) 
+
+    # Superclass, class, and subclass can be different cases: convert all to lower case
+    subsystems_df['superclass'] = subsytems_df['superclass'].str.lower()
+    subsystems_df['class'] = subsytems_df['class'].str.lower()
+    subsystems_df['subclass'] = subsytems_df['subclass'].str.lower()
 
     # query 
     #base_query = "https://www.patricbrc.org/api/subsystem/?in(genome_id,("
