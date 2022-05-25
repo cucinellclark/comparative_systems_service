@@ -175,9 +175,9 @@ def run_subsystems(genome_ids, output_file, output_dir, session):
     subsystems_df = getSubsystemsDf(genome_ids,session) 
 
     # Superclass, class, and subclass can be different cases: convert all to lower case
-    subsystems_df['superclass'] = subsytems_df['superclass'].str.lower()
-    subsystems_df['class'] = subsytems_df['class'].str.lower()
-    subsystems_df['subclass'] = subsytems_df['subclass'].str.lower()
+    subsystems_df['superclass'] = subsystems_df['superclass'].str.lower()
+    subsystems_df['class'] = subsystems_df['class'].str.lower()
+    subsystems_df['subclass'] = subsystems_df['subclass'].str.lower()
 
     # query 
     #base_query = "https://www.patricbrc.org/api/subsystem/?in(genome_id,("
