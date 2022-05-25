@@ -205,7 +205,7 @@ def run_subsystems(genome_ids, output_file, output_dir, session):
             overview_dict[genome_id][superclass] = {}
             overview_dict[genome_id][superclass]["class_counts"] = len(superclass_df['class'].unique())
             overview_dict[genome_id][superclass]["gene_counts"] = len(superclass_df['gene'].unique())
-            for clss in subsystems_df['class'].unique():
+            for clss in superclass_df['class'].unique():
                 class_df = superclass_df.loc[superclass_df['class'] == clss]
                 overview_dict[genome_id][superclass][clss] = {}
                 overview_dict[genome_id][superclass][clss]['subclass_counts'] = len(class_df['subclass'].unique())
