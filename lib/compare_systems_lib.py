@@ -261,7 +261,7 @@ def run_subsystems(genome_ids, output_file, output_dir, session):
     output_json = {}
     output_json['genome_ids'] = genome_ids
     output_json['overview'] = overview_dict 
-    output_json['subsystems'] = subsystems_table
+    output_json['subsystems'] = subsystems_table.to_csv(index=False,sep='\t')
     with open(output_json_file,'w') as o:
         o.write(json.dumps(output_json))
 
