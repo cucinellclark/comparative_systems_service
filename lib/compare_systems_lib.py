@@ -224,7 +224,7 @@ def run_subsystems(genome_ids, output_file, output_dir, session):
     #    json.dump(overview_dict,o)
 
     # faceting for subsystems table
-
+    print('here')
     if False:
         st_list = [] #subsystem table list
         # get stats on a per-genome basis
