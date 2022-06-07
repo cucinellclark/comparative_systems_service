@@ -41,7 +41,7 @@ def get_maximum_value(df, col):
     max_label = col_counts[0].index
     return max_label
 
-def run_families(genome_ids, output_file, output_dir, session):
+def run_families(genome_ids, query_dict, output_file, output_dir, session):
     #base_query = "https://www.patricbrc.org/api/genome_feature/?in(genome_id,("
     #end_query = "))&limit(-1)&http_accept=text/tsv"
     #query = base_query + ",".join(genome_ids) + end_query
@@ -49,6 +49,7 @@ def run_families(genome_ids, output_file, output_dir, session):
     #feature_df = pd.read_csv(query,sep="\t")
     feature_list = []
     # proteinfams_df = getFeatureDf(genome_ids,session, limit=2500000)
+    proteinfams_df = query_dict['feature']
     # change column names
     column_map = {
         'Genome': 'genome_name',
@@ -168,11 +169,12 @@ def run_families(genome_ids, output_file, output_dir, session):
 
     print("ProteinFamilies Complete")
 
-def run_subsystems(genome_ids, output_file, output_dir, session):
+def run_subsystems(genome_ids, query_dict, output_file, output_dir, session):
     
     # json(facet,{"stat":{"type":"field","field":"superclass","limit":-1,"facet":{"subsystem_count":"unique(subsystem_id)","class":{"type":"field","field":"class","limit":-1,"facet":{"subsystem_count":"unique(subsystem_id)","gene_count":"unique(feature_id)","subclass":{"type":"field","field":"subclass","limit":-1,"facet":{"subsystem_count":"unique(subsystem_id)","gene_count":"unique(feature_id)"}}}}}}}):  
 
     # subsystems_df = getSubsystemsDf(genome_ids,session) 
+    subsystems_df = query_dict['subsystems']
 
     # Superclass, class, and subclass can be different cases: convert all to lower case
     subsystems_df['superclass'] = subsystems_df['superclass'].str.lower()
@@ -240,6 +242,15 @@ def run_subsystems(genome_ids, output_file, output_dir, session):
     
         genome_table['genome_id'] = [genome_id]*genome_table.shape[0]
         
+        # Get unique subsystem ids, first row for information
+        keep_rows = []
+        sub_id_list = []
+        for i in range(0,genome_table.shape[0]):
+            if not genome_table.iloc[i]['subsystem_id'] in sub_id_list:
+                sub_id_list.append(genome_table.iloc[i]['subsystem_id'])
+                keep_rows.append(i)
+        genome_table = genome_table.iloc[keep_rows]
+
         # add stats columns 
         for sub_id in genome_table['subsystem_id']:
             tmp_df = genome_df.loc[genome_df['subsystem_id'] == sub_id] 
@@ -247,14 +258,38 @@ def run_subsystems(genome_ids, output_file, output_dir, session):
             genome_table.loc[genome_table['subsystem_id'] == sub_id,'role_count'] = len(tmp_df['role_id'])
             # TODO: genome count calculation
         
-        # TODO: genes tab table
-
         st_list.append(genome_table)    
 
-    # TODO: genes table
     subsystems_table = pd.concat(st_list)
     #subsystems_table_output_file = subsystems_file.replace('.tsv','_summary.tsv')
     #subsystems_table.to_csv(subsystems_table_output_file,sep="\t",index=False)
+
+    gene_df = query_dict['feature']
+    # change column names
+    column_map = {
+        'Genome': 'genome_name',
+        'Genome ID': 'genome_id',
+        'Accession': 'accession',
+        'BRC ID': 'patric_id',
+        'RefSeq Locus Tag': 'refseq_locus_tag',
+        'Alt Locus Tag': 'alt_locus_tag',
+        'Feature ID': 'feature_id',
+        'Annotation': 'annotation',
+        'Feature Type': 'feature_type',
+        'Start': 'start',
+        'End': 'end',
+        'Length': 'length',
+        'Strand': 'strand',
+        'FIGfam ID': 'figfam_id',
+        'PATRIC genus-specific families (PLfams)': 'plfam_id',
+        'PATRIC cross-genus families (PGfams)': 'pgfam_id',
+        'Protein ID': 'protein_id',
+        'AA Length': 'aa_length',
+        'Gene Symbol': 'gene',
+        'Product': 'product',
+        'GO': 'go'
+    }
+    gene_df.rename(columns=column_map, inplace=True)
 
     output_json_file = subsystems_file.replace('.tsv','_tables.json')
     
@@ -262,14 +297,16 @@ def run_subsystems(genome_ids, output_file, output_dir, session):
     output_json['genome_ids'] = genome_ids
     output_json['overview'] = overview_dict 
     output_json['subsystems'] = subsystems_table.to_csv(index=False,sep='\t')
+    output_json['genes'] = gene_df.to_csv(index=False,sep='\t')
     with open(output_json_file,'w') as o:
         o.write(json.dumps(output_json))
 
-def run_pathways(genome_ids,output_file,output_dir, session):
+def run_pathways(genome_ids, query_dict, output_file,output_dir, session):
     
     pathways_file = os.path.join(output_dir,output_file+'_pathways.tsv')
     # TODO: create alt_locus_tag query
     # pathway_df = getPathwayDf(genome_ids,session, limit=2500000)
+    pathway_df = query_dict['pathway']
     # TODO:
     # - move this to p3_core/lib/bvbrc_api.py
     # convert pathway_id to string and pad with leading zeros
@@ -350,7 +387,8 @@ def run_pathways(genome_ids,output_file,output_dir, session):
 
     # Get gene data
     feature_list = []
-    gene_df = getFeatureDf(genome_ids,session, limit=2500000)
+    # gene_df = getFeatureDf(genome_ids,session, limit=2500000)
+    gene_df = query_dict['feature']
     # change column names
     column_map = {
         'Genome': 'genome_name',
@@ -442,7 +480,7 @@ def run_pathways(genome_ids,output_file,output_dir, session):
 
     print("Pathways Complete")
 
-# Store pathways, subsystems, and protein families queries in a dictionary
+# Store pathways, subsystems, and features queries in a dictionary
 def run_all_queries(genome_ids, session):
     query_dict = {}
     ### Run pathways query
@@ -504,12 +542,10 @@ def run_compare_systems(job_data, output_dir):
         genome_ids = list(set(genome_ids))
 
     query_dict = run_all_queries(genome_ids, s)
-    import pdb
-    pdb.set_trace()
 
     # TODO: add chunking
     # TODO: add recipe
     # TODO: add multithreading
-    #run_pathways(genome_ids,output_file,output_dir,s)
-    run_subsystems(genome_ids,output_file,output_dir,s)
-    #run_families(genome_ids,output_file,output_dir,s)
+    #run_pathways(genome_ids, query_dict, output_file, output_dir, s)
+    run_subsystems(genome_ids, query_dict, output_file, output_dir, s)
+    #run_families(genome_ids, query_dict output_file, output_dir, s)
