@@ -48,7 +48,7 @@ def run_families(genome_ids, output_file, output_dir, session):
     #print("GenomeFeatures Query:\n{0}".format(query))
     #feature_df = pd.read_csv(query,sep="\t")
     feature_list = []
-    proteinfams_df = getFeatureDf(genome_ids,session, limit=2500000)
+    # proteinfams_df = getFeatureDf(genome_ids,session, limit=2500000)
     # change column names
     column_map = {
         'Genome': 'genome_name',
@@ -172,7 +172,7 @@ def run_subsystems(genome_ids, output_file, output_dir, session):
     
     # json(facet,{"stat":{"type":"field","field":"superclass","limit":-1,"facet":{"subsystem_count":"unique(subsystem_id)","class":{"type":"field","field":"class","limit":-1,"facet":{"subsystem_count":"unique(subsystem_id)","gene_count":"unique(feature_id)","subclass":{"type":"field","field":"subclass","limit":-1,"facet":{"subsystem_count":"unique(subsystem_id)","gene_count":"unique(feature_id)"}}}}}}}):  
 
-    subsystems_df = getSubsystemsDf(genome_ids,session) 
+    # subsystems_df = getSubsystemsDf(genome_ids,session) 
 
     # Superclass, class, and subclass can be different cases: convert all to lower case
     subsystems_df['superclass'] = subsystems_df['superclass'].str.lower()
@@ -269,8 +269,7 @@ def run_pathways(genome_ids,output_file,output_dir, session):
     
     pathways_file = os.path.join(output_dir,output_file+'_pathways.tsv')
     # TODO: create alt_locus_tag query
-    pathway_list = []
-    pathway_df = getPathwayDf(genome_ids,session, limit=2500000)
+    # pathway_df = getPathwayDf(genome_ids,session, limit=2500000)
     # TODO:
     # - move this to p3_core/lib/bvbrc_api.py
     # convert pathway_id to string and pad with leading zeros
@@ -443,15 +442,41 @@ def run_pathways(genome_ids,output_file,output_dir, session):
 
     print("Pathways Complete")
 
+# Store pathways, subsystems, and protein families queries in a dictionary
+def run_all_queries(genome_ids, session):
+    query_dict = {}
+    ### Run pathways query
+    if True:
+        print('pathways query')
+        pathway_df = getPathwayDf(genome_ids,session, limit=2500000)
+        if pathway_df:
+            query_dict['pathway'] = pathway_df
+        else:
+            sys.stderr.write('Pathways dataframe is None\n')
+    ### Run subsystems query
+    if True:
+        print('subsystems query')
+        subsystems_df = getSubsystemsDf(genome_ids,session) 
+        if subsystems_df:
+            query_dict['subsystems'] = subsystems_df
+        else:
+            sys.stderr.write('Subsystems dataframe is None\n')
+    ### Run features query
+    if True:
+        print('features query')
+        feature_df = getFeatureDf(genome_ids,session, limit=2500000)
+        if feature_df:
+            query_dict['feature'] = feature_df
+        else:
+            sys.stderr.write('Features dataframe is None\n')
+    return query_dict
+
 def get_genome_group_ids(group_list,session):
     genome_group_ids = []
     for genome_group in group_list:
         genome_id_list = getGenomeGroupIds(genome_group,session,genomeGroupPath=True)
         genome_group_ids = genome_group_ids + genome_id_list
     return genome_group_ids
-
-# TODO:
-#   - Write out pandas dfs without indices
 
 def run_compare_systems(job_data, output_dir):
 
@@ -477,6 +502,10 @@ def run_compare_systems(job_data, output_dir):
         # make ids unique 
         genome_ids = genome_ids + genome_group_ids
         genome_ids = list(set(genome_ids))
+
+    query_dict = run_all_queries(genome_ids, s)
+    import pdb
+    pdb.set_trace()
 
     # TODO: add chunking
     # TODO: add recipe
