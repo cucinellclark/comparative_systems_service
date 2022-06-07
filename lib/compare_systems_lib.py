@@ -449,7 +449,7 @@ def run_all_queries(genome_ids, session):
     if True:
         print('pathways query')
         pathway_df = getPathwayDf(genome_ids,session, limit=2500000)
-        if pathway_df:
+        if not pathway_df is None:
             query_dict['pathway'] = pathway_df
         else:
             sys.stderr.write('Pathways dataframe is None\n')
@@ -457,7 +457,7 @@ def run_all_queries(genome_ids, session):
     if True:
         print('subsystems query')
         subsystems_df = getSubsystemsDf(genome_ids,session) 
-        if subsystems_df:
+        if not subsystems_df is None:
             query_dict['subsystems'] = subsystems_df
         else:
             sys.stderr.write('Subsystems dataframe is None\n')
@@ -465,7 +465,7 @@ def run_all_queries(genome_ids, session):
     if True:
         print('features query')
         feature_df = getFeatureDf(genome_ids,session, limit=2500000)
-        if feature_df:
+        if not feature_df is None:
             query_dict['feature'] = feature_df
         else:
             sys.stderr.write('Features dataframe is None\n')
