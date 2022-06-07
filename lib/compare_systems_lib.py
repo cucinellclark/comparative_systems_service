@@ -18,7 +18,7 @@ import requests
 import pandas as pd
 import numpy as np
 
-from bvbrc_api import authenticateByEnv,getGenomeGroupIds,getFeatureDf,getSubsystemsDf,getPathwayDf
+from bvbrc_api import authenticateByEnv,getGenomeIdsByGenomeGroup,getFeatureDf,getSubsystemsDf,getPathwayDf
 
 def chunker(seq, size):
     return (seq[pos:pos + size] for pos in range(0, len(seq), size))
@@ -474,7 +474,7 @@ def run_all_queries(genome_ids, session):
 def get_genome_group_ids(group_list,session):
     genome_group_ids = []
     for genome_group in group_list:
-        genome_id_list = getGenomeGroupIds(genome_group,session,genomeGroupPath=True)
+        genome_id_list = getGenomeIdsByGenomeGroup(genome_group,session,genomeGroupPath=True)
         genome_group_ids = genome_group_ids + genome_id_list
     return genome_group_ids
 
