@@ -162,6 +162,7 @@ def run_families(genome_ids, query_dict, output_file, output_dir, session):
     output_json['plfam'] = plfam_output.to_csv(index=False,sep='\t')
     output_json['pgfam'] = pgfam_output.to_csv(index=False,sep='\t')
     output_json['genome_ids'] = genome_ids
+    output_json['job_name'] = output_file
 
     output_json_file = proteinfams_file.replace('.tsv','_tables.json')
     with open(output_json_file,"w") as o:
@@ -296,6 +297,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, session):
     output_json = {}
     output_json['genome_ids'] = genome_ids
     output_json['overview'] = overview_dict 
+    output_json['job_name'] = output_file
     output_json['subsystems'] = subsystems_table.to_csv(index=False,sep='\t')
     output_json['genes'] = gene_df.to_csv(index=False,sep='\t')
     with open(output_json_file,'w') as o:
@@ -472,6 +474,7 @@ def run_pathways(genome_ids, query_dict, output_file,output_dir, session):
     output_json['ecnumber'] = ec_output.to_csv(index=False,sep='\t')
     output_json['genes'] = genes_output.to_csv(index=False,sep='\t')
     output_json['genome_ids'] = genome_ids
+    output_json['job_name'] = output_file
     
 
     output_json_file = pathways_file.replace('.tsv','_tables.json')
