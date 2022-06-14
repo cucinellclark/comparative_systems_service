@@ -290,7 +290,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, session):
         'Product': 'product',
         'GO': 'go'
     }
-    gene_df.rename(columns=column_map, inplace=True)
+    gene_df.rename(columns=column_map, axis=1, inplace=True)
     #gene_df.drop(['_version_'],inplace=True)
     # Add subsystems columns to genes table
     remove_columns = ['active','date_inserted','genome_name','gene','id','owner','patric_id','public','product','refseq_locus_tag','taxon_id','_version_']
