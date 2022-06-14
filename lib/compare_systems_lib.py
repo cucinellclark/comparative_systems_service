@@ -176,7 +176,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, session):
 
     # subsystems_df = getSubsystemsDf(genome_ids,session) 
     subsystems_df = query_dict['subsystems']
-
+    
     # Superclass, class, and subclass can be different cases: convert all to lower case
     subsystems_df['superclass'] = subsystems_df['superclass'].str.lower()
     subsystems_df['class'] = subsystems_df['class'].str.lower()
@@ -291,6 +291,10 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, session):
         'GO': 'go'
     }
     gene_df.rename(columns=column_map, inplace=True)
+    #gene_df.drop(['_version_'],inplace=True)
+    # Add subsystems columns to genes table
+    remove_columns = ['active','date_inserted','genome_name','gene','id','owner','patric_id','public','product','refseq_locus_tag','taxon_id','_version_']
+    gene_df = pd.merge(gene_df,subsystems_df.drop(remove_columns,inplace=True),on=['genome_id','feature_id'],how='outer')
 
     output_json_file = subsystems_file.replace('.tsv','_tables.json')
     
