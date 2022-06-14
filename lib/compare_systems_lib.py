@@ -41,13 +41,6 @@ def get_maximum_value(df, col):
     max_label = col_counts[0].index
     return max_label
 
-# genome_data is a pandas dataframe with genome data from a genome/ query
-# genome_ids is the order of the genome ids
-# returns a list of genome names in the order of genome_ids
-def getGenomeNamesInOrder(genome_data, genome_ids):
-    import pdb
-    pdb.set_trace()
-
 def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, session):
     #base_query = "https://www.patricbrc.org/api/genome_feature/?in(genome_id,("
     #end_query = "))&limit(-1)&http_accept=text/tsv"
@@ -307,7 +300,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
     
     output_json = {}
     output_json['genome_ids'] = genome_ids
-    output_json['genome_names'] = getGenomeNamesInOrder(genome_data, genome_ids)
+    output_json['genome_names'] = genome_data.set_index('Genome ID').loc[genome_ids]['Genome Name'].tolist() # returns a list of genome names in the same order as the genome ids 
     output_json['overview'] = overview_dict 
     output_json['job_name'] = output_file
     output_json['subsystems'] = subsystems_table.to_csv(index=False,sep='\t')
