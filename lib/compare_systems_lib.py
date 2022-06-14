@@ -50,31 +50,6 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
     feature_list = []
     # proteinfams_df = getFeatureDf(genome_ids,session, limit=2500000)
     proteinfams_df = query_dict['feature']
-    # change column names
-    column_map = {
-        'Genome': 'genome_name',
-        'Genome ID': 'genome_id',
-        'Accession': 'accession',
-        'BRC ID': 'patric_id',
-        'RefSeq Locus Tag': 'refseq_locus_tag',
-        'Alt Locus Tag': 'alt_locus_tag',
-        'Feature ID': 'feature_id',
-        'Annotation': 'annotation',
-        'Feature Type': 'feature_type',
-        'Start': 'start',
-        'End': 'end',
-        'Length': 'length',
-        'Strand': 'strand',
-        'FIGfam ID': 'figfam_id',
-        'PATRIC genus-specific families (PLfams)': 'plfam_id',
-        'PATRIC cross-genus families (PGfams)': 'pgfam_id',
-        'Protein ID': 'protein_id',
-        'AA Length': 'aa_length',
-        'Gene Symbol': 'gene',
-        'Product': 'product',
-        'GO': 'go'
-    }
-    proteinfams_df.rename(columns=column_map, inplace=True)
 
     proteinfams_file = os.path.join(output_dir,output_file+"_proteinfams.tsv")
     proteinfams_df.to_csv(proteinfams_file, index=False, header=True, sep="\t")
@@ -267,32 +242,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
 
     gene_df = query_dict['feature']
     # change column names
-    column_map = {
-        'Genome': 'genome_name',
-        'Genome ID': 'genome_id',
-        'Accession': 'accession',
-        'BRC ID': 'patric_id',
-        'RefSeq Locus Tag': 'refseq_locus_tag',
-        'Alt Locus Tag': 'alt_locus_tag',
-        'Feature ID': 'feature_id',
-        'Annotation': 'annotation',
-        'Feature Type': 'feature_type',
-        'Start': 'start',
-        'End': 'end',
-        'Length': 'length',
-        'Strand': 'strand',
-        'FIGfam ID': 'figfam_id',
-        'PATRIC genus-specific families (PLfams)': 'plfam_id',
-        'PATRIC cross-genus families (PGfams)': 'pgfam_id',
-        'Protein ID': 'protein_id',
-        'AA Length': 'aa_length',
-        'Gene Symbol': 'gene',
-        'Product': 'product',
-        'GO': 'go'
-    }
-    import pdb
-    pdb.set_trace()
-    gene_df.rename(columns=column_map, axis=1)
+    
     #gene_df.drop(['_version_'],inplace=True)
     # Add subsystems columns to genes table
     remove_columns = ['date_inserted','date_modified','genome_name','gene','owner','patric_id','public','product','refseq_locus_tag','taxon_id','_version_']
@@ -398,31 +348,7 @@ def run_pathways(genome_ids, query_dict, output_file,output_dir, genome_data, se
     feature_list = []
     # gene_df = getFeatureDf(genome_ids,session, limit=2500000)
     gene_df = query_dict['feature']
-    # change column names
-    column_map = {
-        'Genome': 'genome_name',
-        'Genome ID': 'genome_id',
-        'Accession': 'accession',
-        'BRC ID': 'patric_id',
-        'RefSeq Locus Tag': 'refseq_locus_tag',
-        'Alt Locus Tag': 'alt_locus_tag',
-        'Feature ID': 'feature_id',
-        'Annotation': 'annotation',
-        'Feature Type': 'feature_type',
-        'Start': 'start',
-        'End': 'end',
-        'Length': 'length',
-        'Strand': 'strand',
-        'FIGfam ID': 'figfam_id',
-        'PATRIC genus-specific families (PLfams)': 'plfam_id',
-        'PATRIC cross-genus families (PGfams)': 'pgfam_id',
-        'Protein ID': 'protein_id',
-        'AA Length': 'aa_length',
-        'Gene Symbol': 'gene',
-        'Product': 'product',
-        'GO': 'go'
-    }
-    gene_df.rename(columns=column_map, inplace=True)
+    
     # Parse gene data
     # TODO:
     # - make sure to check genome_id type issue 
@@ -514,6 +440,30 @@ def run_all_queries(genome_ids, session):
         print('features query')
         feature_df = getFeatureDf(genome_ids,session, limit=2500000)
         if not feature_df is None:
+            column_map = {
+                'Genome': 'genome_name',
+                'Genome ID': 'genome_id',
+                'Accession': 'accession',
+                'BRC ID': 'patric_id',
+                'RefSeq Locus Tag': 'refseq_locus_tag',
+                'Alt Locus Tag': 'alt_locus_tag',
+                'Feature ID': 'feature_id',
+                'Annotation': 'annotation',
+                'Feature Type': 'feature_type',
+                'Start': 'start',
+                'End': 'end',
+                'Length': 'length',
+                'Strand': 'strand',
+                'FIGfam ID': 'figfam_id',
+                'PATRIC genus-specific families (PLfams)': 'plfam_id',
+                'PATRIC cross-genus families (PGfams)': 'pgfam_id',
+                'Protein ID': 'protein_id',
+                'AA Length': 'aa_length',
+                'Gene Symbol': 'gene',
+                'Product': 'product',
+                'GO': 'go'
+            }
+            feature_df.rename(columns=column_map, axis=1, inplace=True)
             query_dict['feature'] = feature_df
         else:
             sys.stderr.write('Features dataframe is None\n')
