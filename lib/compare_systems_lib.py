@@ -294,7 +294,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, session):
     #gene_df.drop(['_version_'],inplace=True)
     # Add subsystems columns to genes table
     remove_columns = ['active','date_inserted','genome_name','gene','id','owner','patric_id','public','product','refseq_locus_tag','taxon_id','_version_']
-    gene_df = pd.merge(gene_df,subsystems_df.drop(remove_columns,axis=1,inplace=True),on=['genome_id','feature_id'],how='outer')
+    gene_df = pd.merge(gene_df,subsystems_df.drop(remove_columns,axis=1),on=['genome_id','feature_id'],how='outer')
 
     output_json_file = subsystems_file.replace('.tsv','_tables.json')
     
