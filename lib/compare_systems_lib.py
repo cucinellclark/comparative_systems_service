@@ -18,7 +18,7 @@ import requests
 import pandas as pd
 import numpy as np
 
-from bvbrc_api import authenticateByEnv,getGenomeIdsByGenomeGroup,getFeatureDf,getSubsystemsDf,getPathwayDf
+from bvbrc_api import authenticateByEnv,getGenomeIdsByGenomeGroup,getFeatureDf,getSubsystemsDf,getPathwayDf,getDataForGenomes
 
 def chunker(seq, size):
     return (seq[pos:pos + size] for pos in range(0, len(seq), size))
@@ -41,7 +41,14 @@ def get_maximum_value(df, col):
     max_label = col_counts[0].index
     return max_label
 
-def run_families(genome_ids, query_dict, output_file, output_dir, session):
+# genome_data is a pandas dataframe with genome data from a genome/ query
+# genome_ids is the order of the genome ids
+# returns a list of genome names in the order of genome_ids
+def getGenomeNamesInOrder(genome_data, genome_ids):
+    import pdb
+    pdb.set_trace()
+
+def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, session):
     #base_query = "https://www.patricbrc.org/api/genome_feature/?in(genome_id,("
     #end_query = "))&limit(-1)&http_accept=text/tsv"
     #query = base_query + ",".join(genome_ids) + end_query
@@ -170,7 +177,7 @@ def run_families(genome_ids, query_dict, output_file, output_dir, session):
 
     print("ProteinFamilies Complete")
 
-def run_subsystems(genome_ids, query_dict, output_file, output_dir, session):
+def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, session):
     
     # json(facet,{"stat":{"type":"field","field":"superclass","limit":-1,"facet":{"subsystem_count":"unique(subsystem_id)","class":{"type":"field","field":"class","limit":-1,"facet":{"subsystem_count":"unique(subsystem_id)","gene_count":"unique(feature_id)","subclass":{"type":"field","field":"subclass","limit":-1,"facet":{"subsystem_count":"unique(subsystem_id)","gene_count":"unique(feature_id)"}}}}}}}):  
 
@@ -300,6 +307,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, session):
     
     output_json = {}
     output_json['genome_ids'] = genome_ids
+    output_json['genome_names'] = getGenomeNamesInOrder(genome_data, genome_ids)
     output_json['overview'] = overview_dict 
     output_json['job_name'] = output_file
     output_json['subsystems'] = subsystems_table.to_csv(index=False,sep='\t')
@@ -307,7 +315,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, session):
     with open(output_json_file,'w') as o:
         o.write(json.dumps(output_json))
 
-def run_pathways(genome_ids, query_dict, output_file,output_dir, session):
+def run_pathways(genome_ids, query_dict, output_file,output_dir, genome_data, session):
     
     pathways_file = os.path.join(output_dir,output_file+'_pathways.tsv')
     # TODO: create alt_locus_tag query
@@ -548,11 +556,14 @@ def run_compare_systems(job_data, output_dir):
         genome_ids = genome_ids + genome_group_ids
         genome_ids = list(set(genome_ids))
 
+    # optionally add more genome info to output 
+    genome_data = getDataForGenomes(genome_ids,s) 
+
     query_dict = run_all_queries(genome_ids, s)
 
     # TODO: add chunking
     # TODO: add recipe
     # TODO: add multithreading
-    #run_pathways(genome_ids, query_dict, output_file, output_dir, s)
-    run_subsystems(genome_ids, query_dict, output_file, output_dir, s)
-    #run_families(genome_ids, query_dict output_file, output_dir, s)
+    #run_pathways(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    #run_families(genome_ids, query_dict output_file, output_dir, genome_data, s)
