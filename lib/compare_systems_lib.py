@@ -464,7 +464,7 @@ def run_all_queries(genome_ids, session):
                 'GO': 'go'
             }
             if 'Genome ID' in feature_df.columns:
-                feature_df.rename(columns=column_map, axis=1, inplace=True)
+                feature_df.rename(columns=column_map, inplace=True)
             query_dict['feature'] = feature_df
         else:
             sys.stderr.write('Features dataframe is None\n')
