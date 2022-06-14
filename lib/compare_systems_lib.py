@@ -202,22 +202,22 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
         overview_dict[genome_id] = {}
         overview_dict[genome_id]["superclass_counts"] = len(genome_df['subsystem_id'].unique())
         # TODO: check that this is correct for each level
-        overview_dict[genome_id]["gene_counts"] = len(genome_df['gene'].unique())
+        overview_dict[genome_id]["gene_counts"] = genome_df.shape[0] 
         for superclass in genome_df['superclass'].unique():
             superclass_df = subsystems_df.loc[subsystems_df['superclass'] == superclass]
             overview_dict[genome_id][superclass] = {}
             overview_dict[genome_id][superclass]["class_counts"] = len(superclass_df['subsystem_id'].unique())
-            overview_dict[genome_id][superclass]["gene_counts"] = len(superclass_df['gene'].unique())
+            overview_dict[genome_id][superclass]["gene_counts"] = superclass_df.shape[0] 
             for clss in superclass_df['class'].unique():
                 class_df = superclass_df.loc[superclass_df['class'] == clss]
                 overview_dict[genome_id][superclass][clss] = {}
                 overview_dict[genome_id][superclass][clss]['subclass_counts'] = len(class_df['subsystem_id'].unique())
-                overview_dict[genome_id][superclass][clss]['gene_counts'] = len(class_df['gene'].unique())
+                overview_dict[genome_id][superclass][clss]['gene_counts'] = class_df.shape[0] 
                 for subclass in class_df['subclass'].unique():
                     subclass_df = class_df.loc[class_df['subclass'] == subclass]
                     overview_dict[genome_id][superclass][clss][subclass] = {}
                     overview_dict[genome_id][superclass][clss][subclass]['subsystem_name_counts'] = len(subclass_df['subsystem_id'].unique()) 
-                    overview_dict[genome_id][superclass][clss][subclass]['gene_counts'] = len(subclass_df['gene'].unique())
+                    overview_dict[genome_id][superclass][clss][subclass]['gene_counts'] = subclass_df.shape[0] 
                     #for name in subsystems_df['subsystem_name'].unique(): 
                     #    key = build_key([superclass,clss,subclass,name]) #TODO: might not need 
                     #    key_set.add(key)
