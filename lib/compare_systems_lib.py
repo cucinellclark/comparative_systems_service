@@ -256,7 +256,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
                 genome_table.loc[genome_table['subsystem_id'] == sub_id,'gene_count'] = len(tmp_df['gene'].unique()) # unsure if this is correct)
             else: # unsure if this is correct
                 genome_table.loc[genome_table['subsystem_id'] ==sub_id,'gene_count'] = tmp_df.shape[0]
-            genome_table.loc[genome_table['subsystem_id'] == sub_id,'role_count'] = len(tmp_df['role_id'])
+            genome_table.loc[genome_table['subsystem_id'] == sub_id,'role_count'] = len(tmp_df['role_id'].unique())
             # TODO: genome count calculation
         
         st_list.append(genome_table)    
