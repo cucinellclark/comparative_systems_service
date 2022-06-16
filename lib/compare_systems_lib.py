@@ -252,7 +252,10 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
         # add stats columns 
         for sub_id in genome_table['subsystem_id']:
             tmp_df = genome_df.loc[genome_df['subsystem_id'] == sub_id] 
-            genome_table.loc[genome_table['subsystem_id'] == sub_id,'gene_count'] = len(tmp_df['gene'])
+            if 'gene' in tmp_df.columns.tolist():
+                genome_table.loc[genome_table['subsystem_id'] == sub_id,'gene_count'] = len(tmp_df['gene'].unique()) # unsure if this is correct)
+            else: # unsure if this is correct
+                genome_table.loc[genome_table['subsystem_id'] ==sub_id,'gene_count'] = tmp_df.shape[0]
             genome_table.loc[genome_table['subsystem_id'] == sub_id,'role_count'] = len(tmp_df['role_id'])
             # TODO: genome count calculation
         
