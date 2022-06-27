@@ -329,13 +329,16 @@ def run_pathways(genome_ids, query_dict, output_file,output_dir, genome_data, se
         pathway_table['gene_count'] = [0]*pathway_table.shape[0]
         pathway_table['ec_count'] = [0]*pathway_table.shape[0]
         pathway_table['genome_ec'] = [0]*pathway_table.shape[0]
-        import pdb
-        pdb.set_trace()
         for pathway_id in pathway_table['pathway_id']: # should be unique
             tmp_df = genome_df.loc[pathway_id]
-            pathway_table.loc[pathway_id,'gene_count'] = len(tmp_df['feature_id'].unique())
-            pathway_table.loc[pathway_id,'ec_count'] = len(tmp_df['ec_number'].unique())
-            pathway_table.loc[pathway_id,'genome_ec'] = len(tmp_df['genome_ec'].unique())
+            if tmp_df.shape[0] > 1:
+                pathway_table.loc[pathway_id,'gene_count'] = len(tmp_df['feature_id'].unique())
+                pathway_table.loc[pathway_id,'ec_count'] = len(tmp_df['ec_number'].unique())
+                pathway_table.loc[pathway_id,'genome_ec'] = len(tmp_df['genome_ec'].unique())
+            else:
+                pathway_table.loc[pathway_id,'gene_count'] = tmp_df.shape[0]
+                pathway_table.loc[pathway_id,'ec_count'] = tmp_df.shape[0] 
+                pathway_table.loc[pathway_id,'genome_ec'] = tmp_df.shape[0] 
             # for genes info: take first record
             p_id = tmp_df.iloc[0]['patric_id']
             if p_id not in genes_info_dict:
@@ -356,13 +359,17 @@ def run_pathways(genome_ids, query_dict, output_file,output_dir, genome_data, se
         ec_table['gene_count'] = [0]*ec_table.shape[0]
         ec_table['ec_count'] = [0]*ec_table.shape[0]
         ec_table['genome_ec'] = [0]*ec_table.shape[0]
-        ec_table.set_index('ec_index')
-        for ec_number in ec_table['ec_index']:
+        genome_df.set_index('ec_index')
+        for ec_number in ec_table['ec_number']:
             tmp_df = genome_df.loc[ec_number]
-            ec_table.loc[ec_number,'gene_count'] = len(tmp_df['feature_id'].unique()) 
-            ec_table.loc[ec_number,'ec_count'] = len(tmp_df['ec_number'].unique()) 
-            ec_table.loc[ec_number,'genome_ec'] = len(tmp_df['ec_number'].unique())
-
+            if tmp_df.shape[0] > 1:
+                ec_table.loc[ec_number,'gene_count'] = len(tmp_df['feature_id'].unique()) 
+                ec_table.loc[ec_number,'ec_count'] = len(tmp_df['ec_number'].unique()) 
+                ec_table.loc[ec_number,'genome_ec'] = len(tmp_df['ec_number'].unique())
+            else:
+                ec_table.loc[ec_number,'gene_count'] = tmp_df.shape[0] 
+                ec_table.loc[ec_number,'ec_count'] = tmp_df.shape[0] 
+                ec_table.loc[ec_number,'genome_ec'] = tmp_df.shape[0] 
         # append to lists
         pathways_list.append(pathway_table)
         ecnum_list.append(ec_table)
