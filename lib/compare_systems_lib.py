@@ -291,10 +291,6 @@ def run_pathways(genome_ids, query_dict, output_file,output_dir, genome_data, se
     # TODO: create alt_locus_tag query
     # pathway_df = getPathwayDf(genome_ids,session, limit=2500000)
     pathway_df = query_dict['pathway']
-    # TODO:
-    # - move this to p3_core/lib/bvbrc_api.py
-    # convert pathway_id to string and pad with leading zeros
-    #pathway_df['pathway_id'] = pathway_df['pathway_id'].apply(lambda x: '{0:0>5}'.format(x)) 
     pathway_df.to_csv(pathways_file,sep='\t',index=False)
 
     #TODO: remove, reading in file for testing
@@ -387,58 +383,64 @@ def run_pathways(genome_ids, query_dict, output_file,output_dir, genome_data, se
     # gene_df = getFeatureDf(genome_ids,session, limit=2500000)
     gene_df = query_dict['feature']
     
-    # Parse gene data
-    # TODO:
-    # - make sure to check genome_id type issue 
-    genes_list = []
-    for genome_id in genome_ids:
-        print('---Faceting GenomeId Genes Table: {0}---'.format(genome_id))
-        genome_df = gene_df.loc[gene_df['genome_id'] == genome_id]
-        
-        genes_table = genome_df.drop_duplicates()
-        genes_table.gene = genes_table.gene.fillna('')
+    gene_df = pd.merge(gene_df,pathway_output,axis=1),on=['genome_id','patric_id'],how='inner')
+
+    import pdb
+    pdb.set_trace()
     
-        # get first gene entry data for gene duplicates
-        # pathway_id is not duplicated for each gene
-        keep_rows = []
-        g_list = []
-        for i in range(0,genes_table.shape[0]):
-            if not genes_table.iloc[i]['gene'] in g_list:
-                g_list.append(genes_table.iloc[i]['gene'])
-                keep_rows.append(i)
-            if genes_table.iloc[i]['gene'] == '':
-                keep_rows.append(i)
-        genes_table = genes_table.iloc[keep_rows]
+    if False:
+        # Parse gene data
+        # TODO:
+        # - make sure to check genome_id type issue 
+        genes_list = []
+        for genome_id in genome_ids:
+            print('---Faceting GenomeId Genes Table: {0}---'.format(genome_id))
+            genome_df = gene_df.loc[gene_df['genome_id'] == genome_id]
+            
+            genes_table = genome_df.drop_duplicates()
+            genes_table.gene = genes_table.gene.fillna('')
+        
+            # get first gene entry data for gene duplicates
+            # pathway_id is not duplicated for each gene
+            keep_rows = []
+            g_list = []
+            for i in range(0,genes_table.shape[0]):
+                if not genes_table.iloc[i]['gene'] in g_list:
+                    g_list.append(genes_table.iloc[i]['gene'])
+                    keep_rows.append(i)
+                if genes_table.iloc[i]['gene'] == '':
+                    keep_rows.append(i)
+            genes_table = genes_table.iloc[keep_rows]
 
-        # fill in ec_description, ec_number, index, pathwayid, pathway name 
-        genes_table['ec_description'] = ['']*genes_table.shape[0]
-        genes_table['ec_number'] = ['']*genes_table.shape[0]
-        genes_table['index'] = ['']*genes_table.shape[0]
-        genes_table['pathway_id'] = ['']*genes_table.shape[0]
-        genes_table['pathway_name'] = ['']*genes_table.shape[0]
-        # genes table stats
-        genes_table['genome_count'] = [1]*genes_table.shape[0]
-        genes_table['gene_count'] = [0]*genes_table.shape[0]
-        genes_table['ec_count'] = [0]*genes_table.shape[0]
-        genes_table['genome_ec'] = [0]*genes_table.shape[0]
-        #genes_table['alt_locus_tag'] = ['']*genes_table.shape[0]
-        # use patric_id to account for '' genes
-        for p_id in genes_table['patric_id']:
-            tmp_df = pathway_df.loc[pathway_df['genome_id'] == genome_id]
-            tmp_df = tmp_df[tmp_df['patric_id'] == p_id]
-            genes_table.loc[genes_table['patric_id'] == p_id,'gene_count'] = len(tmp_df['feature_id'].unique())
-            genes_table.loc[genes_table['patric_id'] == p_id,'ec_count'] = len(tmp_df['ec_number'].unique())
-            genes_table.loc[genes_table['patric_id'] == p_id,'genome_ec'] = len(tmp_df['ec_number'].unique())
-            if p_id in genes_info_dict:
-                genes_table.loc[genes_table['patric_id'] == p_id,'ec_description'] = genes_info_dict[p_id]['ec_description']
-                genes_table.loc[genes_table['patric_id'] == p_id,'ec_number'] = genes_info_dict[p_id]['ec_number']
-                genes_table.loc[genes_table['patric_id'] == p_id,'index'] = genes_info_dict[p_id]['id']
-                genes_table.loc[genes_table['patric_id'] == p_id,'pathway_id'] = genes_info_dict[p_id]['pathway_id']
-                genes_table.loc[genes_table['patric_id'] == p_id,'pathway_name'] = genes_info_dict[p_id]['pathway_name']
- 
-        genes_list.append(genes_table)
+            # fill in ec_description, ec_number, index, pathwayid, pathway name 
+            genes_table['ec_description'] = ['']*genes_table.shape[0]
+            genes_table['ec_number'] = ['']*genes_table.shape[0]
+            genes_table['index'] = ['']*genes_table.shape[0]
+            genes_table['pathway_id'] = ['']*genes_table.shape[0]
+            genes_table['pathway_name'] = ['']*genes_table.shape[0]
+            # genes table stats
+            genes_table['genome_count'] = [1]*genes_table.shape[0]
+            genes_table['gene_count'] = [0]*genes_table.shape[0]
+            genes_table['ec_count'] = [0]*genes_table.shape[0]
+            genes_table['genome_ec'] = [0]*genes_table.shape[0]
+            #genes_table['alt_locus_tag'] = ['']*genes_table.shape[0]
+            # use patric_id to account for '' genes
+            for p_id in genes_table['patric_id']:
+                tmp_df = pathway_df.loc[pathway_df['genome_id'] == genome_id]
+                tmp_df = tmp_df[tmp_df['patric_id'] == p_id]
+                genes_table.loc[genes_table['patric_id'] == p_id,'gene_count'] = len(tmp_df['feature_id'].unique())
+                genes_table.loc[genes_table['patric_id'] == p_id,'ec_count'] = len(tmp_df['ec_number'].unique())
+                genes_table.loc[genes_table['patric_id'] == p_id,'genome_ec'] = len(tmp_df['ec_number'].unique())
+                if p_id in genes_info_dict:
+                    genes_table.loc[genes_table['patric_id'] == p_id,'ec_description'] = genes_info_dict[p_id]['ec_description']
+                    genes_table.loc[genes_table['patric_id'] == p_id,'ec_number'] = genes_info_dict[p_id]['ec_number']
+                    genes_table.loc[genes_table['patric_id'] == p_id,'index'] = genes_info_dict[p_id]['id']
+                    genes_table.loc[genes_table['patric_id'] == p_id,'pathway_id'] = genes_info_dict[p_id]['pathway_id']
+                    genes_table.loc[genes_table['patric_id'] == p_id,'pathway_name'] = genes_info_dict[p_id]['pathway_name']
+     
+            genes_list.append(genes_table)
 
-    genes_output = pd.concat(genes_list)
+    #genes_output = pd.concat(genes_list)
 
     output_json = {}
     output_json['pathway'] = pathway_output.to_csv(index=False,sep='\t')
