@@ -294,7 +294,7 @@ def run_pathways(genome_ids, query_dict, output_file,output_dir, genome_data, se
     # TODO:
     # - move this to p3_core/lib/bvbrc_api.py
     # convert pathway_id to string and pad with leading zeros
-    pathway_df['pathway_id'] = pathway_df['pathway_id'].apply(lambda x: '{0:0>5}'.format(x)) 
+    #pathway_df['pathway_id'] = pathway_df['pathway_id'].apply(lambda x: '{0:0>5}'.format(x)) 
     pathway_df.to_csv(pathways_file,sep='\t',index=False)
 
     #TODO: remove, reading in file for testing
