@@ -335,12 +335,14 @@ def run_pathways(genome_ids, query_dict, output_file,output_dir, genome_data, se
                 pathway_table.loc[pathway_id,'gene_count'] = len(tmp_df['feature_id'].unique())
                 pathway_table.loc[pathway_id,'ec_count'] = len(tmp_df['ec_number'].unique())
                 pathway_table.loc[pathway_id,'genome_ec'] = len(tmp_df['genome_ec'].unique())
+                # for genes info: take first record
+                p_id = tmp_df.iloc[0]['patric_id']
             else:
                 pathway_table.loc[pathway_id,'gene_count'] = 1 
                 pathway_table.loc[pathway_id,'ec_count'] = 1 
                 pathway_table.loc[pathway_id,'genome_ec'] = 1 
-            # for genes info: take first record
-            p_id = tmp_df.iloc[0]['patric_id']
+                # for genes info: take first record
+                p_id = tmp_df['patric_id']
             if p_id not in genes_info_dict:
                 genes_info_dict[p_id] = tmp_df.iloc[0] 
 
