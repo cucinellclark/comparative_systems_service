@@ -329,6 +329,8 @@ def run_pathways(genome_ids, query_dict, output_file,output_dir, genome_data, se
         pathway_table['gene_count'] = [0]*pathway_table.shape[0]
         pathway_table['ec_count'] = [0]*pathway_table.shape[0]
         pathway_table['genome_ec'] = [0]*pathway_table.shape[0]
+        import pdb
+        pdb.set_trace()
         for pathway_id in pathway_table['pathway_id']: # should be unique
             tmp_df = genome_df.loc[pathway_id]
             pathway_table.loc[pathway_id,'gene_count'] = len(tmp_df['feature_id'].unique())
