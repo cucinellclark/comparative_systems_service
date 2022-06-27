@@ -362,6 +362,7 @@ def run_pathways(genome_ids, query_dict, output_file,output_dir, genome_data, se
         ec_table['ec_count'] = [0]*ec_table.shape[0]
         ec_table['genome_ec'] = [0]*ec_table.shape[0]
         genome_df.set_index('ec_index',inplace=True)
+        ec_table.set_index('ec_index',inplace=True)
         for ec_number in ec_table['ec_number']:
             tmp_df = genome_df.loc[ec_number]
             if isinstance(tmp_df, pd.DataFrame):
