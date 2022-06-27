@@ -383,7 +383,7 @@ def run_pathways(genome_ids, query_dict, output_file,output_dir, genome_data, se
     # gene_df = getFeatureDf(genome_ids,session, limit=2500000)
     gene_df = query_dict['feature']
     
-    gene_df = pd.merge(gene_df,pathway_output,axis=1),on=['genome_id','patric_id'],how='inner')
+    gene_df = pd.merge(gene_df,pathway_output,on=['genome_id','patric_id'],how='inner')
 
     import pdb
     pdb.set_trace()
