@@ -390,7 +390,7 @@ def run_pathways(genome_ids, query_dict, output_file,output_dir, genome_data, se
     import pdb
     pdb.set_trace()
     
-    gene_df = pd.merge(gene_df.drop(return_columns_to_remove('pathways_genes',gene_df.columns.tolist()), axis=1),pathway_output,on=['genome_id','feature_id'],how='inner')
+    gene_df = pd.merge(gene_df.drop(return_columns_to_remove('pathways_genes',gene_df.columns.tolist()), axis=1),pathway_output,on=['genome_id','patric_id'],how='inner')
 
     if False:
         # Parse gene data
