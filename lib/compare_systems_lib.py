@@ -319,7 +319,7 @@ def run_pathways(genome_ids, query_dict, output_file,output_dir, genome_data, se
         # TODO: add alt_locus_tag column
         '''
         pathway_table = genome_df[['genome_id','annotation','pathway_class','pathway_name','pathway_id']]
-        ec_table = genome_df[['genome_id','annotation','pathway_class','pathway_name','pathway_id','ec_number','ec_description']]
+        ec_table = genome_df[['genome_id','annotation','pathway_class','pathway_name','pathway_id','ec_number','ec_description','ec_index']]
 
         pathway_table = pathway_table.drop_duplicates()
         ec_table = ec_table.drop_duplicates()
