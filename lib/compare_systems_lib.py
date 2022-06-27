@@ -361,6 +361,8 @@ def run_pathways(genome_ids, query_dict, output_file,output_dir, genome_data, se
         ec_table['gene_count'] = [0]*ec_table.shape[0]
         ec_table['ec_count'] = [0]*ec_table.shape[0]
         ec_table['genome_ec'] = [0]*ec_table.shape[0]
+        import pdb  
+        pdb.set_trace()
         genome_df.set_index('ec_index')
         for ec_number in ec_table['ec_number']:
             tmp_df = genome_df.loc[ec_number]
