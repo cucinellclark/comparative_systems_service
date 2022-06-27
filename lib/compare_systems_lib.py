@@ -174,9 +174,9 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
     subsystems_df = query_dict['subsystems']
     
     # Superclass, class, and subclass can be different cases: convert all to lower case
-    subsystems_df['superclass'] = subsystems_df['superclass'].str.lower()
-    subsystems_df['class'] = subsystems_df['class'].str.lower()
-    subsystems_df['subclass'] = subsystems_df['subclass'].str.lower()
+    #subsystems_df['superclass'] = subsystems_df['superclass'].str.lower()
+    #subsystems_df['class'] = subsystems_df['class'].str.lower()
+    #subsystems_df['subclass'] = subsystems_df['subclass'].str.lower()
 
     # query 
     #base_query = "https://www.patricbrc.org/api/subsystem/?in(genome_id,("
@@ -199,18 +199,18 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
         overview_dict[genome_id]["superclass_counts"] = len(genome_df['subsystem_id'].unique())
         # TODO: check that this is correct for each level
         overview_dict[genome_id]["gene_counts"] = genome_df.shape[0] 
-        for superclass in genome_df['superclass'].unique():
-            superclass_df = subsystems_df.loc[subsystems_df['superclass'] == superclass]
+        for superclass in genome_df['superclass'].unique().str.lower():
+            superclass_df = subsystems_df.loc[subsystems_df['superclass'].str.lower() == superclass]
             overview_dict[genome_id][superclass] = {}
             overview_dict[genome_id][superclass]["class_counts"] = len(superclass_df['subsystem_id'].unique())
             overview_dict[genome_id][superclass]["gene_counts"] = superclass_df.shape[0] 
-            for clss in superclass_df['class'].unique():
-                class_df = superclass_df.loc[superclass_df['class'] == clss]
+            for clss in superclass_df['class'].unique().str.lower():
+                class_df = superclass_df.loc[superclass_df['class'].str.lower() == clss]
                 overview_dict[genome_id][superclass][clss] = {}
                 overview_dict[genome_id][superclass][clss]['subclass_counts'] = len(class_df['subsystem_id'].unique())
                 overview_dict[genome_id][superclass][clss]['gene_counts'] = class_df.shape[0] 
-                for subclass in class_df['subclass'].unique():
-                    subclass_df = class_df.loc[class_df['subclass'] == subclass]
+                for subclass in class_df['subclass'].unique().str.lower():
+                    subclass_df = class_df.loc[class_df['subclass'].str.lower() == subclass]
                     overview_dict[genome_id][superclass][clss][subclass] = {}
                     overview_dict[genome_id][superclass][clss][subclass]['subsystem_name_counts'] = len(subclass_df['subsystem_id'].unique()) 
                     overview_dict[genome_id][superclass][clss][subclass]['gene_counts'] = subclass_df.shape[0] 
@@ -449,6 +449,7 @@ def run_all_queries(genome_ids, session):
         print('pathways query')
         pathway_df = getPathwayDf(genome_ids,session, limit=2500000)
         if not pathway_df is None:
+            pathway_df.set_index('pathway_id', inplace=True)
             query_dict['pathway'] = pathway_df
         else:
             sys.stderr.write('Pathways dataframe is None\n')
@@ -457,6 +458,7 @@ def run_all_queries(genome_ids, session):
         print('subsystems query')
         subsystems_df = getSubsystemsDf(genome_ids,session) 
         if not subsystems_df is None:
+            subsystems_df.set_index('subsystem_id', inplace=True)
             query_dict['subsystems'] = subsystems_df
         else:
             sys.stderr.write('Subsystems dataframe is None\n')
