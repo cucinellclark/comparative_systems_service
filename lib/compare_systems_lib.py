@@ -461,7 +461,7 @@ def run_all_queries(genome_ids, session):
         print('subsystems query')
         subsystems_df = getSubsystemsDf(genome_ids,session) 
         if not subsystems_df is None:
-            subsystems_df['subsystems_index'] = subsystems_df['subsystems_id']
+            subsystems_df['subsystems_index'] = subsystems_df['subsystem_id']
             subsystems_df.set_index('subsystem_index', inplace=True)
             query_dict['subsystems'] = subsystems_df
         else:
