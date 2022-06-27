@@ -329,11 +329,11 @@ def run_pathways(genome_ids, query_dict, output_file,output_dir, genome_data, se
         pathway_table['gene_count'] = [0]*pathway_table.shape[0]
         pathway_table['ec_count'] = [0]*pathway_table.shape[0]
         pathway_table['genome_ec'] = [0]*pathway_table.shape[0]
-        for pathway_id in pathway_table['pathway_id']:
-            tmp_df = genome_df.loc[genome_df['pathway_id'] == pathway_id]
-            pathway_table.loc[pathway_table['pathway_id'] == pathway_id,'gene_count'] = len(tmp_df['feature_id'].unique())
-            pathway_table.loc[pathway_table['pathway_id'] == pathway_id,'ec_count'] = len(tmp_df['ec_number'].unique())
-            pathway_table.loc[pathway_table['pathway_id'] == pathway_id,'genome_ec'] = len(tmp_df['genome_ec'].unique())
+        for pathway_id in pathway_table['pathway_index']:
+            tmp_df = genome_df.loc[pathway_id]
+            pathway_table.loc[pathway_id,'gene_count'] = len(tmp_df['feature_id'].unique())
+            pathway_table.loc[pathway_id,'ec_count'] = len(tmp_df['ec_number'].unique())
+            pathway_table.loc[pathway_id,'genome_ec'] = len(tmp_df['genome_ec'].unique())
             # for genes info: take first record
             p_id = tmp_df.iloc[0]['patric_id']
             if p_id not in genes_info_dict:
@@ -354,11 +354,12 @@ def run_pathways(genome_ids, query_dict, output_file,output_dir, genome_data, se
         ec_table['gene_count'] = [0]*ec_table.shape[0]
         ec_table['ec_count'] = [0]*ec_table.shape[0]
         ec_table['genome_ec'] = [0]*ec_table.shape[0]
-        for ec_number in ec_table['ec_number']:
-            tmp_df = genome_df.loc[genome_df['ec_number'] == ec_number]
-            ec_table.loc[ec_table['ec_number'] == ec_number,'gene_count'] = len(tmp_df['feature_id'].unique()) 
-            ec_table.loc[ec_table['ec_number'] == ec_number,'ec_count'] = len(tmp_df['ec_number'].unique()) 
-            ec_table.loc[ec_table['ec_number'] == ec_number,'genome_ec'] = len(tmp_df['ec_number'].unique())
+        ec_table.set_index('ec_index')
+        for ec_number in ec_table['ec_index']:
+            tmp_df = genome_df.loc[ec_number]
+            ec_table.loc[ec_number,'gene_count'] = len(tmp_df['feature_id'].unique()) 
+            ec_table.loc[ec_number,'ec_count'] = len(tmp_df['ec_number'].unique()) 
+            ec_table.loc[ec_number,'genome_ec'] = len(tmp_df['ec_number'].unique())
 
         # append to lists
         pathways_list.append(pathway_table)
@@ -449,7 +450,9 @@ def run_all_queries(genome_ids, session):
         print('pathways query')
         pathway_df = getPathwayDf(genome_ids,session, limit=2500000)
         if not pathway_df is None:
-            pathway_df.set_index('pathway_id', inplace=True)
+            pathway_df['pathway_index'] = pathway_df['pathway_id']
+            pathway_df['ec_index'] = pathway_df['ec_number']
+            pathway_df.set_index('pathway_index', inplace=True)
             query_dict['pathway'] = pathway_df
         else:
             sys.stderr.write('Pathways dataframe is None\n')
@@ -458,7 +461,8 @@ def run_all_queries(genome_ids, session):
         print('subsystems query')
         subsystems_df = getSubsystemsDf(genome_ids,session) 
         if not subsystems_df is None:
-            subsystems_df.set_index('subsystem_id', inplace=True)
+            subsystems_df['subsystems_index'] = subsystems_df['subsystems_id']
+            subsystems_df.set_index('subsystem_index', inplace=True)
             query_dict['subsystems'] = subsystems_df
         else:
             sys.stderr.write('Subsystems dataframe is None\n')
