@@ -64,6 +64,10 @@ def return_columns_to_remove(system,columns):
                                     'aa_length','gene','go']
         table_columns = list(set.intersection(set(drop_pgfams_columns),set(columns))) 
         return table_columns
+    elif system is 'pathways_genes':
+        drop_gene_columns = ['genome_name','accession','alt_locus_tag','refseq_locus_tag','feature_id','annotation','product']
+        table_columns = list(set.intersection(set(drop_gene_columns),set(columns)))
+        return table_columns
     else: # pathways does not have drop columns
         sys.stderr.write("Error, system is not a valid type\n")
         return [] 
@@ -386,7 +390,7 @@ def run_pathways(genome_ids, query_dict, output_file,output_dir, genome_data, se
     import pdb
     pdb.set_trace()
     
-    gene_df = pd.merge(gene_df,pathway_output,on=['genome_id','patric_id'],how='inner')
+    gene_df = pd.merge(gene_df.drop(return_columns_to_remove('pathways_genes',gene_df.columns.tolist()), axis=1),pathway_output,on=['genome_id','feature_id'],how='inner')
 
     if False:
         # Parse gene data
