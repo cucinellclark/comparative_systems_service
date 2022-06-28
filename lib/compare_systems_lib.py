@@ -123,7 +123,7 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
                 'aa_length_mean': np.mean(tmp_df['aa_length']) if is_dataframe else tmp_df['aa_length'],
                 'aa_length_std': np.std(tmp_df['aa_length']) if is_dataframe else 0,
                 'feature_count': len(tmp_df['feature_id']) if is_dataframe else 1,
-                'genomes': format(len(tmp_df['feature_id']),'#04x').replace('0x','') if is_dataframe else format(1,'#04x').replace('0x','')
+                'genomes': format(len(tmp_df['feature_id']),'#04x').replace('0x','') if is_dataframe else format(1,'#04x').replace('0x',''),
                 'genome_count': 1
             }
             plfam_table.loc[plfam_id] = [pd.Series(replace_row)]
