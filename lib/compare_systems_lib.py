@@ -81,8 +81,6 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
     feature_list = []
     # proteinfams_df = getFeatureDf(genome_ids,session, limit=2500000)
     proteinfams_df = query_dict['feature']
-    import pdb
-    pdb.set_trace()
 
     proteinfams_file = os.path.join(output_dir,output_file+"_proteinfams.tsv")
     proteinfams_df.to_csv(proteinfams_file, index=False, header=True, sep="\t")
@@ -119,13 +117,23 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
         for plfam_id in plfam_table['plfam_id']:
             tmp_df = genome_df.loc[plfam_id]
             is_dataframe = isinstance(tmp_df, pd.DataFrame)
-            plfam_table.loc[plfam_id,'aa_length_min'] = np.min(tmp_df['aa_length']) if is_dataframe else tmp_df['aa_length']
-            plfam_table.loc[plfam_id,'aa_length_max'] = np.max(tmp_df['aa_length']) if is_dataframe else tmp_df['aa_length']
-            plfam_table.loc[plfam_id,'aa_length_mean'] = np.mean(tmp_df['aa_length']) if is_dataframe else tmp_df['aa_length']
-            plfam_table.loc[plfam_id,'aa_length_std'] = np.std(tmp_df['aa_length']) if is_dataframe else 0
-            plfam_table.loc[plfam_id,'feature_count'] = len(tmp_df['feature_id']) if is_dataframe else 1
+            replace_row = {
+                'aa_length_min': np.min(tmp_df['aa_length']) if is_dataframe else tmp_df['aa_length'],
+                'aa_length_max': np.max(tmp_df['aa_length']) if is_dataframe else tmp_df['aa_length'],
+                'aa_length_mean': np.mean(tmp_df['aa_length']) if is_dataframe else tmp_df['aa_length'],
+                'aa_length_std': np.std(tmp_df['aa_length']) if is_dataframe else 0,
+                'feature_count': len(tmp_df['feature_id']) if is_dataframe else 1,
+                'genomes': format(len(tmp_df['feature_id']),'#04x').replace('0x','') if is_dataframe else format(1,'#04x').replace('0x','')
+                'genome_count': 1
+            }
+            plfam_table.loc[plfam_id] = [pd.Series(replace_row)]
+            #plfam_table.loc[plfam_id,'aa_length_min'] = np.min(tmp_df['aa_length']) if is_dataframe else tmp_df['aa_length']
+            #plfam_table.loc[plfam_id,'aa_length_max'] = np.max(tmp_df['aa_length']) if is_dataframe else tmp_df['aa_length']
+            #plfam_table.loc[plfam_id,'aa_length_mean'] = np.mean(tmp_df['aa_length']) if is_dataframe else tmp_df['aa_length']
+            #plfam_table.loc[plfam_id,'aa_length_std'] = np.std(tmp_df['aa_length']) if is_dataframe else 0
+            #plfam_table.loc[plfam_id,'feature_count'] = len(tmp_df['feature_id']) if is_dataframe else 1
             # genomes used in Heatmap viewer
-            plfam_table.loc[plfam_id,'genomes'] = format(len(tmp_df['feature_id']),'#04x').replace('0x','') if is_dataframe else format(1,'#04x').replace('0x','')
+            #plfam_table.loc[plfam_id,'genomes'] = format(len(tmp_df['feature_id']),'#04x').replace('0x','') if is_dataframe else format(1,'#04x').replace('0x','')
         
         plfam_list.append(plfam_table)
         #figfam_list.append(figfam_table)
