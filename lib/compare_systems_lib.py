@@ -114,6 +114,8 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
         plfam_table['aa_length_max'] = [0]*plfam_table.shape[0] 
         plfam_table['aa_length_mean'] = [0]*plfam_table.shape[0] 
         plfam_table['aa_length_std'] = [0]*plfam_table.shape[0] 
+        import pdb
+        pdb.set_trace()
         for plfam_id in plfam_table['plfam_id']:
             tmp_df = genome_df.loc[plfam_id]
             is_dataframe = isinstance(tmp_df, pd.DataFrame)
