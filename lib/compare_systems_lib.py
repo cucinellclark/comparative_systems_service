@@ -82,11 +82,8 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
     # proteinfams_df = getFeatureDf(genome_ids,session, limit=2500000)
     proteinfams_df = query_dict['feature']
 
-    import pdb
-    pdb.set_trace()
     proteinfams_file = os.path.join(output_dir,output_file+"_proteinfams.tsv")
     proteinfams_df.to_csv(proteinfams_file, index=False, header=True, sep="\t")
-    print('after this')
     # TODO: remove, used for testing
     #proteinfams_df = pd.read_csv(proteinfams_file,sep="\t")
     
@@ -95,9 +92,10 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
     for genome_id in genome_ids:
         print("---{0}".format(genome_id))    
         genome_df = proteinfams_df.loc[proteinfams_df['genome_id'] == genome_id]
-
+        print('here1')
         plfam_table = genome_df.drop(return_columns_to_remove('proteinfamilies_plfams',genome_df.columns.tolist()), axis=1) 
 
+        print('here2')
         # Get unique family ids, first row for information 
         keep_rows = []
         plfam_id_list = []
@@ -107,6 +105,7 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
                 keep_rows.append(i)
         plfam_table = plfam_table.iloc[keep_rows]
 
+        print('here3')
         # plfam_stats 
         plfam_table['feature_count'] = [0]*plfam_table.shape[0]
         plfam_table['genome_count'] = [1]*plfam_table.shape[0] 
@@ -125,7 +124,8 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
             plfam_table.loc[plfam_id,'feature_count'] = len(tmp_df['feature_id']) if is_dataframe else 1
             # genomes used in Heatmap viewer
             plfam_table.loc[plfam_id,'genomes'] = format(len(tmp_df['feature_id']),'#04x').replace('0x','') if is_dataframe else format(1,'#04x').replace('0x','')
-
+        
+        print('here4')
         plfam_list.append(plfam_table)
         #figfam_list.append(figfam_table)
     
