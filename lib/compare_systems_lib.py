@@ -535,7 +535,7 @@ def run_all_queries(genome_ids, session):
                 feature_df.rename(columns=column_map, inplace=True)
             feature_df['plfam_index'] = feature_df['plfam_id']
             feature_df['pgfam_index'] = feature_df['pgfam_id']
-            feature_df.set_index('plfam_index', inplace=True)
+            #feature_df.set_index('plfam_index', inplace=True)
             query_dict['feature'] = feature_df
         else:
             sys.stderr.write('Features dataframe is None\n')
