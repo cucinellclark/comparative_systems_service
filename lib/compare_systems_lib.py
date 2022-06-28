@@ -90,7 +90,7 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
     # process plfams
     plfam_list = [] 
     for genome_id in genome_ids:
-        print("---{0}".format(genome_id))    
+        print("---{0}--plfams".format(genome_id))    
         genome_df = proteinfams_df.loc[proteinfams_df['genome_id'] == genome_id]
         genome_df = genome_df.loc[genome_df['plfam_id'].notna()]
 
@@ -131,7 +131,7 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
     pgfam_list = []
     proteinfams_df.set_index('pgfam_index',inplace=True)
     for genome_id in genome_ids:
-        print("---{0}".format(genome_id))    
+        print("---{0}--pgfams".format(genome_id))    
         genome_df = proteinfams_df.loc[proteinfams_df['genome_id'] == genome_id]
         genome_df = genome_df.loc[genome_df['pgfam_id'].notna()]
         
@@ -154,7 +154,7 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
         pgfam_table['aa_length_mean'] = [0]*pgfam_table.shape[0] 
         pgfam_table['aa_length_std'] = [0]*pgfam_table.shape[0] 
         for pgfam_id in pgfam_table['pgfam_id']:
-            tmp_df = genome_df.loc[genome_df['pgfam_id'] == pgfam_id]
+            tmp_df = genome_df.loc[pgfam_id]
             is_dataframe = isinstance(tmp_df, pd.DataFrame)
             pgfam_table.loc[pgfam_id,'aa_length_min'] = np.min(tmp_df['aa_length']) if is_dataframe else tmp_df['aa_length']
             pgfam_table.loc[pgfam_id,'aa_length_max'] = np.max(tmp_df['aa_length']) if is_dataframe else tmp_df['aa_length']
@@ -306,6 +306,8 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
     output_json['genes'] = gene_df.to_csv(index=False,sep='\t')
     with open(output_json_file,'w') as o:
         o.write(json.dumps(output_json))
+
+    print('Subsystems complete')
 
 def run_pathways(genome_ids, query_dict, output_file,output_dir, genome_data, session):
     
