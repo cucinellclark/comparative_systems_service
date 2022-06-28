@@ -93,6 +93,7 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
         print("---{0}--plfams".format(genome_id))    
         genome_df = proteinfams_df.loc[proteinfams_df['genome_id'] == genome_id]
         genome_df = genome_df.loc[genome_df['plfam_id'].notna()]
+        genome_df.set_index('plfam_index',inplace=True)
 
         plfam_table = genome_df.drop(return_columns_to_remove('proteinfamilies_plfams',genome_df.columns.tolist()), axis=1) 
 
@@ -129,11 +130,11 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
     
     # process pgfams
     pgfam_list = []
-    proteinfams_df.set_index('pgfam_index',inplace=True)
     for genome_id in genome_ids:
         print("---{0}--pgfams".format(genome_id))    
         genome_df = proteinfams_df.loc[proteinfams_df['genome_id'] == genome_id]
         genome_df = genome_df.loc[genome_df['pgfam_id'].notna()]
+        genome_df.set_index('pgfam_index',inplace=True)
         
         pgfam_table = genome_df.drop(return_columns_to_remove('proteinfamilies_pgfams',genome_df.columns.tolist()), axis=1)
         
