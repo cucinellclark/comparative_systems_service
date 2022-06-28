@@ -202,6 +202,8 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
         overview_dict[genome_id] = {}
         overview_dict[genome_id]["superclass_counts"] = len(genome_df['subsystem_id'].unique())
         # TODO: check that this is correct for each level
+        import pdb
+        pdb.set_trace()
         overview_dict[genome_id]["gene_counts"] = genome_df.shape[0] 
         for superclass in genome_df['superclass'].unique().str.lower():
             superclass_df = subsystems_df.loc[subsystems_df['superclass'].str.lower() == superclass]
