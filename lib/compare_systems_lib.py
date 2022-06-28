@@ -257,11 +257,15 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
         # add stats columns 
         for sub_id in genome_table['subsystem_id']:
             tmp_df = genome_df.loc[sub_id] 
-            if 'gene' in tmp_df.columns.tolist():
-                genome_table.loc[sub_id,'gene_count'] = len(tmp_df['gene'].unique()) # unsure if this is correct)
-            else: # unsure if this is correct
-                genome_table.loc[sub_id,'gene_count'] = tmp_df.shape[0]
-            genome_table.loc[sub_id,'role_count'] = len(tmp_df['role_id'].unique())
+            if isinstance(tmp_df, pd.DataFrame): # if only one record, returns as Series
+                if 'gene' in tmp_df.columns.tolist():
+                    genome_table.loc[sub_id,'gene_count'] = len(tmp_df['gene'].unique()) # unsure if this is correct)
+                else: # unsure if this is correct
+                    genome_table.loc[sub_id,'gene_count'] = tmp_df.shape[0]
+                genome_table.loc[sub_id,'role_count'] = len(tmp_df['role_id'].unique())
+            else:
+                genome_table.loc[sub_id,'gene_count'] = 1
+                genome_table.loc[sub_id,'role_count'] = 1
             # TODO: genome count calculation
         
         st_list.append(genome_table)    
