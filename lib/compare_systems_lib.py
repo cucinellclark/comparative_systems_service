@@ -331,7 +331,7 @@ def run_pathways(genome_ids, query_dict, output_file,output_dir, genome_data, se
         pathway_table['genome_ec'] = [0]*pathway_table.shape[0]
         for pathway_id in pathway_table['pathway_id']: # should be unique
             tmp_df = genome_df.loc[pathway_id]
-            if isinstance(tmp_df, pd.DataFrame): # more than one value
+            if isinstance(tmp_df, pd.DataFrame): # if only one entry, returns a Series 
                 pathway_table.loc[pathway_id,'gene_count'] = len(tmp_df['feature_id'].unique())
                 pathway_table.loc[pathway_id,'ec_count'] = len(tmp_df['ec_number'].unique())
                 pathway_table.loc[pathway_id,'genome_ec'] = len(tmp_df['genome_ec'].unique())
@@ -365,7 +365,7 @@ def run_pathways(genome_ids, query_dict, output_file,output_dir, genome_data, se
         ec_table.set_index('ec_index',inplace=True)
         for ec_number in ec_table['ec_number']:
             tmp_df = genome_df.loc[ec_number]
-            if isinstance(tmp_df, pd.DataFrame):
+            if isinstance(tmp_df, pd.DataFrame): # if only one entry, returns a Series
                 ec_table.loc[ec_number,'gene_count'] = len(tmp_df['feature_id'].unique()) 
                 ec_table.loc[ec_number,'ec_count'] = len(tmp_df['ec_number'].unique()) 
                 ec_table.loc[ec_number,'genome_ec'] = len(tmp_df['ec_number'].unique())
@@ -387,10 +387,7 @@ def run_pathways(genome_ids, query_dict, output_file,output_dir, genome_data, se
     # gene_df = getFeatureDf(genome_ids,session, limit=2500000)
     gene_df = query_dict['feature']
     
-    import pdb
-    pdb.set_trace()
-    
-    gene_df = pd.merge(gene_df.drop(return_columns_to_remove('pathways_genes',gene_df.columns.tolist()), axis=1),pathway_df,on=['genome_id','patric_id'],how='inner')
+    genes_output = pd.merge(gene_df.drop(return_columns_to_remove('pathways_genes',gene_df.columns.tolist()), axis=1),pathway_df,on=['genome_id','patric_id'],how='inner')
 
     if False:
         # Parse gene data
@@ -560,5 +557,5 @@ def run_compare_systems(job_data, output_dir):
     # TODO: add recipe
     # TODO: add multithreading
     run_pathways(genome_ids, query_dict, output_file, output_dir, genome_data, s)
-    run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, s)
-    run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    #run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    #run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s)
