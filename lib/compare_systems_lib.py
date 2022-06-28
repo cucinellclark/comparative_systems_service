@@ -117,7 +117,13 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
         for plfam_id in plfam_table['plfam_id']:
             tmp_df = genome_df.loc[plfam_id]
             is_dataframe = isinstance(tmp_df, pd.DataFrame)
+            prev_row = plfam_table.loc[plfam_id]
             replace_row = {
+                'genome_id': genome_id,
+                'length': prev_row['length'],
+                'plfam_id': plfam_id,
+                'product': prev_row['product'], 
+                'pgfam_index': prev_row['pgfam_index'],
                 'aa_length_min': np.min(tmp_df['aa_length']) if is_dataframe else tmp_df['aa_length'],
                 'aa_length_max': np.max(tmp_df['aa_length']) if is_dataframe else tmp_df['aa_length'],
                 'aa_length_mean': np.mean(tmp_df['aa_length']) if is_dataframe else tmp_df['aa_length'],
