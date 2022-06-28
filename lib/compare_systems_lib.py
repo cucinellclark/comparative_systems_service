@@ -84,9 +84,9 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
 
     import pdb
     pdb.set_trace()
-
     proteinfams_file = os.path.join(output_dir,output_file+"_proteinfams.tsv")
     proteinfams_df.to_csv(proteinfams_file, index=False, header=True, sep="\t")
+    print('after this')
     # TODO: remove, used for testing
     #proteinfams_df = pd.read_csv(proteinfams_file,sep="\t")
     
