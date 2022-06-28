@@ -126,6 +126,8 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
                 'genomes': format(len(tmp_df['feature_id']),'#04x').replace('0x','') if is_dataframe else format(1,'#04x').replace('0x',''),
                 'genome_count': 1
             }
+            import pdb
+            pdb.set_trace()
             plfam_table.loc[plfam_id] = [pd.Series(replace_row)]
             #plfam_table.loc[plfam_id,'aa_length_min'] = np.min(tmp_df['aa_length']) if is_dataframe else tmp_df['aa_length']
             #plfam_table.loc[plfam_id,'aa_length_max'] = np.max(tmp_df['aa_length']) if is_dataframe else tmp_df['aa_length']
