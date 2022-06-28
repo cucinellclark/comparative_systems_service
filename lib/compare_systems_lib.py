@@ -92,10 +92,10 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
     for genome_id in genome_ids:
         print("---{0}".format(genome_id))    
         genome_df = proteinfams_df.loc[proteinfams_df['genome_id'] == genome_id]
-        print('here1')
+        genome_df = genome_df.loc[genome_df['plfam_id'].notna()]
+
         plfam_table = genome_df.drop(return_columns_to_remove('proteinfamilies_plfams',genome_df.columns.tolist()), axis=1) 
 
-        print('here2')
         # Get unique family ids, first row for information 
         keep_rows = []
         plfam_id_list = []
@@ -105,7 +105,6 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
                 keep_rows.append(i)
         plfam_table = plfam_table.iloc[keep_rows]
 
-        print('here3')
         # plfam_stats 
         plfam_table['feature_count'] = [0]*plfam_table.shape[0]
         plfam_table['genome_count'] = [1]*plfam_table.shape[0] 
@@ -114,8 +113,6 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
         plfam_table['aa_length_max'] = [0]*plfam_table.shape[0] 
         plfam_table['aa_length_mean'] = [0]*plfam_table.shape[0] 
         plfam_table['aa_length_std'] = [0]*plfam_table.shape[0] 
-        import pdb
-        pdb.set_trace()
         for plfam_id in plfam_table['plfam_id']:
             tmp_df = genome_df.loc[plfam_id]
             is_dataframe = isinstance(tmp_df, pd.DataFrame)
@@ -127,7 +124,6 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
             # genomes used in Heatmap viewer
             plfam_table.loc[plfam_id,'genomes'] = format(len(tmp_df['feature_id']),'#04x').replace('0x','') if is_dataframe else format(1,'#04x').replace('0x','')
         
-        print('here4')
         plfam_list.append(plfam_table)
         #figfam_list.append(figfam_table)
     
@@ -137,6 +133,7 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
     for genome_id in genome_ids:
         print("---{0}".format(genome_id))    
         genome_df = proteinfams_df.loc[proteinfams_df['genome_id'] == genome_id]
+        genome_df = genome_df.loc[genome_df['pgfam_id'].notna()]
         
         pgfam_table = genome_df.drop(return_columns_to_remove('proteinfamilies_pgfams',genome_df.columns.tolist()), axis=1)
         
