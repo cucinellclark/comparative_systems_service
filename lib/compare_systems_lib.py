@@ -82,6 +82,9 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
     # proteinfams_df = getFeatureDf(genome_ids,session, limit=2500000)
     proteinfams_df = query_dict['feature']
 
+    import pdb
+    pdb.set_trace()
+
     proteinfams_file = os.path.join(output_dir,output_file+"_proteinfams.tsv")
     proteinfams_df.to_csv(proteinfams_file, index=False, header=True, sep="\t")
     # TODO: remove, used for testing
@@ -564,4 +567,4 @@ def run_compare_systems(job_data, output_dir):
     # TODO: add multithreading
     run_pathways(genome_ids, query_dict, output_file, output_dir, genome_data, s)
     run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, s)
-    #run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s)
