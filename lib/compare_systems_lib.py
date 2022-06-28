@@ -243,6 +243,9 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
         genome_table['role_count'] = [0]*genome_table.shape[0]
     
         genome_table['genome_id'] = [genome_id]*genome_table.shape[0]
+
+        import pdb
+        pdb.set_trace()
         
         # Get unique subsystem ids, first row for information
         keep_rows = []
@@ -346,6 +349,7 @@ def run_pathways(genome_ids, query_dict, output_file,output_dir, genome_data, se
             if p_id not in genes_info_dict:
                 genes_info_dict[p_id] = tmp_df.iloc[0] 
 
+        # TODO: maybe modify once the multiple-rows thing has been decided
         # get first ec_number entry data for ec_number duplicates
         # pathway_id is not duplicated for each ec_number
         keep_rows = []
