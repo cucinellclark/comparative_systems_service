@@ -20,6 +20,8 @@ import numpy as np
 
 from bvbrc_api import authenticateByEnv,getGenomeIdsByGenomeGroup,getFeatureDf,getSubsystemsDf,getPathwayDf,getDataForGenomes
 
+import time
+
 def chunker(seq, size):
     return (seq[pos:pos + size] for pos in range(0, len(seq), size))
 
@@ -174,18 +176,25 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
             #plfam_table.loc[plfam_id,'genomes'] = format(len(tmp_df['feature_id']),'#04x').replace('0x','') if is_dataframe else format(1,'#04x').replace('0x','')
         '''
         print('here1')
+        print(str(time.time()))
         plfam_table['aa_length_min'] = plfam_table.apply(lambda row: get_plfam_stats(row,genome_df,'aa_length_min'), axis=1)
         print('here2')
+        print(str(time.time()))
         plfam_table['aa_length_max'] = plfam_table.apply(lambda row: get_plfam_stats(row,genome_df,'aa_length_max'), axis=1)
         print('here3')
+        print(str(time.time()))
         plfam_table['aa_length_mean'] = plfam_table.apply(lambda row: get_plfam_stats(row,genome_df,'aa_length_mean'), axis=1)
         print('here4')
+        print(str(time.time()))
         plfam_table['aa_length_std'] = plfam_table.apply(lambda row: get_plfam_stats(row,genome_df,'aa_length_std'), axis=1)
         print('here5')
+        print(str(time.time()))
         plfam_table['feature_count'] = plfam_table.apply(lambda row: get_plfam_stats(row,genome_df,'feature_count'), axis=1)
         print('here6')
+        print(str(time.time()))
         plfam_table['genomes'] = plfam_table.apply(lambda row: get_plfam_stats(row,genome_df,'genomes'), axis=1)
         print('here7')
+        print(str(time.time()))
         
         plfam_list.append(plfam_table)
         #figfam_list.append(figfam_table)
