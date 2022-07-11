@@ -75,6 +75,8 @@ def return_columns_to_remove(system,columns):
         return [] 
 
 time_dict = {}
+time_dict['start'] = []
+time_dict['stop'] = []
 def get_plfam_stats(row,stats_df,stats_name):
     time_dict['start'].append(time.time())
     plfam_stats = stats_df.loc[row['plfam_id']]
