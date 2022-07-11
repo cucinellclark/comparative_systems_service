@@ -72,6 +72,33 @@ def return_columns_to_remove(system,columns):
         sys.stderr.write("Error, system is not a valid type\n")
         return [] 
 
+def get_plfam_stats(row,stats_df,stats_name):
+    plfam_stats = stats_df.loc[row['plfam_id']]
+    is_dataframe = isinstance(plfam_stats,pd.DataFrame)
+    if stats_name is 'aa_length_min':
+        min_value = np.min(plfam_stats['aa_length']) if is_dataframe else plfam_stats['aa_length']
+        return min_value
+    elif stats_name is 'aa_length_max':
+        max_value = np.max(plfam_stats['aa_length']) if is_dataframe else plfam_stats['aa_length']
+        return max_value
+    elif stats_name is 'aa_length_mean':
+        mean_value = np.mean(plfam_stats['aa_length']) if is_dataframe else plfam_stats['aa_length']
+        return mean_value
+    elif stats_name is 'aa_length_std':
+        std_value = np.std(plfam_stats['aa_length']) if is_dataframe else 0
+        return std_value
+    elif stats_name is 'feature_count': 
+        count_value = len(plfam_stats) if is_dataframe else 1
+        return count_value
+    elif stats_name is 'genomes':
+        # genomes used in Heatmap viewer
+        genomes_value = format(len(plfam_stats['feature_id']),'#04x').replace('0x','') if is_dataframe else format(1,'#04x').replace('0x','')
+        return genomes_value
+    else:
+        sys.stderr.write(f'invalid stats name: {stats_name}')
+        return None
+    
+
 def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, session):
     #base_query = "https://www.patricbrc.org/api/genome_feature/?in(genome_id,("
     #end_query = "))&limit(-1)&http_accept=text/tsv"
@@ -139,13 +166,19 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
             '''
             #plfam_row_list.append(replace_row)
             #plfam_table.loc[plfam_id] = pd.Series(replace_row)
-            plfam_table.loc[plfam_id,'aa_length_min'] = np.min(tmp_df['aa_length']) if is_dataframe else tmp_df['aa_length']
-            plfam_table.loc[plfam_id,'aa_length_max'] = np.max(tmp_df['aa_length']) if is_dataframe else tmp_df['aa_length']
-            plfam_table.loc[plfam_id,'aa_length_mean'] = np.mean(tmp_df['aa_length']) if is_dataframe else tmp_df['aa_length']
-            plfam_table.loc[plfam_id,'aa_length_std'] = np.std(tmp_df['aa_length']) if is_dataframe else 0
-            plfam_table.loc[plfam_id,'feature_count'] = len(tmp_df['feature_id']) if is_dataframe else 1
+            #plfam_table.loc[plfam_id,'aa_length_min'] = np.min(tmp_df['aa_length']) if is_dataframe else tmp_df['aa_length']
+            #plfam_table.loc[plfam_id,'aa_length_max'] = np.max(tmp_df['aa_length']) if is_dataframe else tmp_df['aa_length']
+            #plfam_table.loc[plfam_id,'aa_length_mean'] = np.mean(tmp_df['aa_length']) if is_dataframe else tmp_df['aa_length']
+            #plfam_table.loc[plfam_id,'aa_length_std'] = np.std(tmp_df['aa_length']) if is_dataframe else 0
+            #plfam_table.loc[plfam_id,'feature_count'] = len(tmp_df['feature_id']) if is_dataframe else 1
             # genomes used in Heatmap viewer
-            plfam_table.loc[plfam_id,'genomes'] = format(len(tmp_df['feature_id']),'#04x').replace('0x','') if is_dataframe else format(1,'#04x').replace('0x','')
+            #plfam_table.loc[plfam_id,'genomes'] = format(len(tmp_df['feature_id']),'#04x').replace('0x','') if is_dataframe else format(1,'#04x').replace('0x','')
+        plfam_table['aa_length_min'] = plfam_table.apply(lambda row: get_plfam_stats(row,genome_df,'aa_length_min'), axis=1)
+        plfam_table['aa_length_max'] = plfam_table.apply(lambda row: get_plfam_stats(row,genome_df,'aa_length_max'), axis=1)
+        plfam_table['aa_length_mean'] = plfam_table.apply(lambda row: get_plfam_stats(row,genome_df,'aa_length_mean']), axis=1)
+        plfam_table['aa_length_std'] = plfam_table.apply(lambda row: get_plfam_stats(row,genome_df,'aa_length_std']), axis=1)
+        plfam_table['feature_count'] = plfam_table.apply(lambda row: get_plfam_stats(row,genome_df,'feature_count']), axis=1)
+        plfam_table['genomes'] = plfam_table.apply(lambda row: get_plfam_stats(row,genome_df,'genomes']), axis=1)
         
         plfam_list.append(plfam_table)
         #figfam_list.append(figfam_table)
