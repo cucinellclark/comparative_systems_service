@@ -173,12 +173,19 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
             # genomes used in Heatmap viewer
             #plfam_table.loc[plfam_id,'genomes'] = format(len(tmp_df['feature_id']),'#04x').replace('0x','') if is_dataframe else format(1,'#04x').replace('0x','')
         '''
+        print('here1')
         plfam_table['aa_length_min'] = plfam_table.apply(lambda row: get_plfam_stats(row,genome_df,'aa_length_min'), axis=1)
+        print('here2')
         plfam_table['aa_length_max'] = plfam_table.apply(lambda row: get_plfam_stats(row,genome_df,'aa_length_max'), axis=1)
+        print('here3')
         plfam_table['aa_length_mean'] = plfam_table.apply(lambda row: get_plfam_stats(row,genome_df,'aa_length_mean'), axis=1)
+        print('here4')
         plfam_table['aa_length_std'] = plfam_table.apply(lambda row: get_plfam_stats(row,genome_df,'aa_length_std'), axis=1)
+        print('here5')
         plfam_table['feature_count'] = plfam_table.apply(lambda row: get_plfam_stats(row,genome_df,'feature_count'), axis=1)
+        print('here6')
         plfam_table['genomes'] = plfam_table.apply(lambda row: get_plfam_stats(row,genome_df,'genomes'), axis=1)
+        print('here7')
         
         plfam_list.append(plfam_table)
         #figfam_list.append(figfam_table)
