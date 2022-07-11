@@ -74,10 +74,11 @@ def return_columns_to_remove(system,columns):
         sys.stderr.write("Error, system is not a valid type\n")
         return [] 
 
+time_dict = {}
 def get_plfam_stats(row,stats_df,stats_name):
-    print('s1')
+    time_dict['start'].append(time.time())
     plfam_stats = stats_df.loc[row['plfam_id']]
-    print('s2')
+    time_dict['stop'].append(time.time())
     is_dataframe = isinstance(plfam_stats,pd.DataFrame)
     if stats_name is 'aa_length_min':
         min_value = np.min(plfam_stats['aa_length']) if is_dataframe else plfam_stats['aa_length']
@@ -201,6 +202,9 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
         plfam_list.append(plfam_table)
         #figfam_list.append(figfam_table)
     
+    import pdb
+    pdb.set_trace()
+
     # process pgfams
     pgfam_list = []
     for genome_id in genome_ids:
