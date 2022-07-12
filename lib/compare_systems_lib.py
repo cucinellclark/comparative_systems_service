@@ -162,6 +162,8 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
         
     plfam_line_list = []        
     pgfam_line_list = []
+    import pdb
+    pdb.set_trace()
     for plfam_id in plfam_dict['unique_set']: 
         plfam_data = {}
         plfam_data['plfam_id'] = plfam_id
