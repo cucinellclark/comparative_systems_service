@@ -102,15 +102,31 @@ def get_plfam_stats(row,stats_df,stats_name):
     
 
 def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, session):
+    plfam_dict = {}
+    pgfam_dict = {}
     for gids in chunker(genome_ids, 20):
         base = "https://www.patricbrc.org/api/genome_feature/?http_download=true"
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+feature_id)&eq(annotation,PATRIC)"
         headers = {"accept":"text/tsv", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
-        for res in getQueryData(base,query,headers):
+        result_header = True
+        for line in getQueryData(base,query,headers):
+            if result_header:
+                result_header = False
+                continue
+            line = line.strip().split('\t')
+            genome_id = line[1]
+            plfam_id = line[14]
+            pgfam_id = line[15]
+            aa_length = line[17]
+            if genome_id not in plfam_dict:
+                plfam_dict[genome_id] = {}
+            if genome_id not in pgfam_dict:
+                pgfam_dict[genome_id] = {}
             import pdb
             pdb.set_trace()
     #print("GenomeFeatures Query:\n{0}".format(query))
     #feature_df = pd.read_csv(query,sep="\t")
+    'Genome\tGenome ID\tAccession\tBRC ID\tRefSeq Locus Tag\tAlt Locus Tag\tFeature ID\tAnnotation\tFeature Type\tStart\tEnd\tLength\tStrand\tFIGfam ID\tPATRIC genus-specific families (PLfams)\tPATRIC cross-genus families (PGfams)\tProtein ID\tAA Length\tGene Symbol\tProduct\tGO'
 
     
 
