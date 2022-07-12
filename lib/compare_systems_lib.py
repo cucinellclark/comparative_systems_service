@@ -123,7 +123,7 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
                 continue
             line = line.strip().split('\t')
             # 21 entries in complete query result
-            if len(line) < 21: 
+            if len(line) < 20: 
                 skip_count = skip_count + 1 
                 continue
             try:
