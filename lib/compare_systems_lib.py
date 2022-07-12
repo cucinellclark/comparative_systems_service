@@ -118,7 +118,8 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
                 print(line)
                 continue
             line = line.strip().split('\t')
-            if len(line) == 13:
+            # 21 entries in complete query result
+            if len(line) < 21: 
                 continue
             try:
                 genome_id = line[1].replace('\"','')
@@ -165,6 +166,8 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
         plfam_data = {}
         plfam_data['plfam_id'] = plfam_id
         for gid in genome_ids: 
+            if gid not in plfam_dict:
+                continue
             plfam_data['genome_id'] = gid
             if plfam_id in plfam_dict[gid]:
                 aa_length_list = plfam_dict[gid][plfam_id]['aa_length_list'] 
@@ -180,6 +183,8 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
         pgfam_data = {}
         pgfam_data['pgfam_id'] = pgfam_id
         for gid in genome_ids: 
+            if gid not in pgfam_dict:
+                continue
             pgfam_data['genome_id'] = gid
             if pgfam_id in pgfam_dict[gid]:
                 aa_length_list = pgfam_dict[gid][pgfam_id]['aa_length_list'] 
