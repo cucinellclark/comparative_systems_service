@@ -113,6 +113,7 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
         for line in getQueryData(base,query,headers):
             if result_header:
                 result_header = False
+                print(line)
                 continue
             line = line.strip().split('\t')
             try:
