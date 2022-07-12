@@ -200,7 +200,7 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
     output_json['genome_ids'] = genome_ids
     output_json['job_name'] = output_file
 
-    output_json_file = proteinfams_file.replace('.tsv','_tables.json')
+    output_json_file = os.path.join(output_dir,output_file+'_proteinfams_tables.json')
     with open(output_json_file,"w") as o:
         o.write(json.dumps(output_json))
 
