@@ -162,14 +162,12 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
         
     plfam_line_list = []        
     pgfam_line_list = []
-    import pdb
-    pdb.set_trace()
     for plfam_id in plfam_dict['unique_set']: 
-        plfam_data = {}
-        plfam_data['plfam_id'] = plfam_id
         for gid in genome_ids: 
             if gid not in plfam_dict:
                 continue
+            plfam_data = {}
+            plfam_data['plfam_id'] = plfam_id
             plfam_data['genome_id'] = gid
             if plfam_id in plfam_dict[gid]:
                 aa_length_list = plfam_dict[gid][plfam_id]['aa_length_list'] 
@@ -182,11 +180,11 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
                 plfam_line_list.append(plfam_data)
     
     for pgfam_id in pgfam_dict['unique_set']: 
-        pgfam_data = {}
-        pgfam_data['pgfam_id'] = pgfam_id
         for gid in genome_ids: 
             if gid not in pgfam_dict:
                 continue
+            pgfam_data = {}
+            pgfam_data['pgfam_id'] = pgfam_id
             pgfam_data['genome_id'] = gid
             if pgfam_id in pgfam_dict[gid]:
                 aa_length_list = pgfam_dict[gid][pgfam_id]['aa_length_list'] 
