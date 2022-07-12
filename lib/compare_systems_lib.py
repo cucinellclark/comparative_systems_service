@@ -136,19 +136,25 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
                 plfam_dict[genome_id] = {}
             if genome_id not in pgfam_dict:
                 pgfam_dict[genome_id] = {}
-            if plfam_id not in plfam_dict[genome_id]:
+            if plfam_id and plfam_id not in plfam_dict[genome_id]:
                 plfam_dict[genome_id][plfam_id] = {}
                 plfam_dict[genome_id][plfam_id]['aa_length_list'] = []
                 # TODO: check if I need to check for duplicate features
                 plfam_dict[genome_id][plfam_id]['feature_count'] = 0
                 plfam_dict[genome_id][plfam_id]['genome_count'] = 1
-                plfam_dict[genome_id][plfam_id]['genome_count'] = 1
-            if plfam_id not in plfam_dict[genome_id]:
-                plfam_dict[genome_id][plfam_id] = {}
-                plfam_dict[genome_id][plfam_id]['aa_length_list'] = []
+            if pgfam_id and pgfam_id not in pgfam_dict[genome_id]:
+                pgfam_dict[genome_id][pgfam_id] = {}
+                pgfam_dict[genome_id][pgfam_id]['aa_length_list'] = []
                 # TODO: check if I need to check for duplicate features
-                plfam_dict[genome_id][plfam_id]['feature_count'] = 0
-                plfam_dict[genome_id][plfam_id]['genome_count'] = 1
+                pgfam_dict[genome_id][pgfam_id]['feature_count'] = 0
+                pgfam_dict[genome_id][pgfam_id]['genome_count'] = 1
+            if plfam_id:
+                plfam_dict[genome_id][plfam_id]['aa_length_list'].append(aa_length)
+                plfam_dict[genome_id][plfam_id]['feature_count'] = plfam_dict[genome_id][plfam_id]['feature_count'] + 1
+           if pgfam_id:
+                pgfam_dict[genome_id][pgfam_id]['aa_length_list'].append(aa_length)
+                pgfam_dict[genome_id][pgfam_id]['feature_count'] = pgfam_dict[genome_id][pgfam_id]['feature_count'] + 1
+                
         import pdb
         pdb.set_trace()
     #print("GenomeFeatures Query:\n{0}".format(query))
