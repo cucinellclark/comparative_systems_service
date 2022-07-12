@@ -105,7 +105,9 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
     for gids in chunker(genome_ids, 20):
         base = "https://www.patricbrc.org/api/genome_feature/?http_download=true"
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+feature_id)&eq(annotation,PATRIC)"
-        print(query+'&'+query)
+        for res in getQueryData(base,query,session):
+            import pdb
+            pdb.set_trace()
     #print("GenomeFeatures Query:\n{0}".format(query))
     #feature_df = pd.read_csv(query,sep="\t")
 
@@ -639,7 +641,8 @@ def run_compare_systems(job_data, output_dir):
     # optionally add more genome info to output 
     genome_data = getDataForGenomes(genome_ids,s) 
 
-    query_dict = run_all_queries(genome_ids, s)
+    #query_dict = run_all_queries(genome_ids, s)
+    query_dict = {}
 
     # TODO: add chunking
     # TODO: add recipe
