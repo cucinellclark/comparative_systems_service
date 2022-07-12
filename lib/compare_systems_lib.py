@@ -104,6 +104,7 @@ def get_plfam_stats(row,stats_df,stats_name):
 def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, session):
     plfam_dict = {}
     pgfam_dict = {}
+    genome_dict = {}
     for gids in chunker(genome_ids, 20):
         base = "https://www.patricbrc.org/api/genome_feature/?http_download=true"
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+feature_id)&eq(annotation,PATRIC)"
@@ -114,23 +115,41 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
                 result_header = False
                 continue
             line = line.strip().split('\t')
-            genome_id = line[1]
-            plfam_id = line[14]
-            pgfam_id = line[15]
-            aa_length = line[17]
+            genome_id = line[1].replace('\"','')
+            plfam_id = line[14].replace('\"','')
+            pgfam_id = line[15].replace('\"','')
+            aa_length = line[17].replace('\"','')
+            if genome_id not in genome_dict:
+                genome_dict[genome_id] = {}
+                genome_dict[genome_id]['plfam_set'] = set()
+                genome_dict[genome_id]['pgfam_set'] = set()
+            genome_dict[genome_id]['plfam_set'].add(plfam_id) 
+            genome_dict[genome_id]['pgfam_set'].add(pgfam_id) 
             if genome_id not in plfam_dict:
                 plfam_dict[genome_id] = {}
             if genome_id not in pgfam_dict:
                 pgfam_dict[genome_id] = {}
-            import pdb
-            pdb.set_trace()
+            if plfam_id not in plfam_dict[genome_id]:
+                plfam_dict[genome_id][plfam_id] = {}
+                plfam_dict[genome_id][plfam_id]['aa_length_list'] = []
+                # TODO: check if I need to check for duplicate features
+                plfam_dict[genome_id][plfam_id]['feature_count'] = 0
+                plfam_dict[genome_id][plfam_id]['genome_count'] = 1
+                plfam_dict[genome_id][plfam_id]['genome_count'] = 1
+            if plfam_id not in plfam_dict[genome_id]:
+                plfam_dict[genome_id][plfam_id] = {}
+                plfam_dict[genome_id][plfam_id]['aa_length_list'] = []
+                # TODO: check if I need to check for duplicate features
+                plfam_dict[genome_id][plfam_id]['feature_count'] = 0
+                plfam_dict[genome_id][plfam_id]['genome_count'] = 1
+        import pdb
+        pdb.set_trace()
     #print("GenomeFeatures Query:\n{0}".format(query))
     #feature_df = pd.read_csv(query,sep="\t")
-    'Genome\tGenome ID\tAccession\tBRC ID\tRefSeq Locus Tag\tAlt Locus Tag\tFeature ID\tAnnotation\tFeature Type\tStart\tEnd\tLength\tStrand\tFIGfam ID\tPATRIC genus-specific families (PLfams)\tPATRIC cross-genus families (PGfams)\tProtein ID\tAA Length\tGene Symbol\tProduct\tGO'
 
     
 
-    sys.exit()
+    return 
     feature_list = []
     # proteinfams_df = getFeatureDataFrame(genome_ids,session, limit=2500000)
     proteinfams_df = query_dict['feature']
