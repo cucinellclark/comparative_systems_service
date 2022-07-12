@@ -151,7 +151,7 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
             if plfam_id:
                 plfam_dict[genome_id][plfam_id]['aa_length_list'].append(aa_length)
                 plfam_dict[genome_id][plfam_id]['feature_count'] = plfam_dict[genome_id][plfam_id]['feature_count'] + 1
-           if pgfam_id:
+            if pgfam_id:
                 pgfam_dict[genome_id][pgfam_id]['aa_length_list'].append(aa_length)
                 pgfam_dict[genome_id][pgfam_id]['feature_count'] = pgfam_dict[genome_id][pgfam_id]['feature_count'] + 1
                 
