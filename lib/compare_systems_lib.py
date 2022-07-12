@@ -187,7 +187,7 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
                 genome_count = plfam_dict[gid][plfam_id]['genome_count']
                 genomes = format(feature_count,'#04x').replace('0x','')
                 product = plfam_dict[gid][plfam_id]['product']
-                plfam_str = f'{plfam_id}\t{gid}\t{feature_count}\t{genome_count}\t{product}\t{aa_length_min}\t{aa_length_max}\t{aa_length_mean}\t{aa_length_std}'
+                plfam_str = f'{plfam_id}\t{gid}\t{feature_count}\t{genome_count}\t{product}\t{aa_length_min}\t{aa_length_max}\t{aa_length_mean}\t{aa_length_std}\t{genomes}'
                 plfam_line_list.append(plfam_str)
     
     for pgfam_id in pgfam_dict['unique_set']: 
@@ -207,7 +207,7 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
                 genome_count = pgfam_dict[gid][pgfam_id]['genome_count']
                 genomes = format(feature_count,'#04x').replace('0x','')
                 product = pgfam_dict[gid][pgfam_id]['product']
-                pgfam_str = f'{pgfam_id}\t{gid}\t{feature_count}\t{genome_count}\t{product}\t{aa_length_min}\t{aa_length_max}\t{aa_length_mean}\t{aa_length_std}'
+                pgfam_str = f'{pgfam_id}\t{gid}\t{feature_count}\t{genome_count}\t{product}\t{aa_length_min}\t{aa_length_max}\t{aa_length_mean}\t{aa_length_std}\t{genomes}'
                 pgfam_line_list.append(pgfam_str)
     
     output_json = {}
