@@ -194,136 +194,6 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
     plfam_output = pd.DataFrame(plfam_line_list)
     pgfam_output = pd.DataFrame(pgfam_line_list)
 
-    #print("GenomeFeatures Query:\n{0}".format(query))
-    #feature_df = pd.read_csv(query,sep="\t")
-    import pdb
-    pdb.set_trace()
-    
-
-    return 
-    feature_list = []
-    # proteinfams_df = getFeatureDataFrame(genome_ids,session, limit=2500000)
-    proteinfams_df = query_dict['feature']
-
-    proteinfams_file = os.path.join(output_dir,output_file+"_proteinfams.tsv")
-    proteinfams_df.to_csv(proteinfams_file, index=False, header=True, sep="\t")
-    # TODO: remove, used for testing
-    #proteinfams_df = pd.read_csv(proteinfams_file,sep="\t")
-    
-    # process plfams
-    plfam_list = [] 
-    for genome_id in genome_ids:
-        print("---{0}--plfams".format(genome_id))    
-        genome_df = proteinfams_df.loc[proteinfams_df['genome_id'] == genome_id]
-        genome_df = genome_df.loc[genome_df['plfam_id'].notna()]
-        genome_df.set_index('plfam_index',inplace=True)
-
-        plfam_table = genome_df.drop(return_columns_to_remove('proteinfamilies_plfams',genome_df.columns.tolist()), axis=1) 
-
-        # Get unique family ids, first row for information 
-        keep_rows = []
-        plfam_id_list = []
-        for i in range(0,plfam_table.shape[0]):
-            if not plfam_table.iloc[i]['plfam_id'] in plfam_id_list:
-                plfam_id_list.append(plfam_table.iloc[i]['plfam_id'])
-                keep_rows.append(i)
-        plfam_table = plfam_table.iloc[keep_rows]
-
-        # try list of dicts
-        plfam_row_list = []
-
-        # plfam_stats 
-        '''
-        plfam_table['feature_count'] = [0]*plfam_table.shape[0]
-        plfam_table['genome_count'] = [1]*plfam_table.shape[0] 
-        plfam_table['genomes'] = [0]*plfam_table.shape[0]
-        plfam_table['aa_length_min'] = [0]*plfam_table.shape[0] 
-        plfam_table['aa_length_max'] = [0]*plfam_table.shape[0] 
-        plfam_table['aa_length_mean'] = [0]*plfam_table.shape[0] 
-        plfam_table['aa_length_std'] = [0]*plfam_table.shape[0] 
-        for plfam_id in plfam_table['plfam_id']:
-            tmp_df = genome_df.loc[plfam_id]
-            is_dataframe = isinstance(tmp_df, pd.DataFrame)
-            prev_row = plfam_table.loc[plfam_id]
-            replace_row = {
-                'genome_id': genome_id,
-                'length': prev_row['length'],
-                'plfam_id': plfam_id,
-                'product': prev_row['product'], 
-                'pgfam_index': prev_row['pgfam_index'],
-                'aa_length_min': np.min(tmp_df['aa_length']) if is_dataframe else tmp_df['aa_length'],
-                'aa_length_max': np.max(tmp_df['aa_length']) if is_dataframe else tmp_df['aa_length'],
-                'aa_length_mean': np.mean(tmp_df['aa_length']) if is_dataframe else tmp_df['aa_length'],
-                'aa_length_std': np.std(tmp_df['aa_length']) if is_dataframe else 0,
-                'feature_count': len(tmp_df['feature_id']) if is_dataframe else 1,
-                'genomes': format(len(tmp_df['feature_id']),'#04x').replace('0x','') if is_dataframe else format(1,'#04x').replace('0x',''),
-                'genome_count': 1
-            }
-            #plfam_row_list.append(replace_row)
-            #plfam_table.loc[plfam_id] = pd.Series(replace_row)
-            #plfam_table.loc[plfam_id,'aa_length_min'] = np.min(tmp_df['aa_length']) if is_dataframe else tmp_df['aa_length']
-            #plfam_table.loc[plfam_id,'aa_length_max'] = np.max(tmp_df['aa_length']) if is_dataframe else tmp_df['aa_length']
-            #plfam_table.loc[plfam_id,'aa_length_mean'] = np.mean(tmp_df['aa_length']) if is_dataframe else tmp_df['aa_length']
-            #plfam_table.loc[plfam_id,'aa_length_std'] = np.std(tmp_df['aa_length']) if is_dataframe else 0
-            #plfam_table.loc[plfam_id,'feature_count'] = len(tmp_df['feature_id']) if is_dataframe else 1
-            # genomes used in Heatmap viewer
-            #plfam_table.loc[plfam_id,'genomes'] = format(len(tmp_df['feature_id']),'#04x').replace('0x','') if is_dataframe else format(1,'#04x').replace('0x','')
-        '''
-        plfam_table['aa_length_min'] = plfam_table.apply(lambda row: get_plfam_stats(row,genome_df,'aa_length_min'), axis=1)
-        plfam_table['aa_length_max'] = plfam_table.apply(lambda row: get_plfam_stats(row,genome_df,'aa_length_max'), axis=1)
-        plfam_table['aa_length_mean'] = plfam_table.apply(lambda row: get_plfam_stats(row,genome_df,'aa_length_mean'), axis=1)
-        plfam_table['aa_length_std'] = plfam_table.apply(lambda row: get_plfam_stats(row,genome_df,'aa_length_std'), axis=1)
-        plfam_table['feature_count'] = plfam_table.apply(lambda row: get_plfam_stats(row,genome_df,'feature_count'), axis=1)
-        plfam_table['genomes'] = plfam_table.apply(lambda row: get_plfam_stats(row,genome_df,'genomes'), axis=1)
-        
-        plfam_list.append(plfam_table)
-        #figfam_list.append(figfam_table)
-    
-    # process pgfams
-    pgfam_list = []
-    for genome_id in genome_ids:
-        print("---{0}--pgfams".format(genome_id))    
-        genome_df = proteinfams_df.loc[proteinfams_df['genome_id'] == genome_id]
-        genome_df = genome_df.loc[genome_df['pgfam_id'].notna()]
-        genome_df.set_index('pgfam_index',inplace=True)
-        
-        pgfam_table = genome_df.drop(return_columns_to_remove('proteinfamilies_pgfams',genome_df.columns.tolist()), axis=1)
-        
-        keep_rows = []
-        pgfam_id_list = []
-        for i in range(0,pgfam_table.shape[0]):
-            if not pgfam_table.iloc[i]['pgfam_id'] in pgfam_id_list:
-                pgfam_id_list.append(pgfam_table.iloc[i]['pgfam_id'])
-                keep_rows.append(i)
-        pgfam_table = pgfam_table.iloc[keep_rows]
-
-        # pgfam_stats 
-        pgfam_table['feature_count'] = [0]*pgfam_table.shape[0] 
-        pgfam_table['genome_count'] = [1]*pgfam_table.shape[0] 
-        pgfam_table['genomes'] = [0]*pgfam_table.shape[0]
-        pgfam_table['aa_length_min'] = [0]*pgfam_table.shape[0] 
-        pgfam_table['aa_length_max'] = [0]*pgfam_table.shape[0] 
-        pgfam_table['aa_length_mean'] = [0]*pgfam_table.shape[0] 
-        pgfam_table['aa_length_std'] = [0]*pgfam_table.shape[0] 
-        for pgfam_id in pgfam_table['pgfam_id']:
-            tmp_df = genome_df.loc[pgfam_id]
-            is_dataframe = isinstance(tmp_df, pd.DataFrame)
-            pgfam_table.loc[pgfam_id,'aa_length_min'] = np.min(tmp_df['aa_length']) if is_dataframe else tmp_df['aa_length']
-            pgfam_table.loc[pgfam_id,'aa_length_max'] = np.max(tmp_df['aa_length']) if is_dataframe else tmp_df['aa_length']
-            pgfam_table.loc[pgfam_id,'aa_length_mean'] = np.mean(tmp_df['aa_length']) if is_dataframe else tmp_df['aa_length']
-            pgfam_table.loc[pgfam_id,'aa_length_std'] = np.std(tmp_df['aa_length']) if is_dataframe else 0
-            pgfam_table.loc[pgfam_id,'feature_count'] = len(tmp_df['feature_id']) if is_dataframe else 1
-            pgfam_table.loc[pgfam_id,'genomes'] = format(len(tmp_df['feature_id']),'#04x').replace('0x','') if is_dataframe else format(1,'#04x').replace('0x','')
-
-        pgfam_list.append(pgfam_table)
-
-
-    # write out tables
-    # counting is done per-genome, multi-genome calculation adjustments are done on the front end
-    plfam_output = pd.concat(plfam_list)
-    #plfam_output = pd.DataFrame(plfam_row_list)
-    pgfam_output = pd.concat(pgfam_list)
-    
     output_json = {}
     output_json['plfam'] = plfam_output.to_csv(index=False,sep='\t')
     output_json['pgfam'] = pgfam_output.to_csv(index=False,sep='\t')
@@ -728,12 +598,11 @@ def run_compare_systems(job_data, output_dir):
     # optionally add more genome info to output 
     genome_data = getDataForGenomes(genome_ids,s) 
 
-    #query_dict = run_all_queries(genome_ids, s)
-    query_dict = {}
+    query_dict = run_all_queries(genome_ids, s)
 
     # TODO: add chunking
     # TODO: add recipe
     # TODO: add multithreading
-    #run_pathways(genome_ids, query_dict, output_file, output_dir, genome_data, s)
-    #run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    run_pathways(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, s)
     run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s)
