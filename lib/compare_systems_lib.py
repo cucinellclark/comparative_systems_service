@@ -202,7 +202,8 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
     output_json = {}
     output_json['plfam'] = plfam_output.to_csv(index=False,sep='\t')
     output_json['pgfam'] = pgfam_output.to_csv(index=False,sep='\t')
-    output_json['genome_ids'] = genome_ids
+    #output_json['genome_ids'] = genome_ids
+    output_json['genome_ids'] = list(set.intersect(set(genome_ids),set(plfam_output.genome_id.unique().tolist()))) 
     output_json['job_name'] = output_file
 
     output_json_file = os.path.join(output_dir,output_file+'_proteinfams_tables.json')
