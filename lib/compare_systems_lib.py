@@ -105,6 +105,8 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
     plfam_dict = {}
     pgfam_dict = {}
     genome_dict = {}
+    plfam_dict['unique_set'] = set()
+    pgfam_dict['unique_set'] = set()
     for gids in chunker(genome_ids, 20):
         base = "https://www.patricbrc.org/api/genome_feature/?http_download=true"
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+feature_id)&eq(annotation,PATRIC)"
@@ -124,8 +126,8 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
                 pgfam_id = line[15].replace('\"','')
                 aa_length = line[17].replace('\"','')
             except Exception as e:
-                import pdb
-                pdb.set_trace()
+                sys.stderr.write(f'Error with the following line:\n{e}\n{line}\n')
+                continue
             if genome_id not in genome_dict:
                 genome_dict[genome_id] = {}
                 genome_dict[genome_id]['plfam_set'] = set()
@@ -149,17 +151,53 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
                 pgfam_dict[genome_id][pgfam_id]['feature_count'] = 0
                 pgfam_dict[genome_id][pgfam_id]['genome_count'] = 1
             if plfam_id:
-                plfam_dict[genome_id][plfam_id]['aa_length_list'].append(aa_length)
+                plfam_dict['unique_set'].add(plfam_id)
+                plfam_dict[genome_id][plfam_id]['aa_length_list'].append(int(aa_length))
                 plfam_dict[genome_id][plfam_id]['feature_count'] = plfam_dict[genome_id][plfam_id]['feature_count'] + 1
             if pgfam_id:
-                pgfam_dict[genome_id][pgfam_id]['aa_length_list'].append(aa_length)
+                pgfam_dict['unique_set'].add(pgfam_id)
+                pgfam_dict[genome_id][pgfam_id]['aa_length_list'].append(int(aa_length))
                 pgfam_dict[genome_id][pgfam_id]['feature_count'] = pgfam_dict[genome_id][pgfam_id]['feature_count'] + 1
-                
-        import pdb
-        pdb.set_trace()
+        
+    plfam_line_list = []        
+    pgfam_line_list = []
+    for plfam_id in plfam_dict['unique_set']: 
+        plfam_data = {}
+        plfam_data['plfam_id'] = plfam_id
+        for gid in genome_ids: 
+            plfam_data['genome_id'] = gid
+            if plfam_id in plfam_dict[gid]:
+                aa_length_list = plfam_dict[gid][plfam_id]['aa_length_list'] 
+                plfam_data['aa_length_max'] = max(aa_length_list)
+                plfam_data['aa_length_min'] = min(aa_length_list)
+                plfam_data['aa_length_mean'] = np.mean(aa_length_list)
+                plfam_data['aa_length_std'] = np.std(aa_length_list)
+                plfam_data['feature_count'] = plfam_dict[gid][plfam_id]['feature_count']
+                plfam_data['genomes'] = format(plfam_data['feature_count'],'#04x').replace('0x','')
+                plfam_line_list.append(plfam_data)
+    
+    for pgfam_id in pgfam_dict['unique_set']: 
+        pgfam_data = {}
+        pgfam_data['pgfam_id'] = pgfam_id
+        for gid in genome_ids: 
+            pgfam_data['genome_id'] = gid
+            if pgfam_id in pgfam_dict[gid]:
+                aa_length_list = pgfam_dict[gid][pgfam_id]['aa_length_list'] 
+                pgfam_data['aa_length_max'] = max(aa_length_list)
+                pgfam_data['aa_length_min'] = min(aa_length_list)
+                pgfam_data['aa_length_mean'] = np.mean(aa_length_list)
+                pgfam_data['aa_length_std'] = np.std(aa_length_list)
+                pgfam_data['feature_count'] = pgfam_dict[gid][pgfam_id]['feature_count']
+                pgfam_data['genomes'] = format(pgfam_data['feature_count'],'#04x').replace('0x','')
+                pgfam_line_list.append(pgfam_data)
+
+    plfam_output = pd.DataFrame(plfam_line_list)
+    pgfam_output = pd.DataFrame(pgfam_line_list)
+
     #print("GenomeFeatures Query:\n{0}".format(query))
     #feature_df = pd.read_csv(query,sep="\t")
-
+    import pdb
+    pdb.set_trace()
     
 
     return 
