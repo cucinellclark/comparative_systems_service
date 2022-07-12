@@ -128,7 +128,7 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
                 plfam_id = line[14].replace('\"','')
                 pgfam_id = line[15].replace('\"','')
                 aa_length = line[17].replace('\"','')
-                product = line[19].replace('\"'.'')
+                product = line[19].replace('\"','')
             except Exception as e:
                 sys.stderr.write(f'Error with the following line:\n{e}\n{line}\n')
                 continue
