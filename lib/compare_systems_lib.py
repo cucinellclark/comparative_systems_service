@@ -197,8 +197,35 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
                 pgfam_data['genomes'] = format(pgfam_data['feature_count'],'#04x').replace('0x','')
                 pgfam_line_list.append(pgfam_data)
 
-    plfam_output = pd.DataFrame(plfam_line_list)
-    pgfam_output = pd.DataFrame(pgfam_line_list)
+    column_map = {
+        'Genome': 'genome_name',
+        'Genome ID': 'genome_id',
+        'Accession': 'accession',
+        'BRC ID': 'patric_id',
+        'RefSeq Locus Tag': 'refseq_locus_tag',
+        'Alt Locus Tag': 'alt_locus_tag',
+        'Feature ID': 'feature_id',
+        'Annotation': 'annotation',
+        'Feature Type': 'feature_type',
+        'Start': 'start',
+        'End': 'end',
+        'Length': 'length',
+        'Strand': 'strand',
+        'FIGfam ID': 'figfam_id',
+        'PATRIC genus-specific families (PLfams)': 'plfam_id',
+        'PATRIC cross-genus families (PGfams)': 'pgfam_id',
+        'Protein ID': 'protein_id',
+        'AA Length': 'aa_length',
+        'Gene Symbol': 'gene',
+        'Product': 'product',
+        'GO': 'go'
+    }
+    plfam_output = pd.DataFrame(plfam_line_list,dtype={'Genome ID':str})
+    pgfam_output = pd.DataFrame(pgfam_line_list,dtype={'Genome ID':str})
+    if 'Genome ID' in plfam_output.columns:
+        plfam_output_df.rename(columns=column_map, inplace=True)
+    if 'Genome ID' in pgfam_output.columns:
+        pgfam_output_df.rename(columns=column_map, inplace=True)
 
     output_json = {}
     output_json['plfam'] = plfam_output.to_csv(index=False,sep='\t')
