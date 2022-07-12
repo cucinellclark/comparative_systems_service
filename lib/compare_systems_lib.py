@@ -108,6 +108,7 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
     genome_dict = {}
     plfam_dict['unique_set'] = set()
     pgfam_dict['unique_set'] = set()
+    present_genome_ids = set()
     for gids in chunker(genome_ids, 20):
         base = "https://www.patricbrc.org/api/genome_feature/?http_download=true"
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+feature_id)&eq(annotation,PATRIC)"
@@ -127,6 +128,7 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
                 plfam_id = line[14].replace('\"','')
                 pgfam_id = line[15].replace('\"','')
                 aa_length = line[17].replace('\"','')
+                product = line[19].replace('\"'.'')
             except Exception as e:
                 sys.stderr.write(f'Error with the following line:\n{e}\n{line}\n')
                 continue
@@ -134,6 +136,7 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
                 genome_dict[genome_id] = {}
                 genome_dict[genome_id]['plfam_set'] = set()
                 genome_dict[genome_id]['pgfam_set'] = set()
+            present_genome_ids.add(genome_id)
             genome_dict[genome_id]['plfam_set'].add(plfam_id) 
             genome_dict[genome_id]['pgfam_set'].add(pgfam_id) 
             if genome_id not in plfam_dict:
@@ -146,12 +149,14 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
                 # TODO: check if I need to check for duplicate features
                 plfam_dict[genome_id][plfam_id]['feature_count'] = 0
                 plfam_dict[genome_id][plfam_id]['genome_count'] = 1
+                plfam_dict[genome_id][plfam_id]['product'] = product
             if pgfam_id and pgfam_id not in pgfam_dict[genome_id]:
                 pgfam_dict[genome_id][pgfam_id] = {}
                 pgfam_dict[genome_id][pgfam_id]['aa_length_list'] = []
                 # TODO: check if I need to check for duplicate features
                 pgfam_dict[genome_id][pgfam_id]['feature_count'] = 0
                 pgfam_dict[genome_id][pgfam_id]['genome_count'] = 1
+                pgfam_dict[genome_id][pgfam_id]['product'] = product
             if plfam_id:
                 plfam_dict['unique_set'].add(plfam_id)
                 plfam_dict[genome_id][plfam_id]['aa_length_list'].append(int(aa_length))
@@ -163,22 +168,27 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
         
     plfam_line_list = []        
     pgfam_line_list = []
+    header = 'family_id\tgenome_id\tfeature_count\tgenome_count\tproduct\taa_length_min\taa_length_max\taa_length_mean\taa_length_std'
+    plfam_line_list.append(header)
+    pgfam_line_list.append(header)
     for plfam_id in plfam_dict['unique_set']: 
         for gid in genome_ids: 
             if gid not in plfam_dict:
                 continue
-            plfam_data = {}
-            plfam_data['plfam_id'] = plfam_id
-            plfam_data['genome_id'] = gid
+            #plfam_data['plfam_id'] = plfam_id
+            #plfam_data['genome_id'] = gid
             if plfam_id in plfam_dict[gid]:
                 aa_length_list = plfam_dict[gid][plfam_id]['aa_length_list'] 
-                plfam_data['aa_length_max'] = max(aa_length_list)
-                plfam_data['aa_length_min'] = min(aa_length_list)
-                plfam_data['aa_length_mean'] = np.mean(aa_length_list)
-                plfam_data['aa_length_std'] = np.std(aa_length_list)
-                plfam_data['feature_count'] = plfam_dict[gid][plfam_id]['feature_count']
-                plfam_data['genomes'] = format(plfam_data['feature_count'],'#04x').replace('0x','')
-                plfam_line_list.append(plfam_data)
+                aa_length_max = max(aa_length_list)
+                aa_length_min = min(aa_length_list)
+                aa_length_mean = np.mean(aa_length_list)
+                aa_length_std = np.std(aa_length_list)
+                feature_count = plfam_dict[gid][plfam_id]['feature_count']
+                genome_count = plfam_dict[gid][plfam_id]['genome_count']
+                genomes = format(feature_count,'#04x').replace('0x','')
+                product = plfam_dict[gid][plfam_id]['product']
+                plfam_str = f'{plfam_id}\t{gid}\t{feature_count}\t{genome_count}\t{product}\t{aa_length_min}\t{aa_length_max}\t{aa_length_mean}\t{aa_length_std}'
+                plfam_line_list.append(plfam_str)
     
     for pgfam_id in pgfam_dict['unique_set']: 
         for gid in genome_ids: 
@@ -189,51 +199,22 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
             pgfam_data['genome_id'] = gid
             if pgfam_id in pgfam_dict[gid]:
                 aa_length_list = pgfam_dict[gid][pgfam_id]['aa_length_list'] 
-                pgfam_data['aa_length_max'] = max(aa_length_list)
-                pgfam_data['aa_length_min'] = min(aa_length_list)
-                pgfam_data['aa_length_mean'] = np.mean(aa_length_list)
-                pgfam_data['aa_length_std'] = np.std(aa_length_list)
-                pgfam_data['feature_count'] = pgfam_dict[gid][pgfam_id]['feature_count']
-                pgfam_data['genomes'] = format(pgfam_data['feature_count'],'#04x').replace('0x','')
-                pgfam_line_list.append(pgfam_data)
-
-    column_map = {
-        'Genome': 'genome_name',
-        'Genome ID': 'genome_id',
-        'Accession': 'accession',
-        'BRC ID': 'patric_id',
-        'RefSeq Locus Tag': 'refseq_locus_tag',
-        'Alt Locus Tag': 'alt_locus_tag',
-        'Feature ID': 'feature_id',
-        'Annotation': 'annotation',
-        'Feature Type': 'feature_type',
-        'Start': 'start',
-        'End': 'end',
-        'Length': 'length',
-        'Strand': 'strand',
-        'FIGfam ID': 'figfam_id',
-        'PATRIC genus-specific families (PLfams)': 'plfam_id',
-        'PATRIC cross-genus families (PGfams)': 'pgfam_id',
-        'Protein ID': 'protein_id',
-        'AA Length': 'aa_length',
-        'Gene Symbol': 'gene',
-        'Product': 'product',
-        'GO': 'go'
-    }
-    import pdb
-    pdb.set_trace()
-    plfam_output = pd.read_csv(io.StringIO('\n'.join(plfam_line_list)),dtype={'Genome ID':str})
-    pgfam_output = pd.read_csv(io.StringIO('\n'.join(pgfam_line_list)),dtype={'Genome ID':str})
-    if 'Genome ID' in plfam_output.columns:
-        plfam_output_df.rename(columns=column_map, inplace=True)
-    if 'Genome ID' in pgfam_output.columns:
-        pgfam_output_df.rename(columns=column_map, inplace=True)
-
+                aa_length_max = max(aa_length_list)
+                aa_length_min = min(aa_length_list)
+                aa_length_mean = np.mean(aa_length_list)
+                aa_length_std = np.std(aa_length_list)
+                feature_count = pgfam_dict[gid][pgfam_id]['feature_count']
+                genome_count = pgfam_dict[gid][pgfam_id]['genome_count']
+                genomes = format(feature_count,'#04x').replace('0x','')
+                product = pgfam_dict[gid][pgfam_id]['product']
+                pgfam_str = f'{pgfam_id}\t{gid}\t{feature_count}\t{genome_count}\t{product}\t{aa_length_min}\t{aa_length_max}\t{aa_length_mean}\t{aa_length_std}'
+                pgfam_line_list.append(pgfam_str)
+    
     output_json = {}
-    output_json['plfam'] = plfam_output.to_csv(index=False,sep='\t')
-    output_json['pgfam'] = pgfam_output.to_csv(index=False,sep='\t')
+    output_json['plfam'] = '\n'.join(plfam_line_list) 
+    output_json['pgfam'] = '\n'.join(pgfam_line_list) 
     #output_json['genome_ids'] = genome_ids
-    output_json['genome_ids'] = list(set(genome_ids).intersection(set(plfam_output.genome_id.unique().tolist()))) 
+    output_json['genome_ids'] = list(set(genome_ids).intersection(present_genome_ids)) 
     output_json['job_name'] = output_file
 
     output_json_file = os.path.join(output_dir,output_file+'_proteinfams_tables.json')
