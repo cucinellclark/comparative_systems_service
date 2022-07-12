@@ -115,10 +115,14 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
                 result_header = False
                 continue
             line = line.strip().split('\t')
-            genome_id = line[1].replace('\"','')
-            plfam_id = line[14].replace('\"','')
-            pgfam_id = line[15].replace('\"','')
-            aa_length = line[17].replace('\"','')
+            try:
+                genome_id = line[1].replace('\"','')
+                plfam_id = line[14].replace('\"','')
+                pgfam_id = line[15].replace('\"','')
+                aa_length = line[17].replace('\"','')
+            except Exception as e:
+                import pdb
+                pdb.set_trace()
             if genome_id not in genome_dict:
                 genome_dict[genome_id] = {}
                 genome_dict[genome_id]['plfam_set'] = set()
