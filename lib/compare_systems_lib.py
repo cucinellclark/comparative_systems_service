@@ -108,23 +108,19 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
     genome_dict = {}
     plfam_dict['unique_set'] = set()
     pgfam_dict['unique_set'] = set()
-    test_table_list = []
-    skip_count = 0
     for gids in chunker(genome_ids, 20):
         base = "https://www.patricbrc.org/api/genome_feature/?http_download=true"
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+feature_id)&eq(annotation,PATRIC)"
         headers = {"accept":"text/tsv", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
         result_header = True
         for line in getQueryData(base,query,headers):
-            test_table_list.append(line)
             if result_header:
                 result_header = False
                 print(line)
                 continue
             line = line.strip().split('\t')
-            # 21 entries in complete query result
+            # 20 entries in query result with pgfam and plfam data
             if len(line) < 20: 
-                skip_count = skip_count + 1 
                 continue
             try:
                 genome_id = line[1].replace('\"','')
@@ -203,11 +199,6 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
 
     plfam_output = pd.DataFrame(plfam_line_list)
     pgfam_output = pd.DataFrame(pgfam_line_list)
-    import pdb
-    pdb.set_trace()
-
-    test_table = pd.read_csv(io.StringIO('\n'.join(test_table_list)),sep='\t')
-
 
     output_json = {}
     output_json['plfam'] = plfam_output.to_csv(index=False,sep='\t')
