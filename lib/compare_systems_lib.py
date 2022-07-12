@@ -109,6 +109,7 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
     plfam_dict['unique_set'] = set()
     pgfam_dict['unique_set'] = set()
     test_table_list = []
+    skip_count = 0
     for gids in chunker(genome_ids, 20):
         base = "https://www.patricbrc.org/api/genome_feature/?http_download=true"
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+feature_id)&eq(annotation,PATRIC)"
@@ -123,6 +124,7 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
             line = line.strip().split('\t')
             # 21 entries in complete query result
             if len(line) < 21: 
+                skip_count = skip_count + 1 
                 continue
             try:
                 genome_id = line[1].replace('\"','')
