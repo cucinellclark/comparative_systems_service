@@ -107,12 +107,14 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
     genome_dict = {}
     plfam_dict['unique_set'] = set()
     pgfam_dict['unique_set'] = set()
+    test_table_list = []
     for gids in chunker(genome_ids, 20):
         base = "https://www.patricbrc.org/api/genome_feature/?http_download=true"
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+feature_id)&eq(annotation,PATRIC)"
         headers = {"accept":"text/tsv", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
         result_header = True
         for line in getQueryData(base,query,headers):
+            test_table_list.append(line)
             if result_header:
                 result_header = False
                 print(line)
@@ -198,6 +200,8 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
 
     plfam_output = pd.DataFrame(plfam_line_list)
     pgfam_output = pd.DataFrame(pgfam_line_list)
+
+    test_table = pd.read_csv(io.StringIO('\n'.join(test_table_list)),sep='\t')
 
     import pdb
     pdb.set_trace()
