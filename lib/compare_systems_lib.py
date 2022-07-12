@@ -21,6 +21,7 @@ import numpy as np
 from bvbrc_api import authenticateByEnv,getGenomeIdsByGenomeGroup,getFeatureDataFrame,getSubsystemsDataFrame,getPathwayDataFrame,getDataForGenomes,getQueryData
 
 import time
+import io
 
 def chunker(seq, size):
     return (seq[pos:pos + size] for pos in range(0, len(seq), size))
@@ -200,11 +201,11 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
 
     plfam_output = pd.DataFrame(plfam_line_list)
     pgfam_output = pd.DataFrame(pgfam_line_list)
+    import pdb
+    pdb.set_trace()
 
     test_table = pd.read_csv(io.StringIO('\n'.join(test_table_list)),sep='\t')
 
-    import pdb
-    pdb.set_trace()
 
     output_json = {}
     output_json['plfam'] = plfam_output.to_csv(index=False,sep='\t')
