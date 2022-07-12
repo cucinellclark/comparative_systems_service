@@ -105,7 +105,8 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
     for gids in chunker(genome_ids, 20):
         base = "https://www.patricbrc.org/api/genome_feature/?http_download=true"
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+feature_id)&eq(annotation,PATRIC)"
-        for res in getQueryData(base,query,session):
+        headers = {"accept":"text/tsv", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
+        for res in getQueryData(base,query,headers):
             import pdb
             pdb.set_trace()
     #print("GenomeFeatures Query:\n{0}".format(query))
