@@ -199,6 +199,9 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
     plfam_output = pd.DataFrame(plfam_line_list)
     pgfam_output = pd.DataFrame(pgfam_line_list)
 
+    import pdb
+    pdb.set_trace()
+
     output_json = {}
     output_json['plfam'] = plfam_output.to_csv(index=False,sep='\t')
     output_json['pgfam'] = pgfam_output.to_csv(index=False,sep='\t')
