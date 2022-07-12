@@ -104,7 +104,7 @@ def get_plfam_stats(row,stats_df,stats_name):
 def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, session):
     for gids in chunker(genome_ids, 20):
         base = "https://www.patricbrc.org/api/genome_feature/?http_download=true"
-        query = f"in(genome_id,({*gids,}))&limit(2500000)&sort(+feature_id)&eq(annotation,PATRIC)"
+        query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+feature_id)&eq(annotation,PATRIC)"
         print(query+'&'+query)
     #print("GenomeFeatures Query:\n{0}".format(query))
     #feature_df = pd.read_csv(query,sep="\t")
