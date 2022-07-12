@@ -220,6 +220,8 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
         'Product': 'product',
         'GO': 'go'
     }
+    import pdb
+    pdb.set_trace()
     plfam_output = pd.read_csv(io.StringIO('\n'.join(plfam_line_list)),dtype={'Genome ID':str})
     pgfam_output = pd.read_csv(io.StringIO('\n'.join(pgfam_line_list)),dtype={'Genome ID':str})
     if 'Genome ID' in plfam_output.columns:
