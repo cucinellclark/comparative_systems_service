@@ -116,6 +116,8 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
                 print(line)
                 continue
             line = line.strip().split('\t')
+            if len(line) == 13:
+                continue
             try:
                 genome_id = line[1].replace('\"','')
                 plfam_id = line[14].replace('\"','')
