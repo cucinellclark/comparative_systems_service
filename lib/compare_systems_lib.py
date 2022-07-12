@@ -18,7 +18,7 @@ import requests
 import pandas as pd
 import numpy as np
 
-from bvbrc_api import authenticateByEnv,getGenomeIdsByGenomeGroup,getFeatureDf,getSubsystemsDf,getPathwayDf,getDataForGenomes
+from bvbrc_api import authenticateByEnv,getGenomeIdsByGenomeGroup,getFeatureDataFrame,getSubsystemsDataFrame,getPathwayDataFrame,getDataForGenomes,getQueryDataStream
 
 import time
 
@@ -74,13 +74,8 @@ def return_columns_to_remove(system,columns):
         sys.stderr.write("Error, system is not a valid type\n")
         return [] 
 
-time_dict = {}
-time_dict['start'] = []
-time_dict['stop'] = []
 def get_plfam_stats(row,stats_df,stats_name):
-    time_dict['start'].append(time.time())
     plfam_stats = stats_df.loc[row['plfam_id']]
-    time_dict['stop'].append(time.time())
     is_dataframe = isinstance(plfam_stats,pd.DataFrame)
     if stats_name is 'aa_length_min':
         min_value = np.min(plfam_stats['aa_length']) if is_dataframe else plfam_stats['aa_length']
@@ -107,13 +102,18 @@ def get_plfam_stats(row,stats_df,stats_name):
     
 
 def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, session):
-    #base_query = "https://www.patricbrc.org/api/genome_feature/?in(genome_id,("
-    #end_query = "))&limit(-1)&http_accept=text/tsv"
-    #query = base_query + ",".join(genome_ids) + end_query
+    for gids in chunker(genome_ids, 20):
+        base = "https://www.patricbrc.org/api/genome_feature/?http_download=true"
+        query = f"in(genome_id,({*gids,}))&limit(2500000)&sort(+feature_id)&eq(annotation,PATRIC)"
+        print(query+'&'+query)
     #print("GenomeFeatures Query:\n{0}".format(query))
     #feature_df = pd.read_csv(query,sep="\t")
+
+    
+
+    sys.exit()
     feature_list = []
-    # proteinfams_df = getFeatureDf(genome_ids,session, limit=2500000)
+    # proteinfams_df = getFeatureDataFrame(genome_ids,session, limit=2500000)
     proteinfams_df = query_dict['feature']
 
     proteinfams_file = os.path.join(output_dir,output_file+"_proteinfams.tsv")
@@ -180,33 +180,16 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
             # genomes used in Heatmap viewer
             #plfam_table.loc[plfam_id,'genomes'] = format(len(tmp_df['feature_id']),'#04x').replace('0x','') if is_dataframe else format(1,'#04x').replace('0x','')
         '''
-        print('here1')
-        print(str(time.time()))
         plfam_table['aa_length_min'] = plfam_table.apply(lambda row: get_plfam_stats(row,genome_df,'aa_length_min'), axis=1)
-        print('here2')
-        print(str(time.time()))
         plfam_table['aa_length_max'] = plfam_table.apply(lambda row: get_plfam_stats(row,genome_df,'aa_length_max'), axis=1)
-        print('here3')
-        print(str(time.time()))
         plfam_table['aa_length_mean'] = plfam_table.apply(lambda row: get_plfam_stats(row,genome_df,'aa_length_mean'), axis=1)
-        print('here4')
-        print(str(time.time()))
         plfam_table['aa_length_std'] = plfam_table.apply(lambda row: get_plfam_stats(row,genome_df,'aa_length_std'), axis=1)
-        print('here5')
-        print(str(time.time()))
         plfam_table['feature_count'] = plfam_table.apply(lambda row: get_plfam_stats(row,genome_df,'feature_count'), axis=1)
-        print('here6')
-        print(str(time.time()))
         plfam_table['genomes'] = plfam_table.apply(lambda row: get_plfam_stats(row,genome_df,'genomes'), axis=1)
-        print('here7')
-        print(str(time.time()))
         
         plfam_list.append(plfam_table)
         #figfam_list.append(figfam_table)
     
-    import pdb
-    pdb.set_trace()
-
     # process pgfams
     pgfam_list = []
     for genome_id in genome_ids:
@@ -268,7 +251,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
     
     # json(facet,{"stat":{"type":"field","field":"superclass","limit":-1,"facet":{"subsystem_count":"unique(subsystem_id)","class":{"type":"field","field":"class","limit":-1,"facet":{"subsystem_count":"unique(subsystem_id)","gene_count":"unique(feature_id)","subclass":{"type":"field","field":"subclass","limit":-1,"facet":{"subsystem_count":"unique(subsystem_id)","gene_count":"unique(feature_id)"}}}}}}}):  
 
-    # subsystems_df = getSubsystemsDf(genome_ids,session) 
+    # subsystems_df = getSubsystemsDataFrame(genome_ids,session) 
     subsystems_df = query_dict['subsystems']
     
     # Superclass, class, and subclass can be different cases: convert all to lower case
@@ -394,7 +377,7 @@ def run_pathways(genome_ids, query_dict, output_file,output_dir, genome_data, se
     
     pathways_file = os.path.join(output_dir,output_file+'_pathways.tsv')
     # TODO: create alt_locus_tag query
-    # pathway_df = getPathwayDf(genome_ids,session, limit=2500000)
+    # pathway_df = getPathwayDataFrame(genome_ids,session, limit=2500000)
     pathway_df = query_dict['pathway']
     pathway_df.to_csv(pathways_file,sep='\t',index=False)
 
@@ -486,7 +469,7 @@ def run_pathways(genome_ids, query_dict, output_file,output_dir, genome_data, se
 
     # Get gene data
     feature_list = []
-    # gene_df = getFeatureDf(genome_ids,session, limit=2500000)
+    # gene_df = getFeatureDataFrame(genome_ids,session, limit=2500000)
     gene_df = query_dict['feature']
     
     genes_output = pd.merge(gene_df.drop(return_columns_to_remove('pathways_genes',gene_df.columns.tolist()), axis=1),pathway_df,on=['genome_id','patric_id'],how='inner')
@@ -565,7 +548,7 @@ def run_all_queries(genome_ids, session):
     ### Run pathways query
     if True:
         print('pathways query')
-        pathway_df = getPathwayDf(genome_ids,session, limit=2500000)
+        pathway_df = getPathwayDataFrame(genome_ids,session, limit=2500000)
         if not pathway_df is None:
             pathway_df['pathway_index'] = pathway_df['pathway_id']
             pathway_df['ec_index'] = pathway_df['ec_number']
@@ -576,7 +559,7 @@ def run_all_queries(genome_ids, session):
     ### Run subsystems query
     if True:
         print('subsystems query')
-        subsystems_df = getSubsystemsDf(genome_ids,session) 
+        subsystems_df = getSubsystemsDataFrame(genome_ids,session) 
         if not subsystems_df is None:
             subsystems_df['subsystem_index'] = subsystems_df['subsystem_id']
             subsystems_df.set_index('subsystem_index', inplace=True)
@@ -586,7 +569,7 @@ def run_all_queries(genome_ids, session):
     ### Run features query
     if True:
         print('features query')
-        feature_df = getFeatureDf(genome_ids,session, limit=2500000)
+        feature_df = getFeatureDataFrame(genome_ids,session, limit=2500000)
         if not feature_df is None:
             column_map = {
                 'Genome': 'genome_name',
@@ -661,6 +644,6 @@ def run_compare_systems(job_data, output_dir):
     # TODO: add chunking
     # TODO: add recipe
     # TODO: add multithreading
-    run_pathways(genome_ids, query_dict, output_file, output_dir, genome_data, s)
-    run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    #run_pathways(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    #run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, s)
     run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s)
