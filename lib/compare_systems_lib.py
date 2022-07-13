@@ -168,7 +168,7 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
         
     plfam_line_list = []        
     pgfam_line_list = []
-    header = 'family_id\tgenome_id\tfeature_count\tgenome_count\tproduct\taa_length_min\taa_length_max\taa_length_mean\taa_length_std'
+    header = 'family_id\tgenome_id\tfeature_count\tgenome_count\tproduct\taa_length_min\taa_length_max\taa_length_mean\taa_length_std\tgenomes'
     plfam_line_list.append(header)
     pgfam_line_list.append(header)
     for plfam_id in plfam_dict['unique_set']: 
