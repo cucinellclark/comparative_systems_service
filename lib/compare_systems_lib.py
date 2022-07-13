@@ -18,7 +18,10 @@ import requests
 import pandas as pd
 import numpy as np
 
-from bvbrc_api import authenticateByEnv,getGenomeIdsByGenomeGroup,getFeatureDf,getSubsystemsDf,getPathwayDf,getDataForGenomes
+from bvbrc_api import authenticateByEnv,getGenomeIdsByGenomeGroup,getFeatureDataFrame,getSubsystemsDataFrame,getPathwayDataFrame,getDataForGenomes,getQueryData
+
+import time
+import io
 
 def chunker(seq, size):
     return (seq[pos:pos + size] for pos in range(0, len(seq), size))
@@ -64,103 +67,134 @@ def return_columns_to_remove(system,columns):
                                     'aa_length','gene','go']
         table_columns = list(set.intersection(set(drop_pgfams_columns),set(columns))) 
         return table_columns
+    elif system is 'pathways_genes':
+        drop_gene_columns = ['genome_name','accession','alt_locus_tag','refseq_locus_tag','feature_id','annotation','product']
+        table_columns = list(set.intersection(set(drop_gene_columns),set(columns)))
+        return table_columns
     else: # pathways does not have drop columns
         sys.stderr.write("Error, system is not a valid type\n")
         return [] 
 
 def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, session):
-    #base_query = "https://www.patricbrc.org/api/genome_feature/?in(genome_id,("
-    #end_query = "))&limit(-1)&http_accept=text/tsv"
-    #query = base_query + ",".join(genome_ids) + end_query
-    #print("GenomeFeatures Query:\n{0}".format(query))
-    #feature_df = pd.read_csv(query,sep="\t")
-    feature_list = []
-    # proteinfams_df = getFeatureDf(genome_ids,session, limit=2500000)
-    proteinfams_df = query_dict['feature']
-
-    proteinfams_file = os.path.join(output_dir,output_file+"_proteinfams.tsv")
-    proteinfams_df.to_csv(proteinfams_file, index=False, header=True, sep="\t")
-    # TODO: remove, used for testing
-    #proteinfams_df = pd.read_csv(proteinfams_file,sep="\t")
+    plfam_dict = {}
+    pgfam_dict = {}
+    genome_dict = {}
+    plfam_dict['unique_set'] = set()
+    pgfam_dict['unique_set'] = set()
+    present_genome_ids = set()
+    for gids in chunker(genome_ids, 20):
+        base = "https://www.patricbrc.org/api/genome_feature/?http_download=true"
+        query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+feature_id)&eq(annotation,PATRIC)"
+        headers = {"accept":"text/tsv", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
+        result_header = True
+        for line in getQueryData(base,query,headers):
+            if result_header:
+                result_header = False
+                print(line)
+                continue
+            line = line.strip().split('\t')
+            # 20 entries in query result with pgfam and plfam data
+            if len(line) < 20: 
+                continue
+            try:
+                genome_id = line[1].replace('\"','')
+                plfam_id = line[14].replace('\"','')
+                pgfam_id = line[15].replace('\"','')
+                aa_length = line[17].replace('\"','')
+                product = line[19].replace('\"','')
+            except Exception as e:
+                sys.stderr.write(f'Error with the following line:\n{e}\n{line}\n')
+                continue
+            if genome_id not in genome_dict:
+                genome_dict[genome_id] = {}
+                genome_dict[genome_id]['plfam_set'] = set()
+                genome_dict[genome_id]['pgfam_set'] = set()
+            present_genome_ids.add(genome_id)
+            genome_dict[genome_id]['plfam_set'].add(plfam_id) 
+            genome_dict[genome_id]['pgfam_set'].add(pgfam_id) 
+            if genome_id not in plfam_dict:
+                plfam_dict[genome_id] = {}
+            if genome_id not in pgfam_dict:
+                pgfam_dict[genome_id] = {}
+            if plfam_id and plfam_id not in plfam_dict[genome_id]:
+                plfam_dict[genome_id][plfam_id] = {}
+                plfam_dict[genome_id][plfam_id]['aa_length_list'] = []
+                # TODO: check if I need to check for duplicate features
+                plfam_dict[genome_id][plfam_id]['feature_count'] = 0
+                plfam_dict[genome_id][plfam_id]['genome_count'] = 1
+                plfam_dict[genome_id][plfam_id]['product'] = product
+            if pgfam_id and pgfam_id not in pgfam_dict[genome_id]:
+                pgfam_dict[genome_id][pgfam_id] = {}
+                pgfam_dict[genome_id][pgfam_id]['aa_length_list'] = []
+                # TODO: check if I need to check for duplicate features
+                pgfam_dict[genome_id][pgfam_id]['feature_count'] = 0
+                pgfam_dict[genome_id][pgfam_id]['genome_count'] = 1
+                pgfam_dict[genome_id][pgfam_id]['product'] = product
+            if plfam_id:
+                plfam_dict['unique_set'].add(plfam_id)
+                plfam_dict[genome_id][plfam_id]['aa_length_list'].append(int(aa_length))
+                plfam_dict[genome_id][plfam_id]['feature_count'] = plfam_dict[genome_id][plfam_id]['feature_count'] + 1
+            if pgfam_id:
+                pgfam_dict['unique_set'].add(pgfam_id)
+                pgfam_dict[genome_id][pgfam_id]['aa_length_list'].append(int(aa_length))
+                pgfam_dict[genome_id][pgfam_id]['feature_count'] = pgfam_dict[genome_id][pgfam_id]['feature_count'] + 1
+        
+    plfam_line_list = []        
+    pgfam_line_list = []
+    header = 'family_id\tgenome_id\tfeature_count\tgenome_count\tproduct\taa_length_min\taa_length_max\taa_length_mean\taa_length_std\tgenomes'
+    plfam_line_list.append(header)
+    pgfam_line_list.append(header)
+    for plfam_id in plfam_dict['unique_set']: 
+        for gid in genome_ids: 
+            if gid not in plfam_dict:
+                continue
+            #plfam_data['plfam_id'] = plfam_id
+            #plfam_data['genome_id'] = gid
+            if plfam_id in plfam_dict[gid]:
+                aa_length_list = plfam_dict[gid][plfam_id]['aa_length_list'] 
+                aa_length_max = max(aa_length_list)
+                aa_length_min = min(aa_length_list)
+                aa_length_mean = np.mean(aa_length_list)
+                aa_length_std = np.std(aa_length_list)
+                feature_count = plfam_dict[gid][plfam_id]['feature_count']
+                genome_count = plfam_dict[gid][plfam_id]['genome_count']
+                genomes = format(feature_count,'#04x').replace('0x','')
+                product = plfam_dict[gid][plfam_id]['product']
+                plfam_str = f'{plfam_id}\t{gid}\t{feature_count}\t{genome_count}\t{product}\t{aa_length_min}\t{aa_length_max}\t{aa_length_mean}\t{aa_length_std}\t{genomes}'
+                plfam_line_list.append(plfam_str)
     
-    plfam_list = [] 
-    pgfam_list = []
-    for genome_id in genome_ids:
-        print("---{0}".format(genome_id))    
-        genome_df = proteinfams_df.loc[proteinfams_df['genome_id'] == genome_id]
-
-        plfam_table = genome_df.drop(return_columns_to_remove('proteinfamilies_plfams',genome_df.columns.tolist()), axis=1) 
-        pgfam_table = genome_df.drop(return_columns_to_remove('proteinfamilies_pgfams',genome_df.columns.tolist()), axis=1)
-
-        # Get unique family ids, first row for information 
-        keep_rows = []
-        plfam_id_list = []
-        for i in range(0,plfam_table.shape[0]):
-            if not plfam_table.iloc[i]['plfam_id'] in plfam_id_list:
-                plfam_id_list.append(plfam_table.iloc[i]['plfam_id'])
-                keep_rows.append(i)
-        plfam_table = plfam_table.iloc[keep_rows]
-
-        keep_rows = []
-        pgfam_id_list = []
-        for i in range(0,pgfam_table.shape[0]):
-            if not pgfam_table.iloc[i]['pgfam_id'] in pgfam_id_list:
-                pgfam_id_list.append(pgfam_table.iloc[i]['pgfam_id'])
-                keep_rows.append(i)
-        pgfam_table = pgfam_table.iloc[keep_rows]
-
-        # plfam_stats 
-        plfam_table['feature_count'] = [0]*plfam_table.shape[0]
-        plfam_table['genome_count'] = [1]*plfam_table.shape[0] 
-        plfam_table['genomes'] = [0]*plfam_table.shape[0]
-        plfam_table['aa_length_min'] = [0]*plfam_table.shape[0] 
-        plfam_table['aa_length_max'] = [0]*plfam_table.shape[0] 
-        plfam_table['aa_length_mean'] = [0]*plfam_table.shape[0] 
-        plfam_table['aa_length_std'] = [0]*plfam_table.shape[0] 
-        for plfam_id in plfam_table['plfam_id']:
-            tmp_df = genome_df.loc[genome_df['plfam_id'] == plfam_id]
-            plfam_table.loc[plfam_table['plfam_id'] == plfam_id,'aa_length_min'] = np.min(tmp_df['aa_length'])
-            plfam_table.loc[plfam_table['plfam_id'] == plfam_id,'aa_length_max'] = np.max(tmp_df['aa_length'])
-            plfam_table.loc[plfam_table['plfam_id'] == plfam_id,'aa_length_mean'] = np.mean(tmp_df['aa_length'])
-            plfam_table.loc[plfam_table['plfam_id'] == plfam_id,'aa_length_std'] = np.std(tmp_df['aa_length'])
-            plfam_table.loc[plfam_table['plfam_id'] == plfam_id,'feature_count'] = len(tmp_df['feature_id'])
-            # genomes used in Heatmap viewer
-            plfam_table.loc[plfam_table['plfam_id'] == plfam_id,'genomes'] = format(len(tmp_df['feature_id']),'#04x').replace('0x','')
-
-        # pgfam_stats 
-        pgfam_table['feature_count'] = [0]*pgfam_table.shape[0] 
-        pgfam_table['genome_count'] = [1]*pgfam_table.shape[0] 
-        pgfam_table['genomes'] = [0]*pgfam_table.shape[0]
-        pgfam_table['aa_length_min'] = [0]*pgfam_table.shape[0] 
-        pgfam_table['aa_length_max'] = [0]*pgfam_table.shape[0] 
-        pgfam_table['aa_length_mean'] = [0]*pgfam_table.shape[0] 
-        pgfam_table['aa_length_std'] = [0]*pgfam_table.shape[0] 
-        for pgfam_id in pgfam_table['pgfam_id']:
-            tmp_df = genome_df.loc[genome_df['pgfam_id'] == pgfam_id]
-            pgfam_table.loc[pgfam_table['pgfam_id'] == pgfam_id,'aa_length_min'] = np.min(tmp_df['aa_length'])
-            pgfam_table.loc[pgfam_table['pgfam_id'] == pgfam_id,'aa_length_max'] = np.max(tmp_df['aa_length'])
-            pgfam_table.loc[pgfam_table['pgfam_id'] == pgfam_id,'aa_length_mean'] = np.mean(tmp_df['aa_length'])
-            pgfam_table.loc[pgfam_table['pgfam_id'] == pgfam_id,'aa_length_std'] = np.std(tmp_df['aa_length'])
-            pgfam_table.loc[pgfam_table['pgfam_id'] == pgfam_id,'feature_count'] = len(tmp_df['feature_id'])
-            pgfam_table.loc[pgfam_table['pgfam_id'] == pgfam_id,'genomes'] = format(len(tmp_df['feature_id']),'#04x').replace('0x','')
-
-
-        plfam_list.append(plfam_table)
-        pgfam_list.append(pgfam_table)
-        #figfam_list.append(figfam_table)
-
-    # write out tables
-    # counting is done per-genome, multi-genome calculation adjustments are done on the front end
-    plfam_output = pd.concat(plfam_list)
-    pgfam_output = pd.concat(pgfam_list)
+    for pgfam_id in pgfam_dict['unique_set']: 
+        for gid in genome_ids: 
+            if gid not in pgfam_dict:
+                continue
+            pgfam_data = {}
+            pgfam_data['pgfam_id'] = pgfam_id
+            pgfam_data['genome_id'] = gid
+            if pgfam_id in pgfam_dict[gid]:
+                aa_length_list = pgfam_dict[gid][pgfam_id]['aa_length_list'] 
+                aa_length_max = max(aa_length_list)
+                aa_length_min = min(aa_length_list)
+                aa_length_mean = np.mean(aa_length_list)
+                aa_length_std = np.std(aa_length_list)
+                feature_count = pgfam_dict[gid][pgfam_id]['feature_count']
+                genome_count = pgfam_dict[gid][pgfam_id]['genome_count']
+                genomes = format(feature_count,'#04x').replace('0x','')
+                product = pgfam_dict[gid][pgfam_id]['product']
+                pgfam_str = f'{pgfam_id}\t{gid}\t{feature_count}\t{genome_count}\t{product}\t{aa_length_min}\t{aa_length_max}\t{aa_length_mean}\t{aa_length_std}\t{genomes}'
+                pgfam_line_list.append(pgfam_str)
     
     output_json = {}
-    output_json['plfam'] = plfam_output.to_csv(index=False,sep='\t')
-    output_json['pgfam'] = pgfam_output.to_csv(index=False,sep='\t')
-    output_json['genome_ids'] = genome_ids
+    output_json['plfam'] = '\n'.join(plfam_line_list) 
+    output_json['pgfam'] = '\n'.join(pgfam_line_list) 
+    #output_json['genome_ids'] = genome_ids
+    output_json['genome_ids'] = list(set(genome_ids).intersection(present_genome_ids)) 
+    tmp_data = genome_data.loc[genome_data['Genome ID'].isin(output_json['genome_ids'])]
+    tmp_data.set_index('Genome ID',inplace=True)
+    tmp_data = tmp_data.loc[output_json['genome_ids']]
+    output_json['genome_names'] = tmp_data['Genome Name'].tolist()
     output_json['job_name'] = output_file
 
-    output_json_file = proteinfams_file.replace('.tsv','_tables.json')
+    output_json_file = os.path.join(output_dir,output_file+'_proteinfams_tables.json')
     with open(output_json_file,"w") as o:
         o.write(json.dumps(output_json))
 
@@ -170,13 +204,13 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
     
     # json(facet,{"stat":{"type":"field","field":"superclass","limit":-1,"facet":{"subsystem_count":"unique(subsystem_id)","class":{"type":"field","field":"class","limit":-1,"facet":{"subsystem_count":"unique(subsystem_id)","gene_count":"unique(feature_id)","subclass":{"type":"field","field":"subclass","limit":-1,"facet":{"subsystem_count":"unique(subsystem_id)","gene_count":"unique(feature_id)"}}}}}}}):  
 
-    # subsystems_df = getSubsystemsDf(genome_ids,session) 
+    # subsystems_df = getSubsystemsDataFrame(genome_ids,session) 
     subsystems_df = query_dict['subsystems']
     
     # Superclass, class, and subclass can be different cases: convert all to lower case
-    subsystems_df['superclass'] = subsystems_df['superclass'].str.lower()
-    subsystems_df['class'] = subsystems_df['class'].str.lower()
-    subsystems_df['subclass'] = subsystems_df['subclass'].str.lower()
+    #subsystems_df['superclass'] = subsystems_df['superclass'].str.lower()
+    #subsystems_df['class'] = subsystems_df['class'].str.lower()
+    #subsystems_df['subclass'] = subsystems_df['subclass'].str.lower()
 
     # query 
     #base_query = "https://www.patricbrc.org/api/subsystem/?in(genome_id,("
@@ -199,18 +233,18 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
         overview_dict[genome_id]["superclass_counts"] = len(genome_df['subsystem_id'].unique())
         # TODO: check that this is correct for each level
         overview_dict[genome_id]["gene_counts"] = genome_df.shape[0] 
-        for superclass in genome_df['superclass'].unique():
-            superclass_df = subsystems_df.loc[subsystems_df['superclass'] == superclass]
+        for superclass in genome_df['superclass'].str.lower().unique():
+            superclass_df = subsystems_df.loc[subsystems_df['superclass'].str.lower() == superclass]
             overview_dict[genome_id][superclass] = {}
             overview_dict[genome_id][superclass]["class_counts"] = len(superclass_df['subsystem_id'].unique())
             overview_dict[genome_id][superclass]["gene_counts"] = superclass_df.shape[0] 
-            for clss in superclass_df['class'].unique():
-                class_df = superclass_df.loc[superclass_df['class'] == clss]
+            for clss in superclass_df['class'].str.lower().unique():
+                class_df = superclass_df.loc[superclass_df['class'].str.lower() == clss]
                 overview_dict[genome_id][superclass][clss] = {}
                 overview_dict[genome_id][superclass][clss]['subclass_counts'] = len(class_df['subsystem_id'].unique())
                 overview_dict[genome_id][superclass][clss]['gene_counts'] = class_df.shape[0] 
-                for subclass in class_df['subclass'].unique():
-                    subclass_df = class_df.loc[class_df['subclass'] == subclass]
+                for subclass in class_df['subclass'].str.lower().unique():
+                    subclass_df = class_df.loc[class_df['subclass'].str.lower() == subclass]
                     overview_dict[genome_id][superclass][clss][subclass] = {}
                     overview_dict[genome_id][superclass][clss][subclass]['subsystem_name_counts'] = len(subclass_df['subsystem_id'].unique()) 
                     overview_dict[genome_id][superclass][clss][subclass]['gene_counts'] = subclass_df.shape[0] 
@@ -239,7 +273,8 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
         genome_table['role_count'] = [0]*genome_table.shape[0]
     
         genome_table['genome_id'] = [genome_id]*genome_table.shape[0]
-        
+
+        # TODO: unknown if this needs to stay or go
         # Get unique subsystem ids, first row for information
         keep_rows = []
         sub_id_list = []
@@ -251,12 +286,16 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
 
         # add stats columns 
         for sub_id in genome_table['subsystem_id']:
-            tmp_df = genome_df.loc[genome_df['subsystem_id'] == sub_id] 
-            if 'gene' in tmp_df.columns.tolist():
-                genome_table.loc[genome_table['subsystem_id'] == sub_id,'gene_count'] = len(tmp_df['gene'].unique()) # unsure if this is correct)
-            else: # unsure if this is correct
-                genome_table.loc[genome_table['subsystem_id'] ==sub_id,'gene_count'] = tmp_df.shape[0]
-            genome_table.loc[genome_table['subsystem_id'] == sub_id,'role_count'] = len(tmp_df['role_id'].unique())
+            tmp_df = genome_df.loc[sub_id] 
+            if isinstance(tmp_df, pd.DataFrame): # if only one record, returns as Series
+                if 'gene' in tmp_df.columns.tolist():
+                    genome_table.loc[sub_id,'gene_count'] = len(tmp_df['gene'].unique()) # unsure if this is correct)
+                else: # unsure if this is correct
+                    genome_table.loc[sub_id,'gene_count'] = tmp_df.shape[0]
+                genome_table.loc[sub_id,'role_count'] = len(tmp_df['role_id'].unique())
+            else:
+                genome_table.loc[sub_id,'gene_count'] = 1
+                genome_table.loc[sub_id,'role_count'] = 1
             # TODO: genome count calculation
         
         st_list.append(genome_table)    
@@ -285,16 +324,14 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
     with open(output_json_file,'w') as o:
         o.write(json.dumps(output_json))
 
+    print('Subsystems complete')
+
 def run_pathways(genome_ids, query_dict, output_file,output_dir, genome_data, session):
     
     pathways_file = os.path.join(output_dir,output_file+'_pathways.tsv')
     # TODO: create alt_locus_tag query
-    # pathway_df = getPathwayDf(genome_ids,session, limit=2500000)
+    # pathway_df = getPathwayDataFrame(genome_ids,session, limit=2500000)
     pathway_df = query_dict['pathway']
-    # TODO:
-    # - move this to p3_core/lib/bvbrc_api.py
-    # convert pathway_id to string and pad with leading zeros
-    pathway_df['pathway_id'] = pathway_df['pathway_id'].apply(lambda x: '{0:0>5}'.format(x)) 
     pathway_df.to_csv(pathways_file,sep='\t',index=False)
 
     #TODO: remove, reading in file for testing
@@ -319,7 +356,7 @@ def run_pathways(genome_ids, query_dict, output_file,output_dir, genome_data, se
         # TODO: add alt_locus_tag column
         '''
         pathway_table = genome_df[['genome_id','annotation','pathway_class','pathway_name','pathway_id']]
-        ec_table = genome_df[['genome_id','annotation','pathway_class','pathway_name','pathway_id','ec_number','ec_description']]
+        ec_table = genome_df[['genome_id','annotation','pathway_class','pathway_name','pathway_id','ec_number','ec_description','ec_index']]
 
         pathway_table = pathway_table.drop_duplicates()
         ec_table = ec_table.drop_duplicates()
@@ -329,16 +366,24 @@ def run_pathways(genome_ids, query_dict, output_file,output_dir, genome_data, se
         pathway_table['gene_count'] = [0]*pathway_table.shape[0]
         pathway_table['ec_count'] = [0]*pathway_table.shape[0]
         pathway_table['genome_ec'] = [0]*pathway_table.shape[0]
-        for pathway_id in pathway_table['pathway_id']:
-            tmp_df = genome_df.loc[genome_df['pathway_id'] == pathway_id]
-            pathway_table.loc[pathway_table['pathway_id'] == pathway_id,'gene_count'] = len(tmp_df['feature_id'].unique())
-            pathway_table.loc[pathway_table['pathway_id'] == pathway_id,'ec_count'] = len(tmp_df['ec_number'].unique())
-            pathway_table.loc[pathway_table['pathway_id'] == pathway_id,'genome_ec'] = len(tmp_df['genome_ec'].unique())
-            # for genes info: take first record
-            p_id = tmp_df.iloc[0]['patric_id']
+        for pathway_id in pathway_table['pathway_id']: # should be unique
+            tmp_df = genome_df.loc[pathway_id]
+            if isinstance(tmp_df, pd.DataFrame): # if only one entry, returns a Series 
+                pathway_table.loc[pathway_id,'gene_count'] = len(tmp_df['feature_id'].unique())
+                pathway_table.loc[pathway_id,'ec_count'] = len(tmp_df['ec_number'].unique())
+                pathway_table.loc[pathway_id,'genome_ec'] = len(tmp_df['genome_ec'].unique())
+                # for genes info: take first record
+                p_id = tmp_df.iloc[0]['patric_id']
+            else:
+                pathway_table.loc[pathway_id,'gene_count'] = 1 
+                pathway_table.loc[pathway_id,'ec_count'] = 1 
+                pathway_table.loc[pathway_id,'genome_ec'] = 1 
+                # for genes info: take first record
+                p_id = tmp_df['patric_id']
             if p_id not in genes_info_dict:
                 genes_info_dict[p_id] = tmp_df.iloc[0] 
 
+        # TODO: maybe modify once the multiple-rows thing has been decided
         # get first ec_number entry data for ec_number duplicates
         # pathway_id is not duplicated for each ec_number
         keep_rows = []
@@ -354,12 +399,18 @@ def run_pathways(genome_ids, query_dict, output_file,output_dir, genome_data, se
         ec_table['gene_count'] = [0]*ec_table.shape[0]
         ec_table['ec_count'] = [0]*ec_table.shape[0]
         ec_table['genome_ec'] = [0]*ec_table.shape[0]
+        genome_df.set_index('ec_index',inplace=True)
+        ec_table.set_index('ec_index',inplace=True)
         for ec_number in ec_table['ec_number']:
-            tmp_df = genome_df.loc[genome_df['ec_number'] == ec_number]
-            ec_table.loc[ec_table['ec_number'] == ec_number,'gene_count'] = len(tmp_df['feature_id'].unique()) 
-            ec_table.loc[ec_table['ec_number'] == ec_number,'ec_count'] = len(tmp_df['ec_number'].unique()) 
-            ec_table.loc[ec_table['ec_number'] == ec_number,'genome_ec'] = len(tmp_df['ec_number'].unique())
-
+            tmp_df = genome_df.loc[ec_number]
+            if isinstance(tmp_df, pd.DataFrame): # if only one entry, returns a Series
+                ec_table.loc[ec_number,'gene_count'] = len(tmp_df['feature_id'].unique()) 
+                ec_table.loc[ec_number,'ec_count'] = len(tmp_df['ec_number'].unique()) 
+                ec_table.loc[ec_number,'genome_ec'] = len(tmp_df['ec_number'].unique())
+            else:
+                ec_table.loc[ec_number,'gene_count'] = 1 
+                ec_table.loc[ec_number,'ec_count'] = 1 
+                ec_table.loc[ec_number,'genome_ec'] = 1 
         # append to lists
         pathways_list.append(pathway_table)
         ecnum_list.append(ec_table)
@@ -371,61 +422,64 @@ def run_pathways(genome_ids, query_dict, output_file,output_dir, genome_data, se
 
     # Get gene data
     feature_list = []
-    # gene_df = getFeatureDf(genome_ids,session, limit=2500000)
+    # gene_df = getFeatureDataFrame(genome_ids,session, limit=2500000)
     gene_df = query_dict['feature']
     
-    # Parse gene data
-    # TODO:
-    # - make sure to check genome_id type issue 
-    genes_list = []
-    for genome_id in genome_ids:
-        print('---Faceting GenomeId Genes Table: {0}---'.format(genome_id))
-        genome_df = gene_df.loc[gene_df['genome_id'] == genome_id]
+    genes_output = pd.merge(gene_df.drop(return_columns_to_remove('pathways_genes',gene_df.columns.tolist()), axis=1),pathway_df,on=['genome_id','patric_id'],how='inner')
+
+    if False:
+        # Parse gene data
+        # TODO:
+        # - make sure to check genome_id type issue 
+        genes_list = []
+        for genome_id in genome_ids:
+            print('---Faceting GenomeId Genes Table: {0}---'.format(genome_id))
+            genome_df = gene_df.loc[gene_df['genome_id'] == genome_id]
+            
+            genes_table = genome_df.drop_duplicates()
+            genes_table.gene = genes_table.gene.fillna('')
         
-        genes_table = genome_df.drop_duplicates()
-        genes_table.gene = genes_table.gene.fillna('')
-    
-        # get first gene entry data for gene duplicates
-        # pathway_id is not duplicated for each gene
-        keep_rows = []
-        g_list = []
-        for i in range(0,genes_table.shape[0]):
-            if not genes_table.iloc[i]['gene'] in g_list:
-                g_list.append(genes_table.iloc[i]['gene'])
-                keep_rows.append(i)
-            if genes_table.iloc[i]['gene'] == '':
-                keep_rows.append(i)
-        genes_table = genes_table.iloc[keep_rows]
+            # get first gene entry data for gene duplicates
+            # pathway_id is not duplicated for each gene
+            keep_rows = []
+            g_list = []
+            for i in range(0,genes_table.shape[0]):
+                if not genes_table.iloc[i]['gene'] in g_list:
+                    g_list.append(genes_table.iloc[i]['gene'])
+                    keep_rows.append(i)
+                if genes_table.iloc[i]['gene'] == '':
+                    keep_rows.append(i)
+            genes_table = genes_table.iloc[keep_rows]
 
-        # fill in ec_description, ec_number, index, pathwayid, pathway name 
-        genes_table['ec_description'] = ['']*genes_table.shape[0]
-        genes_table['ec_number'] = ['']*genes_table.shape[0]
-        genes_table['index'] = ['']*genes_table.shape[0]
-        genes_table['pathway_id'] = ['']*genes_table.shape[0]
-        genes_table['pathway_name'] = ['']*genes_table.shape[0]
-        # genes table stats
-        genes_table['genome_count'] = [1]*genes_table.shape[0]
-        genes_table['gene_count'] = [0]*genes_table.shape[0]
-        genes_table['ec_count'] = [0]*genes_table.shape[0]
-        genes_table['genome_ec'] = [0]*genes_table.shape[0]
-        #genes_table['alt_locus_tag'] = ['']*genes_table.shape[0]
-        # use patric_id to account for '' genes
-        for p_id in genes_table['patric_id']:
-            tmp_df = pathway_df.loc[pathway_df['genome_id'] == genome_id]
-            tmp_df = tmp_df[tmp_df['patric_id'] == p_id]
-            genes_table.loc[genes_table['patric_id'] == p_id,'gene_count'] = len(tmp_df['feature_id'].unique())
-            genes_table.loc[genes_table['patric_id'] == p_id,'ec_count'] = len(tmp_df['ec_number'].unique())
-            genes_table.loc[genes_table['patric_id'] == p_id,'genome_ec'] = len(tmp_df['ec_number'].unique())
-            if p_id in genes_info_dict:
-                genes_table.loc[genes_table['patric_id'] == p_id,'ec_description'] = genes_info_dict[p_id]['ec_description']
-                genes_table.loc[genes_table['patric_id'] == p_id,'ec_number'] = genes_info_dict[p_id]['ec_number']
-                genes_table.loc[genes_table['patric_id'] == p_id,'index'] = genes_info_dict[p_id]['id']
-                genes_table.loc[genes_table['patric_id'] == p_id,'pathway_id'] = genes_info_dict[p_id]['pathway_id']
-                genes_table.loc[genes_table['patric_id'] == p_id,'pathway_name'] = genes_info_dict[p_id]['pathway_name']
- 
-        genes_list.append(genes_table)
+            # fill in ec_description, ec_number, index, pathwayid, pathway name 
+            genes_table['ec_description'] = ['']*genes_table.shape[0]
+            genes_table['ec_number'] = ['']*genes_table.shape[0]
+            genes_table['index'] = ['']*genes_table.shape[0]
+            genes_table['pathway_id'] = ['']*genes_table.shape[0]
+            genes_table['pathway_name'] = ['']*genes_table.shape[0]
+            # genes table stats
+            genes_table['genome_count'] = [1]*genes_table.shape[0]
+            genes_table['gene_count'] = [0]*genes_table.shape[0]
+            genes_table['ec_count'] = [0]*genes_table.shape[0]
+            genes_table['genome_ec'] = [0]*genes_table.shape[0]
+            #genes_table['alt_locus_tag'] = ['']*genes_table.shape[0]
+            # use patric_id to account for '' genes
+            for p_id in genes_table['patric_id']:
+                tmp_df = pathway_df.loc[pathway_df['genome_id'] == genome_id]
+                tmp_df = tmp_df[tmp_df['patric_id'] == p_id]
+                genes_table.loc[genes_table['patric_id'] == p_id,'gene_count'] = len(tmp_df['feature_id'].unique())
+                genes_table.loc[genes_table['patric_id'] == p_id,'ec_count'] = len(tmp_df['ec_number'].unique())
+                genes_table.loc[genes_table['patric_id'] == p_id,'genome_ec'] = len(tmp_df['ec_number'].unique())
+                if p_id in genes_info_dict:
+                    genes_table.loc[genes_table['patric_id'] == p_id,'ec_description'] = genes_info_dict[p_id]['ec_description']
+                    genes_table.loc[genes_table['patric_id'] == p_id,'ec_number'] = genes_info_dict[p_id]['ec_number']
+                    genes_table.loc[genes_table['patric_id'] == p_id,'index'] = genes_info_dict[p_id]['id']
+                    genes_table.loc[genes_table['patric_id'] == p_id,'pathway_id'] = genes_info_dict[p_id]['pathway_id']
+                    genes_table.loc[genes_table['patric_id'] == p_id,'pathway_name'] = genes_info_dict[p_id]['pathway_name']
+     
+            genes_list.append(genes_table)
 
-    genes_output = pd.concat(genes_list)
+    #genes_output = pd.concat(genes_list)
 
     output_json = {}
     output_json['pathway'] = pathway_output.to_csv(index=False,sep='\t')
@@ -447,23 +501,28 @@ def run_all_queries(genome_ids, session):
     ### Run pathways query
     if True:
         print('pathways query')
-        pathway_df = getPathwayDf(genome_ids,session, limit=2500000)
+        pathway_df = getPathwayDataFrame(genome_ids,session, limit=2500000)
         if not pathway_df is None:
+            pathway_df['pathway_index'] = pathway_df['pathway_id']
+            pathway_df['ec_index'] = pathway_df['ec_number']
+            pathway_df.set_index('pathway_index', inplace=True)
             query_dict['pathway'] = pathway_df
         else:
             sys.stderr.write('Pathways dataframe is None\n')
     ### Run subsystems query
     if True:
         print('subsystems query')
-        subsystems_df = getSubsystemsDf(genome_ids,session) 
+        subsystems_df = getSubsystemsDataFrame(genome_ids,session) 
         if not subsystems_df is None:
+            subsystems_df['subsystem_index'] = subsystems_df['subsystem_id']
+            subsystems_df.set_index('subsystem_index', inplace=True)
             query_dict['subsystems'] = subsystems_df
         else:
             sys.stderr.write('Subsystems dataframe is None\n')
     ### Run features query
     if True:
         print('features query')
-        feature_df = getFeatureDf(genome_ids,session, limit=2500000)
+        feature_df = getFeatureDataFrame(genome_ids,session, limit=2500000)
         if not feature_df is None:
             column_map = {
                 'Genome': 'genome_name',
@@ -490,6 +549,9 @@ def run_all_queries(genome_ids, session):
             }
             if 'Genome ID' in feature_df.columns:
                 feature_df.rename(columns=column_map, inplace=True)
+            feature_df['plfam_index'] = feature_df['plfam_id']
+            feature_df['pgfam_index'] = feature_df['pgfam_id']
+            #feature_df.set_index('plfam_index', inplace=True)
             query_dict['feature'] = feature_df
         else:
             sys.stderr.write('Features dataframe is None\n')
