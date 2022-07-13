@@ -188,9 +188,10 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
     output_json['pgfam'] = '\n'.join(pgfam_line_list) 
     #output_json['genome_ids'] = genome_ids
     output_json['genome_ids'] = list(set(genome_ids).intersection(present_genome_ids)) 
-    import pdb
-    pdb.set_trace()
-    #output_json['genome_names'] = 
+    tmp_data = genome_data.loc[genome_data['Genome ID'].isin(output_json['genome_ids'])]
+    tmp_data.set_index('Genome ID',inplace=True)
+    tmp_data = tmp_data.loc[output_json['genome_ids']]
+    output_json['genome_names'] = tmp_data['Genome Name'].tolist()
     output_json['job_name'] = output_file
 
     output_json_file = os.path.join(output_dir,output_file+'_proteinfams_tables.json')
