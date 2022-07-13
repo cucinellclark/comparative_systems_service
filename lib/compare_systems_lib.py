@@ -75,33 +75,6 @@ def return_columns_to_remove(system,columns):
         sys.stderr.write("Error, system is not a valid type\n")
         return [] 
 
-def get_plfam_stats(row,stats_df,stats_name):
-    plfam_stats = stats_df.loc[row['plfam_id']]
-    is_dataframe = isinstance(plfam_stats,pd.DataFrame)
-    if stats_name is 'aa_length_min':
-        min_value = np.min(plfam_stats['aa_length']) if is_dataframe else plfam_stats['aa_length']
-        return min_value
-    elif stats_name is 'aa_length_max':
-        max_value = np.max(plfam_stats['aa_length']) if is_dataframe else plfam_stats['aa_length']
-        return max_value
-    elif stats_name is 'aa_length_mean':
-        mean_value = np.mean(plfam_stats['aa_length']) if is_dataframe else plfam_stats['aa_length']
-        return mean_value
-    elif stats_name is 'aa_length_std':
-        std_value = np.std(plfam_stats['aa_length']) if is_dataframe else 0
-        return std_value
-    elif stats_name is 'feature_count': 
-        count_value = len(plfam_stats) if is_dataframe else 1
-        return count_value
-    elif stats_name is 'genomes':
-        # genomes used in Heatmap viewer
-        genomes_value = format(len(plfam_stats['feature_id']),'#04x').replace('0x','') if is_dataframe else format(1,'#04x').replace('0x','')
-        return genomes_value
-    else:
-        sys.stderr.write(f'invalid stats name: {stats_name}')
-        return None
-    
-
 def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, session):
     plfam_dict = {}
     pgfam_dict = {}
