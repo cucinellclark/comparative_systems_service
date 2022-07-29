@@ -75,6 +75,137 @@ def return_columns_to_remove(system,columns):
         sys.stderr.write("Error, system is not a valid type\n")
         return [] 
 
+def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data, session):
+    data_dict = {} 
+    data_dict['plfam'] = {}
+    data_dict['pgfam'] = {}
+    plfam_genomes = {}
+    pgfam_genomes = {}
+    present_genome_ids = set()
+    for gids in chunker(genome_ids, 20):
+        base = "https://www.patricbrc.org/api/genome_feature/?http_download=true"
+        query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+feature_id)&eq(annotation,PATRIC)"
+        headers = {"accept":"text/tsv", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
+        result_header = True
+        for line in getQueryData(base,query,headers):
+            if result_header:
+                result_header = False
+                print(line)
+                continue
+            line = line.strip().split('\t')
+            # 20 entries in query result with pgfam and plfam data
+            if len(line) < 20: 
+                continue
+            try:
+                genome_id = line[1].replace('\"','')
+                plfam_id = line[14].replace('\"','')
+                pgfam_id = line[15].replace('\"','')
+                aa_length = line[17].replace('\"','')
+                product = line[19].replace('\"','')
+            except Exception as e:
+                sys.stderr.write(f'Error with the following line:\n{e}\n{line}\n')
+                continue
+            present_genome_ids.add(genome_id)
+            ### plfam counts
+            if plfam_id not in data_dict['plfam']:
+                data_dict['plfam'][plfam_id] = {} 
+                data_dict['plfam'][plfam_id]['aa_length_list'] = [] 
+                data_dict['plfam'][plfam_id]['feature_count'] = 0 
+                data_dict['plfam'][plfam_id]['genome_count'] = 0 
+                data_dict['plfam'][plfam_id]['product'] = 0 
+            if plfam_id not in plfam_genomes:
+                plfam_genomes[plfam_id] = {} 
+            if genome_id not in plfam_genomes[plfam_id]:
+                plfam_genomes[plfam_id][genome_id] = 0
+            data_dict['plfam'][plfam_id]['aa_length_list'].append(aa_length)
+            data_dict['plfam'][plfam_id]['feature_count']+=1
+            data_dict['plfam'][plfam_id]['genome_count'] = len(plfam_genomes[plfam_id])
+            plfam_genomes[plfam_id][genome_id]+=1
+            ### pgfam counts
+            if pgfam_id not in data_dict['pgfam']:
+                data_dict['pgfam'][pgfam_id] = {} 
+                data_dict['pgfam'][pgfam_id]['aa_length_list'] = [] 
+                data_dict['pgfam'][pgfam_id]['feature_count'] = 0 
+                data_dict['pgfam'][pgfam_id]['genome_count'] = 0 
+                data_dict['pgfam'][pgfam_id]['product'] = 0 
+            if pgfam_id not in pgfam_genomes:
+                pgfam_genomes[pgfam_id] = {} 
+            if genome_id not in pgfam_genomes[pgfam_id]:
+                pgfam_genomes[pgfam_id][genome_id] = 0
+            data_dict['pgfam'][pgfam_id]['aa_length_list'].append(aa_length)
+            data_dict['pgfam'][pgfam_id]['feature_count']+=1
+            data_dict['pgfam'][pgfam_id]['genome_count'] = len(pgfam_genomes[pgfam_id])
+            pgfam_genomes[pgfam_id][genome_id]+=1
+
+    # go back and get the mean, max, min, std dev for each family_id
+    plfam_line_list = []        
+    pgfam_line_list = []
+    header = 'family_id\tfeature_count\tgenome_count\tproduct\taa_length_min\taa_length_max\taa_length_mean\taa_length_std\tgenomes'
+    plfam_line_list.append(header)
+    pgfam_line_list.append(header)
+    plfam_genome_list = {}
+    pgfam_genome_list = {}
+    for plfam_id in data_dict['plfam']:
+        aa_length_list = data_dict['plfam'][plfam_id]['aa_length_list']
+        aa_length_max = max(aa_length_list)
+        aa_length_min = min(aa_length_list)
+        aa_length_mean = np.mean(aa_length_list)
+        aa_length_std = np.std(aa_length_list)
+        feature_count = data_dict['plfam'][plfam_id]['feature_count']
+        genome_count = data_dict['plfam'][plfam_id]['genome_count']
+        #genomes = format(feature_count,'#04x').replace('0x','')
+        genomes = ''
+        plfam_genome_list[plfam_id] = []
+        for gid in genome_ids:
+            if gid in plfam_genomes[plfam_id]:
+                genomes+=format(plfam_genomes[plfam_id][gid],'#04x').replace('0x','')
+                plfam_genome_list[plfam_id].append(gid)
+            else:
+                genomes+='00'
+        product = data_dict['plfam'][plfam_id]['product']
+        plfam_str = f'{plfam_id}\t{feature_count}\t{genome_count}\t{product}\t{aa_length_min}\t{aa_length_max}\t{aa_length_mean}\t{aa_length_std}\t{genomes}'
+        plfam_line_list.append(plfam_str)
+    for pgfam_id in data_dict['pgfam']:
+        aa_length_list = data_dict['pgfam'][pgfam_id]['aa_length_list']
+        aa_length_max = max(aa_length_list)
+        aa_length_min = min(aa_length_list)
+        aa_length_mean = np.mean(aa_length_list)
+        aa_length_std = np.std(aa_length_list)
+        feature_count = data_dict['pgfam'][pgfam_id]['feature_count']
+        genome_count = data_dict['pgfam'][pgfam_id]['genome_count']
+        #genomes = format(feature_count,'#04x').replace('0x','')
+        genomes = ''
+        pgfam_genome_list[pgfam_id] = {}
+        for gid in genome_ids:
+            if gid in pgfam_genomes[pgfam_id]:
+                genomes+=format(pgfam_genomes[pgfam_id][gid],'#04x').replace('0x','')
+                pgfam_genome_list[pgfam_id].append(gid)
+            else:
+                genomes+='00'
+        product = data_dict['pgfam'][pgfam_id]['product']
+        pgfam_str = f'{pgfam_id}\t{feature_count}\t{genome_count}\t{product}\t{aa_length_min}\t{aa_length_max}\t{aa_length_mean}\t{aa_length_std}\t{genomes}'
+        pgfam_line_list.append(pgfam_str)
+
+    output_json = {}
+    output_json['plfam'] = '\n'.join(plfam_line_list) 
+    output_json['pgfam'] = '\n'.join(pgfam_line_list) 
+    #output_json['genome_ids'] = genome_ids
+    #output_json['genome_ids'] = list(set(genome_ids).intersection(present_genome_ids)) 
+    output_json['genome_ids'] = [gid for gid in genome_ids if gid in present_genome_ids] 
+    tmp_data = genome_data.loc[genome_data['Genome ID'].isin(output_json['genome_ids'])]
+    tmp_data.set_index('Genome ID',inplace=True)
+    tmp_data = tmp_data.loc[output_json['genome_ids']]
+    output_json['genome_names'] = tmp_data['Genome Name'].tolist()
+    output_json['job_name'] = output_file
+    output_json['plfam_genomes'] = plfam_genome_list 
+    output_json['pgfam_genomes'] = pgfam_genome_list 
+
+    output_json_file = os.path.join(output_dir,output_file+'_proteinfams_tables.json')
+    with open(output_json_file,"w") as o:
+        o.write(json.dumps(output_json))
+
+    print("ProteinFamilies Complete")
+
 def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, session):
     plfam_dict = {}
     pgfam_dict = {}
@@ -599,4 +730,4 @@ def run_compare_systems(job_data, output_dir):
     # TODO: add multithreading
     run_pathways(genome_ids, query_dict, output_file, output_dir, genome_data, s)
     run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, s)
-    run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
