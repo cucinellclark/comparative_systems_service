@@ -105,6 +105,8 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
             except Exception as e:
                 sys.stderr.write(f'Error with the following line:\n{e}\n{line}\n')
                 continue
+            if aa_length == '':
+                continue
             present_genome_ids.add(genome_id)
             ### plfam counts
             if plfam_id not in data_dict['plfam']:
@@ -117,11 +119,7 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
                 plfam_genomes[plfam_id] = {} 
             if genome_id not in plfam_genomes[plfam_id]:
                 plfam_genomes[plfam_id][genome_id] = 0
-            try:
-                data_dict['plfam'][plfam_id]['aa_length_list'].append(int(aa_length))
-            except Exception as e:
-                import pdb
-                pdb.set_trace()
+            data_dict['plfam'][plfam_id]['aa_length_list'].append(int(aa_length))
             data_dict['plfam'][plfam_id]['feature_count']+=1
             data_dict['plfam'][plfam_id]['genome_count'] = len(plfam_genomes[plfam_id])
             plfam_genomes[plfam_id][genome_id]+=1
