@@ -149,7 +149,11 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         aa_length_list = data_dict['plfam'][plfam_id]['aa_length_list']
         aa_length_max = max(aa_length_list)
         aa_length_min = min(aa_length_list)
-        aa_length_mean = np.mean(aa_length_list)
+        try:
+            aa_length_mean = np.mean(aa_length_list)
+        except Exception as e:
+            import pdb
+            pdb.set_trace()
         aa_length_std = np.std(aa_length_list)
         feature_count = data_dict['plfam'][plfam_id]['feature_count']
         genome_count = data_dict['plfam'][plfam_id]['genome_count']
