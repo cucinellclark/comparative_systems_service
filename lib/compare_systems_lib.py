@@ -156,14 +156,15 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         feature_count = data_dict['plfam'][plfam_id]['feature_count']
         genome_count = data_dict['plfam'][plfam_id]['genome_count']
         #genomes = format(feature_count,'#04x').replace('0x','')
-        genomes = ''
+        genomes_list = []
         plfam_genome_list[plfam_id] = []
         for gid in genome_ids:
             if gid in plfam_genomes[plfam_id]:
-                genomes+=format(plfam_genomes[plfam_id][gid],'#04x').replace('0x','')
+                genomes_list.append(format(plfam_genomes[plfam_id][gid],'#04x').replace('0x',''))
                 plfam_genome_list[plfam_id].append(gid)
             else:
-                genomes+='00'
+                genomes_list.append('00')
+        genomes = ''.join(genomes_list)
         product = data_dict['plfam'][plfam_id]['product']
         plfam_str = f'{plfam_id}\t{feature_count}\t{genome_count}\t{product}\t{aa_length_min}\t{aa_length_max}\t{aa_length_mean}\t{aa_length_std}\t{genomes}'
         plfam_line_list.append(plfam_str)
@@ -176,14 +177,16 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         feature_count = data_dict['pgfam'][pgfam_id]['feature_count']
         genome_count = data_dict['pgfam'][pgfam_id]['genome_count']
         #genomes = format(feature_count,'#04x').replace('0x','')
-        genomes = ''
+        genomes_list = []
         pgfam_genome_list[pgfam_id] = []
         for gid in genome_ids:
             if gid in pgfam_genomes[pgfam_id]:
-                genomes+=format(pgfam_genomes[pgfam_id][gid],'#04x').replace('0x','')
+                #genomes+=format(pgfam_genomes[pgfam_id][gid],'#04x').replace('0x','')
+                genomes_list.append(format(pgfam_genomes[pgfam_id][gid],'#04x').replace('0x',''))
                 pgfam_genome_list[pgfam_id].append(gid)
             else:
-                genomes+='00'
+                genomes_list.append('00')
+        genomes = ''.join(genomes_list)
         product = data_dict['pgfam'][pgfam_id]['product']
         pgfam_str = f'{pgfam_id}\t{feature_count}\t{genome_count}\t{product}\t{aa_length_min}\t{aa_length_max}\t{aa_length_mean}\t{aa_length_std}\t{genomes}'
         pgfam_line_list.append(pgfam_str)
