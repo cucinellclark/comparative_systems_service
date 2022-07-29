@@ -177,7 +177,7 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         genome_count = data_dict['pgfam'][pgfam_id]['genome_count']
         #genomes = format(feature_count,'#04x').replace('0x','')
         genomes = ''
-        pgfam_genome_list[pgfam_id] = {}
+        pgfam_genome_list[pgfam_id] = []
         for gid in genome_ids:
             if gid in pgfam_genomes[pgfam_id]:
                 genomes+=format(pgfam_genomes[pgfam_id][gid],'#04x').replace('0x','')
