@@ -117,7 +117,7 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
                 plfam_genomes[plfam_id] = {} 
             if genome_id not in plfam_genomes[plfam_id]:
                 plfam_genomes[plfam_id][genome_id] = 0
-            data_dict['plfam'][plfam_id]['aa_length_list'].append(aa_length)
+            data_dict['plfam'][plfam_id]['aa_length_list'].append(int(aa_length))
             data_dict['plfam'][plfam_id]['feature_count']+=1
             data_dict['plfam'][plfam_id]['genome_count'] = len(plfam_genomes[plfam_id])
             plfam_genomes[plfam_id][genome_id]+=1
@@ -132,7 +132,7 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
                 pgfam_genomes[pgfam_id] = {} 
             if genome_id not in pgfam_genomes[pgfam_id]:
                 pgfam_genomes[pgfam_id][genome_id] = 0
-            data_dict['pgfam'][pgfam_id]['aa_length_list'].append(aa_length)
+            data_dict['pgfam'][pgfam_id]['aa_length_list'].append(int(aa_length))
             data_dict['pgfam'][pgfam_id]['feature_count']+=1
             data_dict['pgfam'][pgfam_id]['genome_count'] = len(pgfam_genomes[pgfam_id])
             pgfam_genomes[pgfam_id][genome_id]+=1
@@ -149,11 +149,7 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         aa_length_list = data_dict['plfam'][plfam_id]['aa_length_list']
         aa_length_max = max(aa_length_list)
         aa_length_min = min(aa_length_list)
-        try:
-            aa_length_mean = np.mean(aa_length_list)
-        except Exception as e:
-            import pdb
-            pdb.set_trace()
+        aa_length_mean = np.mean(aa_length_list)
         aa_length_std = np.std(aa_length_list)
         feature_count = data_dict['plfam'][plfam_id]['feature_count']
         genome_count = data_dict['plfam'][plfam_id]['genome_count']
