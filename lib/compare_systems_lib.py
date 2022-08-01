@@ -129,7 +129,7 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
                 data_dict['pgfam'][pgfam_id]['aa_length_list'] = [] 
                 data_dict['pgfam'][pgfam_id]['feature_count'] = 0 
                 data_dict['pgfam'][pgfam_id]['genome_count'] = 0 
-                data_dict['pgfam'][pgfam_id]['product'] = 0 
+                data_dict['pgfam'][pgfam_id]['product'] = product 
             if pgfam_id not in pgfam_genomes:
                 pgfam_genomes[pgfam_id] = {} 
             if genome_id not in pgfam_genomes[pgfam_id]:
