@@ -102,6 +102,8 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
                 pgfam_id = line[15].replace('\"','')
                 aa_length = line[17].replace('\"','')
                 product = line[19].replace('\"','')
+                import pdb
+                pdb.set_trace()
             except Exception as e:
                 sys.stderr.write(f'Error with the following line:\n{e}\n{line}\n')
                 continue
@@ -238,8 +240,6 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
                 pgfam_id = line[15].replace('\"','')
                 aa_length = line[17].replace('\"','')
                 product = line[19].replace('\"','')
-                import pdb
-                pdb.set_trace()
             except Exception as e:
                 sys.stderr.write(f'Error with the following line:\n{e}\n{line}\n')
                 continue
