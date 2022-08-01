@@ -206,13 +206,13 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     tmp_data.set_index('Genome ID',inplace=True)
     tmp_data = tmp_data.loc[unsorted_genome_ids]
     unsorted_genome_names = tmp_data['Genome Name'].tolist()
-    sorted_genome_names, sorted_genomes_ids = zip(*sorted(zip(unsorted_genome_names,unsorted_genome_ids)))
+    sorted_genome_names, sorted_genome_ids = zip(*sorted(zip(unsorted_genome_names,unsorted_genome_ids)))
 
     import pdb
     pdb.set_trace()
 
-    output_json['genome_ids'] =  
-    output_json['genome_names'] =
+    output_json['genome_ids'] = sorted_genome_ids 
+    output_json['genome_names'] = sorted_genome_names
     output_json['job_name'] = output_file
     output_json['plfam_genomes'] = plfam_genome_list 
     output_json['pgfam_genomes'] = pgfam_genome_list 
