@@ -148,6 +148,8 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     plfam_genome_list = {}
     pgfam_genome_list = {}
     for plfam_id in data_dict['plfam']:
+        if plfam_id == '':
+            continue
         aa_length_list = data_dict['plfam'][plfam_id]['aa_length_list']
         aa_length_max = max(aa_length_list)
         aa_length_min = min(aa_length_list)
@@ -169,6 +171,8 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         plfam_str = f'{plfam_id}\t{feature_count}\t{genome_count}\t{product}\t{aa_length_min}\t{aa_length_max}\t{aa_length_mean}\t{aa_length_std}\t{genomes}'
         plfam_line_list.append(plfam_str)
     for pgfam_id in data_dict['pgfam']:
+        if pgfam_id == '':
+            continue
         aa_length_list = data_dict['pgfam'][pgfam_id]['aa_length_list']
         aa_length_max = max(aa_length_list)
         aa_length_min = min(aa_length_list)
