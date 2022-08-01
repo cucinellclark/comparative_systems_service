@@ -102,8 +102,6 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
                 pgfam_id = line[15].replace('\"','')
                 aa_length = line[17].replace('\"','')
                 product = line[19].replace('\"','')
-                import pdb
-                pdb.set_trace()
             except Exception as e:
                 sys.stderr.write(f'Error with the following line:\n{e}\n{line}\n')
                 continue
@@ -116,7 +114,7 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
                 data_dict['plfam'][plfam_id]['aa_length_list'] = [] 
                 data_dict['plfam'][plfam_id]['feature_count'] = 0 
                 data_dict['plfam'][plfam_id]['genome_count'] = 0 
-                data_dict['plfam'][plfam_id]['product'] = 0 
+                data_dict['plfam'][plfam_id]['product'] = product 
             if plfam_id not in plfam_genomes:
                 plfam_genomes[plfam_id] = {} 
             if genome_id not in plfam_genomes[plfam_id]:
