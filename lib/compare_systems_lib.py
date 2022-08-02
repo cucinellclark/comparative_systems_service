@@ -168,7 +168,7 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
                 genomes_dir[gid] = format(plfam_genomes[plfam_id][gid],'#04x').replace('0x','')
                 plfam_genome_list[plfam_id].append(gid)
             else:
-                genomes_list.append('00')
+                genomes_dir[gid] = '00'
         #genomes = ''.join(genomes_list)
         genome_str_dict['plfam'][plfam_id] = genomes_dir 
         product = data_dict['plfam'][plfam_id]['product']
@@ -193,7 +193,7 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
                 genomes_dir[gid] = format(pgfam_genomes[pgfam_id][gid],'#04x').replace('0x','')
                 pgfam_genome_list[pgfam_id].append(gid)
             else:
-                genomes_list.append('00')
+                genomes_dir[gid] = '00'
         #genomes = ''.join(genomes_list)
         genome_str_dict['pgfam'][pgfam_id] = genomes_dir 
         product = data_dict['pgfam'][pgfam_id]['product']
