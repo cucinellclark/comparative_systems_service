@@ -142,9 +142,6 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     # go back and get the mean, max, min, std dev for each family_id
     plfam_line_list = []        
     pgfam_line_list = []
-    header = 'family_id\tfeature_count\tgenome_count\tproduct\taa_length_min\taa_length_max\taa_length_mean\taa_length_std\tgenomes'
-    plfam_line_list.append(header)
-    pgfam_line_list.append(header)
     plfam_genome_list = {}
     pgfam_genome_list = {}
     genome_str_dict = {}
@@ -227,6 +224,11 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
             genome_str+=genomes_dir[gid]
         line_parts.append(genome_str)
         pgfam_line_list[x] = '\t'.join(line_parts)
+
+    
+    header = 'family_id\tfeature_count\tgenome_count\tproduct\taa_length_min\taa_length_max\taa_length_mean\taa_length_std\tgenomes'
+    plfam_line_list.insert(0,header)
+    pgfam_line_list.insert(0,header)
 
     output_json = {}
     output_json['plfam'] = '\n'.join(plfam_line_list) 
