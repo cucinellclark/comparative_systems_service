@@ -147,6 +147,9 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     pgfam_line_list.append(header)
     plfam_genome_list = {}
     pgfam_genome_list = {}
+    genome_str_dict = {}
+    genome_str_dict['plfam'] = {}
+    genome_str_dict['pgfam'] = {}
     for plfam_id in data_dict['plfam']:
         if plfam_id == '':
             continue
@@ -158,17 +161,18 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         feature_count = data_dict['plfam'][plfam_id]['feature_count']
         genome_count = data_dict['plfam'][plfam_id]['genome_count']
         #genomes = format(feature_count,'#04x').replace('0x','')
-        genomes_list = []
+        genomes_dir = {} 
         plfam_genome_list[plfam_id] = []
         for gid in genome_ids:
             if gid in plfam_genomes[plfam_id]:
-                genomes_list.append(format(plfam_genomes[plfam_id][gid],'#04x').replace('0x',''))
+                genomes_dir[gid] = format(plfam_genomes[plfam_id][gid],'#04x').replace('0x','')
                 plfam_genome_list[plfam_id].append(gid)
             else:
                 genomes_list.append('00')
-        genomes = ''.join(genomes_list)
+        #genomes = ''.join(genomes_list)
+        genome_str_dict['plfam'][plfam_id] = genomes_dir 
         product = data_dict['plfam'][plfam_id]['product']
-        plfam_str = f'{plfam_id}\t{feature_count}\t{genome_count}\t{product}\t{aa_length_min}\t{aa_length_max}\t{aa_length_mean}\t{aa_length_std}\t{genomes}'
+        plfam_str = f'{plfam_id}\t{feature_count}\t{genome_count}\t{product}\t{aa_length_min}\t{aa_length_max}\t{aa_length_mean}\t{aa_length_std}'
         plfam_line_list.append(plfam_str)
     for pgfam_id in data_dict['pgfam']:
         if pgfam_id == '':
@@ -181,23 +185,21 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         feature_count = data_dict['pgfam'][pgfam_id]['feature_count']
         genome_count = data_dict['pgfam'][pgfam_id]['genome_count']
         #genomes = format(feature_count,'#04x').replace('0x','')
-        genomes_list = []
+        genomes_dir = {}
         pgfam_genome_list[pgfam_id] = []
         for gid in genome_ids:
             if gid in pgfam_genomes[pgfam_id]:
                 #genomes+=format(pgfam_genomes[pgfam_id][gid],'#04x').replace('0x','')
-                genomes_list.append(format(pgfam_genomes[pgfam_id][gid],'#04x').replace('0x',''))
+                genomes_dir[gid] = format(pgfam_genomes[pgfam_id][gid],'#04x').replace('0x','')
                 pgfam_genome_list[pgfam_id].append(gid)
             else:
                 genomes_list.append('00')
-        genomes = ''.join(genomes_list)
+        #genomes = ''.join(genomes_list)
+        genome_str_dict['pgfam'][pgfam_id] = genomes_dir 
         product = data_dict['pgfam'][pgfam_id]['product']
-        pgfam_str = f'{pgfam_id}\t{feature_count}\t{genome_count}\t{product}\t{aa_length_min}\t{aa_length_max}\t{aa_length_mean}\t{aa_length_std}\t{genomes}'
+        pgfam_str = f'{pgfam_id}\t{feature_count}\t{genome_count}\t{product}\t{aa_length_min}\t{aa_length_max}\t{aa_length_mean}\t{aa_length_std}'
         pgfam_line_list.append(pgfam_str)
 
-    output_json = {}
-    output_json['plfam'] = '\n'.join(plfam_line_list) 
-    output_json['pgfam'] = '\n'.join(pgfam_line_list) 
     #output_json['genome_ids'] = genome_ids
     #output_json['genome_ids'] = list(set(genome_ids).intersection(present_genome_ids)) 
 
@@ -208,6 +210,27 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     unsorted_genome_names = tmp_data['Genome Name'].tolist()
     sorted_genome_names, sorted_genome_ids = zip(*sorted(zip(unsorted_genome_names,unsorted_genome_ids)))
 
+    # add genomes string to each line
+    for x in range(0,len(plfam_line_list)): 
+        line_parts = plfam_line_list[x].split('\t')
+        genomes_dir = genome_str_dict['plfam'][line_parts[0]]
+        genome_str = ''
+        for gid in sorted_genome_ids:
+            genome_str+=genomes_dir[gid]
+        line_parts.append(genome_str)
+        plfam_line_list[x] = '\t'.join(line_parts)
+    for x in range(0,len(pgfam_line_list)): 
+        line_parts = pgfam_line_list[x].split('\t')
+        genomes_dir = genome_str_dict['pgfam'][line_parts[0]]
+        genome_str = ''
+        for gid in sorted_genome_ids:
+            genome_str+=genomes_dir[gid]
+        line_parts.append(genome_str)
+        pgfam_line_list[x] = '\t'.join(line_parts)
+
+    output_json = {}
+    output_json['plfam'] = '\n'.join(plfam_line_list) 
+    output_json['pgfam'] = '\n'.join(pgfam_line_list) 
     output_json['genome_ids'] = sorted_genome_ids 
     output_json['genome_names'] = sorted_genome_names
     output_json['job_name'] = output_file
