@@ -204,7 +204,7 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     tmp_data = genome_data.loc[genome_data['Genome ID'].isin(unsorted_genome_ids)]
     tmp_data.set_index('Genome ID',inplace=True)
     tmp_data = tmp_data.loc[unsorted_genome_ids]
-    unsorted_genome_names = tmp_data['Genome Name'].tolist()
+    unsorted_genome_names = list(set(tmp_data['Genome Name'].tolist()))
     import pdb
     pdb.set_trace()
     sorted_genome_names, sorted_genome_ids = zip(*sorted(zip(unsorted_genome_names,unsorted_genome_ids)))
