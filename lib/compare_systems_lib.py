@@ -404,16 +404,22 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
         # TODO: check that this is correct for each level
         overview_dict[genome_id]["gene_counts"] = genome_df.shape[0] 
         for superclass in genome_df['superclass'].str.lower().unique():
+            if type(superclass) != str:
+                continue
             superclass_df = subsystems_df.loc[subsystems_df['superclass'].str.lower() == superclass]
             overview_dict[genome_id][superclass] = {}
             overview_dict[genome_id][superclass]["class_counts"] = len(superclass_df['subsystem_id'].unique())
             overview_dict[genome_id][superclass]["gene_counts"] = superclass_df.shape[0] 
             for clss in superclass_df['class'].str.lower().unique():
+                if type(clss) != str:
+                    continue
                 class_df = superclass_df.loc[superclass_df['class'].str.lower() == clss]
                 overview_dict[genome_id][superclass][clss] = {}
                 overview_dict[genome_id][superclass][clss]['subclass_counts'] = len(class_df['subsystem_id'].unique())
                 overview_dict[genome_id][superclass][clss]['gene_counts'] = class_df.shape[0] 
                 for subclass in class_df['subclass'].str.lower().unique():
+                    if type(subclass) != str:
+                        continue
                     subclass_df = class_df.loc[class_df['subclass'].str.lower() == subclass]
                     overview_dict[genome_id][superclass][clss][subclass] = {}
                     overview_dict[genome_id][superclass][clss][subclass]['subsystem_name_counts'] = len(subclass_df['subsystem_id'].unique()) 
