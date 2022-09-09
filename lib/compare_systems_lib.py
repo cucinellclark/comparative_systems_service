@@ -502,6 +502,36 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
 
     print('Subsystems complete')
 
+def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data, session):
+    
+    pathways_file = os.path.join(output_dir,output_file+'_pathways.tsv')
+
+    for gids in chunker(genome_ids, 20):
+        base = "https://www.patricbrc.org/api/pathway/?http_download=true"
+        query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+id)&eq(annotation,PATRIC)"
+        headers = {"accept":"text/tsv", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
+        
+        print('Query = {0}\nHeaders = {1}'.format(base+'&'+query,header))
+
+        result_header = True
+        for line in getQueryData(base,query,headers):
+            if result_header:
+                result_header = False
+                print(line)
+                continue
+            line = line.strip().split('\t')
+            import pdb
+            pdb.set_trace()
+            try:
+                genome_id = line[1].replace('\"','')
+                plfam_id = line[14].replace('\"','')
+                pgfam_id = line[15].replace('\"','')
+                aa_length = line[17].replace('\"','')
+                product = line[19].replace('\"','')
+            except Exception as e:
+                sys.stderr.write(f'Error with the following line:\n{e}\n{line}\n')
+                continue
+
 def run_pathways(genome_ids, query_dict, output_file,output_dir, genome_data, session):
     
     pathways_file = os.path.join(output_dir,output_file+'_pathways.tsv')
@@ -515,11 +545,15 @@ def run_pathways(genome_ids, query_dict, output_file,output_dir, genome_data, se
     pathways_list = []
     ecnum_list = []
     genes_info_dict = {} # key is patric_id
+    ec_con_table = {}
     # TODO:
     # - make sure to check genome_id type issue 
     for genome_id in genome_ids: 
         print('---Faceting GenomeId: {0}---'.format(genome_id))
         genome_df = pathway_df.loc[pathway_df['genome_id'] == genome_id]
+
+        # get ec
+
         '''
         pathway_table = genome_df.drop(['pathway_ec','genome_name','accession','genome_ec',
                                         'product','gene','public','patric_id','sequence_id','ec_number',
@@ -529,7 +563,6 @@ def run_pathways(genome_ids, query_dict, output_file,output_dir, genome_data, se
         ec_table = genome_df.drop(['pathway_ec','genome_name','accession','genome_ec','product','feature_id',
                                     'gene','public','patric_id','sequence_id','taxon_id','refseq_locus_tag',
                                     'owner','id','_version_','date_inserted','date_modified'], axis=1)
-        # TODO: add alt_locus_tag column
         '''
         pathway_table = genome_df[['genome_id','annotation','pathway_class','pathway_name','pathway_id']]
         ec_table = genome_df[['genome_id','annotation','pathway_class','pathway_name','pathway_id','ec_number','ec_description','ec_index']]
