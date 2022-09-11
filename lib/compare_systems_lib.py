@@ -552,47 +552,47 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
                 sys.stderr.write(f'Error with the following line:\n{e}\n{line}\n')
                 continue
 
-        unique_pathways.add(pathway_id)
-        unique_ecs.add(ec_number)
-        unique_features.add(patric_id)
-        if pathway_id not in unique_pathway_features:
-            unique_pathway_features[pathway_id] = set() 
-        if pathway_id not in unique_pathway_ecs:
-            unique_pathway_ecs[pathway_id] = set()
-        unique_pathway_features[pathway_id].add(patric_id)
-        unique_pathway_ecs[pathway_id].add(ec_number)
+            unique_pathways.add(pathway_id)
+            unique_ecs.add(ec_number)
+            unique_features.add(patric_id)
+            if pathway_id not in unique_pathway_features:
+                unique_pathway_features[pathway_id] = set() 
+            if pathway_id not in unique_pathway_ecs:
+                unique_pathway_ecs[pathway_id] = set()
+            unique_pathway_features[pathway_id].add(patric_id)
+            unique_pathway_ecs[pathway_id].add(ec_number)
 
-        # pathway data
-        if pathway_id not in pathway_dict:
-            pathway_dict[pathway_id] = {} 
-            pathway_dict[pathway_id]['annotation'] = annotation 
-            pathway_dict[pathway_id]['pathway_id'] = pathway_id
-            pathway_dict[pathway_id]['pathway_name'] = pathway_name
-            pathway_dict[pathway_id]['pathway_class'] = pathway_class
-            pathway_dict[pathway_id]['genome_count'] = set()
-            pathway_dict[pathway_id]['ec_count'] = set()
-            pathway_dict[pathway_id]['gene_count'] = set()
-            pathway_dict[pathway_id]['genome_ec'] = set() 
-        pathway_dict[pathway_id]['genome_count'].add(genome_id)
-        pathway_dict[pathway_id]['ec_count'].add(ec_number)
-        pathway_dict[pathway_id]['genome_ec'].add(genome_id+'_'+ec_number)
-        # ec data
-        #ec_header = 'annotation\tpathway_id\tpathway_name\tpathway_class\tproduct\tec_number\tgenome_count\tec_count\tgene_count\tgenome_ec'
-        if ec_number not in ec_dict:
-            ec_dict[ec_number] = {}
-            ec_dict[ec_number]['annotation'] = annotation
-            ec_dict[ec_number]['pathway_id'] = pathway_id
-            ec_dict[ec_number]['pathway_name'] = pathway_name
-            ec_dict[ec_number]['pathway_class'] = pathway_class
-            ec_dict[ec_number]['product'] = product 
-            ec_dict[ec_number]['ec_number'] = ec_number
-            ec_dict[ec_number]['genome_count'] = set()
-            ec_dict[ec_number]['ec_count'] = set()
-            ec_dict[ec_number]['gene_count'] = set()
-            ec_dict[ec_number]['genome_ec'] = set()
-        ec_dict[ec_number]['genome_count'].add(genome_id)
-        ec_dict[ec_number]['ec_count'].add(ec_number)
-        ec_dict[ec_number]['genome_ec'].add(genome_id+'_'+ec_number)
+            # pathway data
+            if pathway_id not in pathway_dict:
+                pathway_dict[pathway_id] = {} 
+                pathway_dict[pathway_id]['annotation'] = annotation 
+                pathway_dict[pathway_id]['pathway_id'] = pathway_id
+                pathway_dict[pathway_id]['pathway_name'] = pathway_name
+                pathway_dict[pathway_id]['pathway_class'] = pathway_class
+                pathway_dict[pathway_id]['genome_count'] = set()
+                pathway_dict[pathway_id]['ec_count'] = set()
+                pathway_dict[pathway_id]['gene_count'] = set()
+                pathway_dict[pathway_id]['genome_ec'] = set() 
+            pathway_dict[pathway_id]['genome_count'].add(genome_id)
+            pathway_dict[pathway_id]['ec_count'].add(ec_number)
+            pathway_dict[pathway_id]['genome_ec'].add(genome_id+'_'+ec_number)
+            # ec data
+            #ec_header = 'annotation\tpathway_id\tpathway_name\tpathway_class\tproduct\tec_number\tgenome_count\tec_count\tgene_count\tgenome_ec'
+            if ec_number not in ec_dict:
+                ec_dict[ec_number] = {}
+                ec_dict[ec_number]['annotation'] = annotation
+                ec_dict[ec_number]['pathway_id'] = pathway_id
+                ec_dict[ec_number]['pathway_name'] = pathway_name
+                ec_dict[ec_number]['pathway_class'] = pathway_class
+                ec_dict[ec_number]['product'] = product 
+                ec_dict[ec_number]['ec_number'] = ec_number
+                ec_dict[ec_number]['genome_count'] = set()
+                ec_dict[ec_number]['ec_count'] = set()
+                ec_dict[ec_number]['gene_count'] = set()
+                ec_dict[ec_number]['genome_ec'] = set()
+            ec_dict[ec_number]['genome_count'].add(genome_id)
+            ec_dict[ec_number]['ec_count'].add(ec_number)
+            ec_dict[ec_number]['genome_ec'].add(genome_id+'_'+ec_number)
 
     # get conservation stats and add lines
     for pathway_id in pathway_dict:
