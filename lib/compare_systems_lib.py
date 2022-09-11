@@ -511,7 +511,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+id)&eq(annotation,PATRIC)"
         headers = {"accept":"text/tsv", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
         
-        print('Query = {0}\nHeaders = {1}'.format(base+'&'+query,header))
+        print('Query = {0}\nHeaders = {1}'.format(base+'&'+query,headers))
 
         result_header = True
         for line in getQueryData(base,query,headers):
