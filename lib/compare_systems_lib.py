@@ -517,6 +517,9 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     ec_dict = {}
     unique_pathways = set()
     unique_ecs = set()
+    unique_features = set()
+    unique_pathway_features = {} 
+    unique_pathway_ecs = {}
 
     for gids in chunker(genome_ids, 20):
         base = "https://www.patricbrc.org/api/pathway/?http_download=true"
@@ -551,6 +554,13 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
 
         unique_pathways.add(pathway_id)
         unique_ecs.add(ec_number)
+        unique_features.add(patric_id)
+        if pathway_id not in unique_pathway_features:
+            unique_pathway_features[pathway_id] = set() 
+        if pathway_id not in unique_pathway_ecs:
+            unique_pathway_ecs[pathway_id] = set()
+        unique_pathway_features[pathway_id].add(patric_id)
+        unique_pathway_ecs[pathway_id].add(ec_number)
 
         # pathway data
         if pathway_id not in pathway_dict:
@@ -584,12 +594,62 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         ec_dict[ec_number]['ec_count'].add(ec_number)
         ec_dict[ec_number]['genome_ec'].add(genome_id+'_'+ec_number)
 
+    # get conservation stats and add lines
+    for pathway_id in pathway_dict:
+        pathway_dict[pathway_id]['genome_count'] = len(pathway_dict[pathway_id]['genome_count'])
+        pathway_dict[pathway_id]['ec_count'] = len(pathway_dict[pathway_id]['ec_count'])
+        pathway_dict[pathway_id]['genome_ec'] = len(pathway_dict[pathway_id]['genome_ec'])
+        pathway_dict[pathway_id]['ec_conservation'] = float(len(unique_pathway_ecs[pathway_id]))/float(len(unique_ecs))*100.0
+        pathway_dict[pathway_id]['gene_conservation'] = float(len(unique_pathway_features[pathway_id]))/float(len(unique_features))*100.0
+        annotation = pathway_dict[pathway_id]['annotation']
+        pathway_id = pathway_dict[pathway_id]['pathway_id']
+        pathway_name = pathway_dict[pathway_id]['pathway_name']
+        pathway_class = pathway_dict[pathway_id]['pathway_class']
+        genome_count = pathway_dict[pathway_id]['genome_count']
+        ec_count = pathway_dict[pathway_id]['ec_count']
+        genome_ec = pathway_dict[pathway_id]['genome_ec']
+        ec_conservation = pathway_dict[pathway_id]['product']
+        gene_conservation = pathway_dict[pathway_id]['gene_conservation']
+        pathway_line = f'{annotation}\t{pathway_id}\t{pathway_name}\t{pathway_class}\t{genome_count}\t{ec_count}\t{gene_count}\t{genome_ec}'
+        pathway_line_list.append(pathway_line)
+    for ec_number in ec_dict:
+        ec_dict[ec_number]['genome_count'] = len(ec_dict[ec_number]['genome_count'])
+        ec_dict[ec_number]['ec_count'] = len(ec_dict[ec_number]['ec_count'])
+        ec_dict[ec_number]['genome_ec'] = len(ec_dict[ec_number]['genome_ec'])
+        ec_dict[ec_number]['genome_count'] = len(ec_dict[ec_number]['genome_count'])
+        annotation = ec_dict[ec_number]['annotation']
+        pathway_id = ec_dict[ec_number]['pathway_id']
+        pathway_name = ec_dict[ec_number]['pathway_name']
+        pathway_class = ec_dict[ec_number]['annotation']
+        product = ec_dict[ec_number]['product']
+        ec_number = ec_dict[ec_number]['ec_number']
+        genome_count = ec_dict[ec_number]['genome_count']
+        ec_count = ec_dict[ec_number]['ec_count']
+        gene_count = ec_dict[ec_number]['gene_count']
+        genome_ec = ec_dict[ec_number]['genome_ec']
+        ec_line = f'{annotation}\t{pathway_id}\t{pathway_name}\t{pathway_class}\t{product}\t{ec_number}\t{genome_count}\t{ec_count}\t{gene_count}\t{genome_ec}'
+        ec_line_list.append(ec_line)
+
     # get gene data frame 
     gene_df = query_dict['feature']
     genes_output = pd.merge(gene_df.drop(return_columns_to_remove('pathways_genes',gene_df.columns.tolist()), axis=1),pathway_df,on=['genome_id','patric_id'],how='inner')
 
-    import pdb
-    pdb.set_trace()
+    pathway_output = pd.concat(pathway_line_list)
+    ec_output = pd.concat(ec_line_list)
+
+    output_json = {}
+    output_json['pathway'] = pathway_output.to_csv(index=False,sep='\t')
+    output_json['ecnumber'] = ec_output.to_csv(index=False,sep='\t')
+    output_json['genes'] = genes_output.to_csv(index=False,sep='\t')
+    output_json['genome_ids'] = genome_ids
+    output_json['job_name'] = output_file
+    
+
+    output_json_file = pathways_file.replace('.tsv','_tables.json')
+    with open(output_json_file,"w") as o:
+        o.write(json.dumps(output_json))
+
+    print("Pathways Complete")
 
 def run_pathways(genome_ids, query_dict, output_file,output_dir, genome_data, session):
     
