@@ -598,6 +598,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     for pathway_id in pathway_dict:
         pathway_dict[pathway_id]['genome_count'] = len(pathway_dict[pathway_id]['genome_count'])
         pathway_dict[pathway_id]['ec_count'] = len(pathway_dict[pathway_id]['ec_count'])
+        pathway_dict[pathway_id]['gene_count'] = len(pathway_dict[pathway_id]['gene_count'])
         pathway_dict[pathway_id]['genome_ec'] = len(pathway_dict[pathway_id]['genome_ec'])
         pathway_dict[pathway_id]['ec_conservation'] = float(len(unique_pathway_ecs[pathway_id]))/float(len(unique_ecs))*100.0
         pathway_dict[pathway_id]['gene_conservation'] = float(len(unique_pathway_features[pathway_id]))/float(len(unique_features))*100.0
@@ -607,6 +608,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         pathway_class = pathway_dict[pathway_id]['pathway_class']
         genome_count = pathway_dict[pathway_id]['genome_count']
         ec_count = pathway_dict[pathway_id]['ec_count']
+        gene_count = pathway_dict[pathway_id]['gene_count']
         genome_ec = pathway_dict[pathway_id]['genome_ec']
         ec_conservation = pathway_dict[pathway_id]['ec_conservation']
         gene_conservation = pathway_dict[pathway_id]['gene_conservation']
@@ -615,8 +617,8 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     for ec_number in ec_dict:
         ec_dict[ec_number]['genome_count'] = len(ec_dict[ec_number]['genome_count'])
         ec_dict[ec_number]['ec_count'] = len(ec_dict[ec_number]['ec_count'])
+        ec_dict[ec_number]['gene_count'] = len(ec_dict[ec_number]['gene_count'])
         ec_dict[ec_number]['genome_ec'] = len(ec_dict[ec_number]['genome_ec'])
-        ec_dict[ec_number]['genome_count'] = len(ec_dict[ec_number]['genome_count'])
         annotation = ec_dict[ec_number]['annotation']
         pathway_id = ec_dict[ec_number]['pathway_id']
         pathway_name = ec_dict[ec_number]['pathway_name']
