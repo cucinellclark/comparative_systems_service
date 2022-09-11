@@ -608,7 +608,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         genome_count = pathway_dict[pathway_id]['genome_count']
         ec_count = pathway_dict[pathway_id]['ec_count']
         genome_ec = pathway_dict[pathway_id]['genome_ec']
-        ec_conservation = pathway_dict[pathway_id]['product']
+        ec_conservation = pathway_dict[pathway_id]['ec_conservation']
         gene_conservation = pathway_dict[pathway_id]['gene_conservation']
         pathway_line = f'{annotation}\t{pathway_id}\t{pathway_name}\t{pathway_class}\t{genome_count}\t{ec_count}\t{gene_count}\t{genome_ec}'
         pathway_line_list.append(pathway_line)
