@@ -546,7 +546,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
                 pathway_class = line[13].replace('\"','') 
                 pathway_id = line[15].replace('\"','')
                 pathway_name = line[16].replace('\"','')
-                #patric_id = line[17].replace('\"','')
+                patric_id = line[17].replace('\"','')
                 product = line[18].replace('\"','')
             except Exception as e:
                 sys.stderr.write(f'Error with the following line:\n{e}\n{line}\n')
