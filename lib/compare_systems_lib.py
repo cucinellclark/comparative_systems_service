@@ -505,6 +505,16 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
 def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data, session):
     
     pathways_file = os.path.join(output_dir,output_file+'_pathways.tsv')
+    pathway_line_list = []
+    ec_line_list = []
+    pathway_header = 'annotation\tpathway_id\tpathway_name\tpathway_class\tgenome_count\tec_count\tgene_count\tgenome_ec'
+    ec_header = 'annotation\tpathway_id\tpathway_name\tpathway_class\tproduct\tec_number\tgenome_count\tec_count\tgene_count\tgenome_ec'
+    pathway_line_list.append(pathway_header)
+    ec_line_list.append(ec_header)
+    pathway_dict = {}
+    ec_dict = {}
+    unique_pathways = set()
+    unique_ecs = set()
 
     for gids in chunker(genome_ids, 20):
         base = "https://www.patricbrc.org/api/pathway/?http_download=true"
@@ -512,6 +522,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         headers = {"accept":"text/tsv", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
         
         print('Query = {0}\nHeaders = {1}'.format(base+'&'+query,headers))
+#accession       alt_locus_tag   annotation      date_inserted   date_modified   ec_description  ec_number       feature_id      genome_ec       genome_id       genome_name     id      owner   pathway_class   pathway_ec      pathway_id   pathway_name     patric_id       product public  refseq_locus_tag        sequence_id     taxon_id        _version_
 
         result_header = True
         for line in getQueryData(base,query,headers):
@@ -520,17 +531,63 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
                 print(line)
                 continue
             line = line.strip().split('\t')
-            import pdb
-            pdb.set_trace()
             try:
-                genome_id = line[1].replace('\"','')
-                plfam_id = line[14].replace('\"','')
-                pgfam_id = line[15].replace('\"','')
-                aa_length = line[17].replace('\"','')
-                product = line[19].replace('\"','')
+                annotation = line[2].replace('\"','')
+                ec_description = line[5].replace('\"','')
+                ec_number = line[6].replace('\"','')
+                feature_id = line[7].replace('\"','')
+                genome_id = line[9].replace('\"','')
+                #genome_name = line[10].replace('\"','')
+                pathway_class = line[13].replace('\"','') 
+                pathway_id = line[15].replace('\"','')
+                pathway_name = line[16].replace('\"','')
+                #patric_id = line[17].replace('\"','')
+                product = line[18].replace('\"','')
             except Exception as e:
                 sys.stderr.write(f'Error with the following line:\n{e}\n{line}\n')
                 continue
+
+        unique_pathways.add(pathway_id)
+        unique_ecs.add(ec_number)
+
+        # pathway data
+        if pathway_id not in pathway_dict:
+            pathway_dict[pathway_id] = {} 
+            pathway_dict[pathway_id]['annotation'] = annotation 
+            pathway_dict[pathway_id]['pathway_id'] = pathway_id
+            pathway_dict[pathway_id]['pathway_name'] = pathway_name
+            pathway_dict[pathway_id]['pathway_class'] = pathway_class
+            pathway_dict[pathway_id]['genome_count'] = set()
+            pathway_dict[pathway_id]['ec_count'] = set()
+            pathway_dict[pathway_id]['gene_count'] = set()
+            pathway_dict[pathway_id]['genome_ec'] = set() 
+        pathway_dict[pathway_id]['genome_count'].add(genome_id)
+        pathway_dict[pathway_id]['ec_count'].add(ec_number)
+        pathway_dict[pathway_id]['genome_ec'].add(genome_id+'_'+ec_number)
+        # ec data
+        #ec_header = 'annotation\tpathway_id\tpathway_name\tpathway_class\tproduct\tec_number\tgenome_count\tec_count\tgene_count\tgenome_ec'
+        if ec_number not in ec_dict:
+            ec_dict[ec_number] = {}
+            ec_dict[ec_number]['annotation'] = annotation
+            ec_dict[ec_number]['pathway_id'] = pathway_id
+            ec_dict[ec_number]['pathway_name'] = pathway_name
+            ec_dict[ec_number]['pathway_class'] = pathway_class
+            ec_dict[ec_number]['product'] = product 
+            ec_dict[ec_number]['ec_number'] = ec_number
+            ec_dict[ec_number]['genome_count'] = set()
+            ec_dict[ec_number]['ec_count'] = set()
+            ec_dict[ec_number]['gene_count'] = set()
+            ec_dict[ec_number]['genome_ec'] = set()
+        ec_dict[ec_number]['genome_count'].add(genome_id)
+        ec_dict[ec_number]['ec_count'].add(ec_number)
+        ec_dict[ec_number]['genome_ec'].add(genome_id+'_'+ec_number)
+
+    # get gene data frame 
+    gene_df = query_dict['feature']
+    genes_output = pd.merge(gene_df.drop(return_columns_to_remove('pathways_genes',gene_df.columns.tolist()), axis=1),pathway_df,on=['genome_id','patric_id'],how='inner')
+
+    import pdb
+    pdb.set_trace()
 
 def run_pathways(genome_ids, query_dict, output_file,output_dir, genome_data, session):
     
