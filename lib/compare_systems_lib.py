@@ -807,5 +807,5 @@ def run_compare_systems(job_data, output_dir):
     # TODO: add recipe
     # TODO: add multithreading
     run_pathways(genome_ids, query_dict, output_file, output_dir, genome_data, s)
-    run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, s)
-    run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    #run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    #run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
