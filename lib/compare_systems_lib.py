@@ -504,9 +504,9 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
 
 def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data, session):
     
+    pathways_file = os.path.join(output_dir,output_file+'_pathways.tsv')
     pathway_df = query_dict['pathway']
     pathway_df.to_csv(pathways_file,sep='\t',index=False)
-    pathways_file = os.path.join(output_dir,output_file+'_pathways.tsv')
     pathway_line_list = []
     ec_line_list = []
     pathway_header = 'annotation\tpathway_id\tpathway_name\tpathway_class\tgenome_count\tec_count\tgene_count\tgenome_ec'
