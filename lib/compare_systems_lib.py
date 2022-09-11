@@ -640,8 +640,8 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     ec_output = '\n'.join(ec_line_list)
 
     output_json = {}
-    output_json['pathway'] = pathway_output.to_csv(index=False,sep='\t')
-    output_json['ecnumber'] = ec_output.to_csv(index=False,sep='\t')
+    output_json['pathway'] = pathway_output
+    output_json['ecnumber'] = ec_output
     output_json['genes'] = genes_output.to_csv(index=False,sep='\t')
     output_json['genome_ids'] = genome_ids
     output_json['job_name'] = output_file
