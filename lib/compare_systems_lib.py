@@ -509,7 +509,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     pathway_df.to_csv(pathways_file,sep='\t',index=False)
     pathway_line_list = []
     ec_line_list = []
-    pathway_header = 'annotation\tpathway_id\tpathway_name\tpathway_class\tgenome_count\tec_count\tgene_count\tgenome_ec'
+    pathway_header = 'annotation\tpathway_id\tpathway_name\tpathway_class\tgenome_count\tec_count\tgene_count\tgenome_ec\tec_conservation\tgene_conservation'
     ec_header = 'annotation\tpathway_id\tpathway_name\tpathway_class\tproduct\tec_number\tgenome_count\tec_count\tgene_count\tgenome_ec'
     pathway_line_list.append(pathway_header)
     ec_line_list.append(ec_header)
@@ -612,7 +612,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         genome_ec = pathway_dict[pathway_id]['genome_ec']
         ec_conservation = pathway_dict[pathway_id]['ec_conservation']
         gene_conservation = pathway_dict[pathway_id]['gene_conservation']
-        pathway_line = f'{annotation}\t{pathway_id}\t{pathway_name}\t{pathway_class}\t{genome_count}\t{ec_count}\t{gene_count}\t{genome_ec}'
+        pathway_line = f'{annotation}\t{pathway_id}\t{pathway_name}\t{pathway_class}\t{genome_count}\t{ec_count}\t{gene_count}\t{genome_ec}\t{ec_conservation}\t{gene_conservation}'
         pathway_line_list.append(pathway_line)
     for ec_number in ec_dict:
         ec_dict[ec_number]['genome_count'] = len(ec_dict[ec_number]['genome_count'])
