@@ -575,6 +575,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
                 pathway_dict[pathway_id]['genome_ec'] = set() 
             pathway_dict[pathway_id]['genome_count'].add(genome_id)
             pathway_dict[pathway_id]['ec_count'].add(ec_number)
+            pathway_dict[pathway_id]['gene_count'].add(feature_id)
             pathway_dict[pathway_id]['genome_ec'].add(genome_id+'_'+ec_number)
             # ec data
             #ec_header = 'annotation\tpathway_id\tpathway_name\tpathway_class\tproduct\tec_number\tgenome_count\tec_count\tgene_count\tgenome_ec'
@@ -592,6 +593,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
                 ec_dict[ec_number]['genome_ec'] = set()
             ec_dict[ec_number]['genome_count'].add(genome_id)
             ec_dict[ec_number]['ec_count'].add(ec_number)
+            ec_dict[ec_number]['gene_count'].add(feature_id)
             ec_dict[ec_number]['genome_ec'].add(genome_id+'_'+ec_number)
 
     # get conservation stats and add lines
