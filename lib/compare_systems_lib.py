@@ -520,7 +520,9 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     unique_features = set()
     unique_pathway_features = {} 
     unique_pathway_ecs = {}
-
+    
+    pathway_query_data = []
+    result_header = True
     for gids in chunker(genome_ids, 20):
         base = "https://www.patricbrc.org/api/pathway/?http_download=true"
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+id)&eq(annotation,PATRIC)"
@@ -529,12 +531,13 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         print('Query = {0}\nHeaders = {1}'.format(base+'&'+query,headers))
 #accession       alt_locus_tag   annotation      date_inserted   date_modified   ec_description  ec_number       feature_id      genome_ec       genome_id       genome_name     id      owner   pathway_class   pathway_ec      pathway_id   pathway_name     patric_id       product public  refseq_locus_tag        sequence_id     taxon_id        _version_
 
-        result_header = True
         for line in getQueryData(base,query,headers):
             if result_header:
                 result_header = False
                 print(line)
+                pathway_query_data.append(line)
                 continue
+            pathway_query_data.append(line)
             line = line.strip().split('\t')
             try:
                 annotation = line[2].replace('\"','')
@@ -633,6 +636,10 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         genome_ec = ec_dict[ec_number]['genome_ec']
         ec_line = f'{annotation}\t{pathway_id}\t{pathway_name}\t{pathway_class}\t{product}\t{ec_number}\t{genome_count}\t{ec_count}\t{gene_count}\t{genome_ec}'
         ec_line_list.append(ec_line)
+
+    pathway_df = pd.DataFrame(pathway_query_data)
+    import pdb
+    pdb.set_trace()
 
     # get gene data frame 
     gene_df = query_dict['feature']
