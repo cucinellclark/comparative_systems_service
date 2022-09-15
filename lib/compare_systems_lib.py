@@ -536,10 +536,10 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
             if result_header:
                 result_header = False
                 print(line)
-                pathway_header = line.strip().split('\t')
+                pathway_header = line.strip().replace('\"','').split('\t')
                 #pathway_query_data.append(line)
                 continue
-            line = line.strip().split('\t')
+            line = line.strip().replace('\"','').split('\t')
             pathway_query_data.append(line)
             try:
                 annotation = line[2].replace('\"','')
@@ -639,7 +639,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         ec_line = f'{annotation}\t{pathway_id}\t{pathway_name}\t{pathway_class}\t{product}\t{ec_number}\t{genome_count}\t{ec_count}\t{gene_count}\t{genome_ec}'
         ec_line_list.append(ec_line)
 
-    pathway_df = pd.DataFrame(pathway_query_data)
+    pathway_df = pd.DataFrame(pathway_query_data,columns=pathway_header)
     import pdb
     pdb.set_trace()
 
