@@ -510,7 +510,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     pathway_line_list = []
     ec_line_list = []
     pathway_header = 'annotation\tpathway_id\tpathway_name\tpathway_class\tgenome_count\tec_count\tgene_count\tgenome_ec\tec_conservation\tgene_conservation'
-    ec_header = 'annotation\tpathway_id\tpathway_name\tpathway_class\tproduct\tec_number\tgenome_count\tec_count\tgene_count\tgenome_ec'
+    ec_header = 'annotation\tpathway_id\tpathway_name\tpathway_class\tec_description\tec_number\tgenome_count\tec_count\tgene_count\tgenome_ec'
     pathway_line_list.append(pathway_header)
     ec_line_list.append(ec_header)
     pathway_dict = {}
@@ -597,7 +597,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
                 ec_dict[ec_number]['pathway_id'] = pathway_id
                 ec_dict[ec_number]['pathway_name'] = pathway_name
                 ec_dict[ec_number]['pathway_class'] = pathway_class
-                ec_dict[ec_number]['product'] = product 
+                ec_dict[ec_number]['ec_description'] = ec_description 
                 ec_dict[ec_number]['ec_number'] = ec_number
                 ec_dict[ec_number]['genome_count'] = set()
                 ec_dict[ec_number]['ec_count'] = set()
@@ -656,9 +656,6 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     pathway_output = '\n'.join(pathway_line_list)
     ec_output = '\n'.join(ec_line_list)
 
-    import pdb
-    pdb.set_trace()
-
     output_json = {}
     output_json['pathway'] = pathway_output
     output_json['ecnumber'] = ec_output
@@ -692,8 +689,6 @@ def run_pathways(genome_ids, query_dict, output_file,output_dir, genome_data, se
     for genome_id in genome_ids: 
         print('---Faceting GenomeId: {0}---'.format(genome_id))
         genome_df = pathway_df.loc[pathway_df['genome_id'] == genome_id]
-
-        # get ec
 
         '''
         pathway_table = genome_df.drop(['pathway_ec','genome_name','accession','genome_ec',
