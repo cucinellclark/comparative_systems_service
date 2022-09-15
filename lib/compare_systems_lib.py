@@ -68,7 +68,7 @@ def return_columns_to_remove(system,columns):
         table_columns = list(set.intersection(set(drop_pgfams_columns),set(columns))) 
         return table_columns
     elif system is 'pathways_genes':
-        drop_gene_columns = ['genome_id','genome_name','accession','alt_locus_tag','refseq_locus_tag','feature_id','annotation','product']
+        drop_gene_columns = ['genome_name','accession','alt_locus_tag','refseq_locus_tag','feature_id','annotation','product']
         table_columns = list(set.intersection(set(drop_gene_columns),set(columns)))
         return table_columns
     else: # pathways does not have drop columns
