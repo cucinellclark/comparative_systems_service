@@ -522,14 +522,14 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     unique_pathway_ecs = {}
     
     pathway_query_data = []
-    required_files = ['annotation','ec_description','ec_number','feature_id','genome_id','pathway_class','pathway_id','pathway_name','patric_id','product']
+    required_fields = ['annotation','ec_description','ec_number','feature_id','genome_id','pathway_class','pathway_id','pathway_name','patric_id','product']
     for gids in chunker(genome_ids, 20):
         base = "https://www.patricbrc.org/api/pathway/?http_download=true"
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+id)&eq(annotation,PATRIC)"
         headers = {"accept":"text/tsv", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
         
         print('Query = {0}\nHeaders = {1}'.format(base+'&'+query,headers))
-#accession       alt_locus_tag   annotation      date_inserted   date_modified   ec_description  ec_number       feature_id      genome_ec       genome_id       genome_name     id      owner   pathway_class   pathway_ec      pathway_id   pathway_name     patric_id       product public  refseq_locus_tag        sequence_id     taxon_id        _version_
+        #accession       alt_locus_tag   annotation      date_inserted   date_modified   ec_description  ec_number       feature_id      genome_ec       genome_id       genome_name     id      owner   pathway_class   pathway_ec      pathway_id   pathway_name     patric_id       product public  refseq_locus_tag        sequence_id     taxon_id        _version_
 
         result_header = True
         pathway_header = None
@@ -544,21 +544,22 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
             pathway_fields = {}
             for idx,f in enumerate(line):
                 pathway_fields[pathway_header[idx]] = f
-            import pdb
-            pdb.set_trace()
+            for field in required_fields:
+                if field not in pathway_fields:
+                    pathway_fields[field] = ''
             pathway_query_data.append(line)
             try:
-                annotation = line[2].replace('\"','')
-                ec_description = line[5].replace('\"','')
-                ec_number = line[6].replace('\"','')
-                feature_id = line[7].replace('\"','')
-                genome_id = line[9].replace('\"','')
+                annotation = pathway_fields['annotation'] 
+                ec_description = pathway_fields['ec_description'] 
+                ec_number = pathway_fields['ec_number'] 
+                feature_id = pathway_fields['feature_id'] 
+                genome_id = pathway_fields['genome_id'] 
                 #genome_name = line[10].replace('\"','')
-                pathway_class = line[13].replace('\"','') 
-                pathway_id = line[15].replace('\"','')
-                pathway_name = line[16].replace('\"','')
-                patric_id = line[17].replace('\"','')
-                product = line[18].replace('\"','')
+                pathway_class =  pathway_fields['pathway_class'] 
+                pathway_id = pathway_fields['pathway_id'] 
+                pathway_name = pathway_fields['pathway_name'] 
+                patric_id = pathway_fields['patric_id'] 
+                product = pathway_fields['product'] 
             except Exception as e:
                 sys.stderr.write(f'Error with the following line:\n{e}\n{line}\n')
                 continue
