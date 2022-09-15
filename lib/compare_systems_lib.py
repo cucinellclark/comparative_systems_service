@@ -636,10 +636,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
 
     # get gene data frame 
     gene_df = query_dict['feature']
-    #genes_output = pd.merge(gene_df.drop(return_columns_to_remove('pathways_genes',gene_df.columns.tolist()), axis=1),pathway_df,on=['patric_id'],how='inner')
-    genes_output = gene_df.copy()
-    import pdb
-    pdb.set_trace()
+    genes_output = pd.merge(gene_df.drop(return_columns_to_remove('pathways_genes',gene_df.columns.tolist()), axis=1),pathway_df,on=['genome_id','patric_id'],how='inner')
 
     pathway_output = '\n'.join(pathway_line_list)
     ec_output = '\n'.join(ec_line_list)
@@ -933,5 +930,5 @@ def run_compare_systems(job_data, output_dir):
     # TODO: add recipe
     # TODO: add multithreading
     run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
-    #run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, s)
-    #run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
