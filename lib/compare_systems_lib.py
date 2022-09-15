@@ -649,6 +649,9 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     pathway_output = '\n'.join(pathway_line_list)
     ec_output = '\n'.join(ec_line_list)
 
+    import pdb
+    pdb.set_trace()
+
     output_json = {}
     output_json['pathway'] = pathway_output
     output_json['ecnumber'] = ec_output
