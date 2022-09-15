@@ -637,13 +637,13 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         pathway_id = ec_dict[ec_number]['pathway_id']
         pathway_name = ec_dict[ec_number]['pathway_name']
         pathway_class = ec_dict[ec_number]['annotation']
-        product = ec_dict[ec_number]['product']
+        ec_description = ec_dict[ec_number]['ec_description']
         ec_number = ec_dict[ec_number]['ec_number']
         genome_count = ec_dict[ec_number]['genome_count']
         ec_count = ec_dict[ec_number]['ec_count']
         gene_count = ec_dict[ec_number]['gene_count']
         genome_ec = ec_dict[ec_number]['genome_ec']
-        ec_line = f'{annotation}\t{pathway_id}\t{pathway_name}\t{pathway_class}\t{product}\t{ec_number}\t{genome_count}\t{ec_count}\t{gene_count}\t{genome_ec}'
+        ec_line = f'{annotation}\t{pathway_id}\t{pathway_name}\t{pathway_class}\t{ec_description}\t{ec_number}\t{genome_count}\t{ec_count}\t{gene_count}\t{genome_ec}'
         ec_line_list.append(ec_line)
 
     pathway_df = pd.DataFrame(pathway_query_data,columns=pathway_header)
