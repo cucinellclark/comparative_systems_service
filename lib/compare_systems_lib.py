@@ -522,8 +522,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     unique_pathway_ecs = {}
     
     pathway_query_data = []
-    result_header = True
-    pathway_header = ''
+    required_files = ['annotation','ec_description','ec_number','feature_id','genome_id','pathway_class','pathway_id','pathway_name','patric_id','product']
     for gids in chunker(genome_ids, 20):
         base = "https://www.patricbrc.org/api/pathway/?http_download=true"
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+id)&eq(annotation,PATRIC)"
@@ -532,6 +531,8 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         print('Query = {0}\nHeaders = {1}'.format(base+'&'+query,headers))
 #accession       alt_locus_tag   annotation      date_inserted   date_modified   ec_description  ec_number       feature_id      genome_ec       genome_id       genome_name     id      owner   pathway_class   pathway_ec      pathway_id   pathway_name     patric_id       product public  refseq_locus_tag        sequence_id     taxon_id        _version_
 
+        result_header = True
+        pathway_header = None
         for line in getQueryData(base,query,headers):
             if result_header:
                 result_header = False
@@ -540,6 +541,11 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
                 #pathway_query_data.append(line)
                 continue
             line = line.strip().replace('\"','').split('\t')
+            pathway_fields = {}
+            for idx,f in enumerate(line):
+                pathway_fields[pathway_header[idx]] = f
+            import pdb
+            pdb.set_trace()
             pathway_query_data.append(line)
             try:
                 annotation = line[2].replace('\"','')
