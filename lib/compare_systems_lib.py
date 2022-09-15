@@ -523,6 +523,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     
     pathway_query_data = []
     result_header = True
+    pathway_header = ''
     for gids in chunker(genome_ids, 20):
         base = "https://www.patricbrc.org/api/pathway/?http_download=true"
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+id)&eq(annotation,PATRIC)"
@@ -535,10 +536,11 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
             if result_header:
                 result_header = False
                 print(line)
-                pathway_query_data.append(line)
+                pathway_header = line.strip().split('\t')
+                #pathway_query_data.append(line)
                 continue
-            pathway_query_data.append(line)
             line = line.strip().split('\t')
+            pathway_query_data.append(line)
             try:
                 annotation = line[2].replace('\"','')
                 ec_description = line[5].replace('\"','')
