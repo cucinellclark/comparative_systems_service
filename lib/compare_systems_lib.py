@@ -534,6 +534,8 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         result_header = True
         pathway_header = None
         for line in getQueryData(base,query,headers):
+            import pdb
+            pdb.set_trace()
             if result_header:
                 result_header = False
                 print(line)
