@@ -939,6 +939,9 @@ def run_compare_systems(job_data, output_dir):
 
     query_dict = run_all_queries(genome_ids, s)
 
+    import pdb
+    pdb.set_trace()
+
     # TODO: add chunking
     # TODO: add recipe
     # TODO: add multithreading
