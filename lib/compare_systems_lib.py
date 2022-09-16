@@ -375,6 +375,8 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
     # json(facet,{"stat":{"type":"field","field":"superclass","limit":-1,"facet":{"subsystem_count":"unique(subsystem_id)","class":{"type":"field","field":"class","limit":-1,"facet":{"subsystem_count":"unique(subsystem_id)","gene_count":"unique(feature_id)","subclass":{"type":"field","field":"subclass","limit":-1,"facet":{"subsystem_count":"unique(subsystem_id)","gene_count":"unique(feature_id)"}}}}}}}):  
 
     # subsystems_df = getSubsystemsDataFrame(genome_ids,session) 
+    if 'subsystems' not in query_dict:
+        return None
     subsystems_df = query_dict['subsystems']
     
     # Superclass, class, and subclass can be different cases: convert all to lower case
@@ -524,6 +526,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     pathway_query_data = []
     required_fields = ['annotation','ec_description','ec_number','feature_id','genome_id','pathway_class','pathway_id','pathway_name','patric_id','product']
     pathway_data_found = False
+    pathway_genomes_found = set()
     for gids in chunker(genome_ids, 20):
         base = "https://www.patricbrc.org/api/pathway/?http_download=true"
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+id)&eq(annotation,PATRIC)"
@@ -565,7 +568,8 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
             except Exception as e:
                 sys.stderr.write(f'Error with the following line:\n{e}\n{line}\n')
                 continue
-
+            
+            pathway_genomes_found.add(genome_id)
             unique_pathways.add(pathway_id)
             unique_ecs.add(ec_number)
             unique_features.add(patric_id)
@@ -610,11 +614,8 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
             ec_dict[ec_number]['gene_count'].add(feature_id)
             ec_dict[ec_number]['genome_ec'].add(genome_id+'_'+ec_number)
 
-    import pdb
-    pdb.set_trace()
-
     if not pathway_data_found:
-        return False
+        return None
 
     # get conservation stats and add lines
     for pathway_id in pathway_dict:
@@ -956,3 +957,5 @@ def run_compare_systems(job_data, output_dir):
     pathway_success = run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
     subsystems_success = run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, s)
     proteinfams_success = run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+
+    # TODO: process success objects: should have data on what genome ids were found during the run
