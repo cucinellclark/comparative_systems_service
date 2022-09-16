@@ -523,6 +523,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     
     pathway_query_data = []
     required_fields = ['annotation','ec_description','ec_number','feature_id','genome_id','pathway_class','pathway_id','pathway_name','patric_id','product']
+    pathway_data_found = False
     for gids in chunker(genome_ids, 20):
         base = "https://www.patricbrc.org/api/pathway/?http_download=true"
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+id)&eq(annotation,PATRIC)"
@@ -534,8 +535,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         result_header = True
         pathway_header = None
         for line in getQueryData(base,query,headers):
-            import pdb
-            pdb.set_trace()
+            pathway_data_found = True
             if result_header:
                 result_header = False
                 print(line)
@@ -609,6 +609,12 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
             ec_dict[ec_number]['ec_count'].add(ec_number)
             ec_dict[ec_number]['gene_count'].add(feature_id)
             ec_dict[ec_number]['genome_ec'].add(genome_id+'_'+ec_number)
+
+    import pdb
+    pdb.set_trace()
+
+    if not pathway_data_found:
+        return False
 
     # get conservation stats and add lines
     for pathway_id in pathway_dict:
@@ -947,6 +953,6 @@ def run_compare_systems(job_data, output_dir):
     # TODO: add chunking
     # TODO: add recipe
     # TODO: add multithreading
-    run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
-    run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, s)
-    run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    pathway_success = run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    subsystems_success = run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    proteinfams_success = run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
