@@ -709,6 +709,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     output_json['genome_ids'] = list(pathway_genomes_found) 
     output_json['job_name'] = output_file
     
+    pathway_df.to_csv(pathways_file,sep='\t',index=False)
 
     output_json_file = pathways_file.replace('.tsv','_tables.json')
     with open(output_json_file,"w") as o:
