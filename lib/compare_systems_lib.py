@@ -244,6 +244,7 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         o.write(json.dumps(output_json))
 
     print("ProteinFamilies Complete")
+    return ({ 'success': True, 'genomes': present_genome_ids })
 
 def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, session):
     plfam_dict = {}
@@ -376,7 +377,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
 
     # subsystems_df = getSubsystemsDataFrame(genome_ids,session) 
     if 'subsystems' not in query_dict:
-        return None
+        return ({ 'success': False })
     subsystems_df = query_dict['subsystems']
     
     # Superclass, class, and subclass can be different cases: convert all to lower case
@@ -399,7 +400,9 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
     # faceting for subsystems overview
     overview_dict = {}
     key_set = set()
+    subsystem_present_genomes = set()
     for genome_id in subsystems_df['genome_id'].unique():
+        subsystem_present_genomes.add(genome_id)
         genome_df = subsystems_df.loc[subsystems_df['genome_id'] == genome_id]
         overview_dict[genome_id] = {}
         overview_dict[genome_id]["superclass_counts"] = len(genome_df['subsystem_id'].unique())
@@ -493,8 +496,8 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
     output_json_file = subsystems_file.replace('.tsv','_tables.json')
     
     output_json = {}
-    output_json['genome_ids'] = genome_ids
-    output_json['genome_names'] = genome_data.set_index('Genome ID').loc[genome_ids]['Genome Name'].tolist() # returns a list of genome names in the same order as the genome ids 
+    output_json['genome_ids'] = list(subsystem_present_genomes) 
+    output_json['genome_names'] = genome_data.set_index('Genome ID').loc[list(subsystem_present_genomes)]['Genome Name'].tolist() # returns a list of genome names in the same order as the genome ids 
     output_json['overview'] = overview_dict 
     output_json['job_name'] = output_file
     output_json['subsystems'] = subsystems_table.to_csv(index=False,sep='\t')
@@ -503,6 +506,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
         o.write(json.dumps(output_json))
 
     print('Subsystems complete')
+    return ({ 'success': True, 'genomes': list(subsystem_present_genomes) })
 
 def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data, session):
     
@@ -618,7 +622,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
             ec_dict[ec_number]['genome_ec'].add(genome_id+'_'+ec_number)
 
     if not pathway_data_found:
-        return None
+        return ({ 'success': False }) 
 
     pathway_df = pd.DataFrame(pathway_query_data,columns=pathway_header)
     gene_df = query_dict['feature']
@@ -702,7 +706,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     output_json['pathway'] = pathway_output
     output_json['ecnumber'] = ec_output
     output_json['genes'] = genes_output.to_csv(index=False,sep='\t')
-    output_json['genome_ids'] = genome_ids
+    output_json['genome_ids'] = list(pathway_genomes_found) 
     output_json['job_name'] = output_file
     
 
@@ -711,6 +715,11 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         o.write(json.dumps(output_json))
 
     print("Pathways Complete")
+    pathway_success_json = {
+        'genomes': list(pathway_genomes_found)
+        'success': True
+    }
+    return pathway_success_json
 
 def run_pathways(genome_ids, query_dict, output_file,output_dir, genome_data, session):
     
