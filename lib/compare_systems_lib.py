@@ -636,7 +636,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         if gene not in unique_pathway_features[pathway_id]:
             unique_pathway_features[pathway_id][gene] = set()
         unique_pathway_features[pathway_id][gene].add(genome_id)
-        unique_features.ad(gene)
+        unique_features.add(gene)
 
     # get gene data frame 
     # get conservation stats and add lines
