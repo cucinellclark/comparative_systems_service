@@ -716,7 +716,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
 
     print("Pathways Complete")
     pathway_success_json = {
-        'genomes': list(pathway_genomes_found)
+        'genomes': list(pathway_genomes_found),
         'success': True
     }
     return pathway_success_json
