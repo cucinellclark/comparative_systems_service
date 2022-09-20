@@ -574,11 +574,15 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
             unique_ecs.add(ec_number)
             unique_features.add(patric_id)
             if pathway_id not in unique_pathway_features:
-                unique_pathway_features[pathway_id] = set() 
+                unique_pathway_features[pathway_id] = {} 
+            if patric_id not in unique_pathway_features[pathway_id]: 
+                unique_pathway_features[pathway_id][patric_id] = set()
+            unique_pathway_features[pathway_id][patric_id].add(genome_id)
             if pathway_id not in unique_pathway_ecs:
-                unique_pathway_ecs[pathway_id] = set()
-            unique_pathway_features[pathway_id].add(patric_id)
-            unique_pathway_ecs[pathway_id].add(ec_number)
+                unique_pathway_ecs[pathway_id] = {}
+            if ec_number not in unique_pathway_ecs[pathway_id]:
+                unique_pathway_ecs[pathway_id][ec_number] = set()
+            unique_pathway_ecs[pathway_id][ec_number].add(genome_id)
 
             # pathway data
             if pathway_id not in pathway_dict:
@@ -623,8 +627,8 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         pathway_dict[pathway_id]['ec_count'] = len(pathway_dict[pathway_id]['ec_count'])
         pathway_dict[pathway_id]['gene_count'] = len(pathway_dict[pathway_id]['gene_count'])
         pathway_dict[pathway_id]['genome_ec'] = len(pathway_dict[pathway_id]['genome_ec'])
-        pathway_dict[pathway_id]['ec_conservation'] = float(len(unique_pathway_ecs[pathway_id]))/float(len(unique_ecs))*100.0
-        pathway_dict[pathway_id]['gene_conservation'] = float(len(unique_pathway_features[pathway_id]))/float(len(unique_features))*100.0
+        #pathway_dict[pathway_id]['ec_conservation'] = float(len(unique_pathway_ecs[pathway_id]))/float(len(unique_ecs))*100.0
+        #pathway_dict[pathway_id]['gene_conservation'] = float(len(unique_pathway_features[pathway_id]))/float(len(unique_features))*100.0
         annotation = pathway_dict[pathway_id]['annotation']
         pathway_id = pathway_dict[pathway_id]['pathway_id']
         pathway_name = pathway_dict[pathway_id]['pathway_name']
@@ -633,8 +637,26 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         ec_count = pathway_dict[pathway_id]['ec_count']
         gene_count = pathway_dict[pathway_id]['gene_count']
         genome_ec = pathway_dict[pathway_id]['genome_ec']
-        ec_conservation = pathway_dict[pathway_id]['ec_conservation']
-        gene_conservation = pathway_dict[pathway_id]['gene_conservation']
+        # calculate ec_conservation score
+        ec_numerator = 0
+        ec_denominator = 0
+        for ec_number in unique_pathway_ecs[pathway_id]:
+            if len(unique_pathway_ecs[pathway_id][ec_number]) == len(pathway_genomes_found):
+                ec_numerator += 1
+            ec_denominator += 1
+        ec_numerator = float(ec_numerator) * float(len(pathway_genomes_found))
+        ec_denominator = float(ec_denominator) * float(len(pathway_genomes_found))
+        ec_conservation = ec_num / ec_denominator * 100.0
+        # calculate gene_conservation
+        gene_numerator = 0
+        gene_denominator = 0
+        for gene in unique_pathway_features[pathway_id]:
+            if len(unique_pathway_features[pathway_id][gene]) == len(pathway_genomes_found):
+                gene_numerator += 1
+            gene_denominator += 1
+        gene_numerator = float(gene_numerator) * float(len(pathway_genomes_found))
+        gene_denominator = float(gene_denominator) * float(len(pathway_genomes_found))
+        gene_conservation = gene_num / gene_denominator * 100.0
         pathway_line = f'{annotation}\t{pathway_id}\t{pathway_name}\t{pathway_class}\t{genome_count}\t{ec_count}\t{gene_count}\t{genome_ec}\t{ec_conservation}\t{gene_conservation}'
         pathway_line_list.append(pathway_line)
     for ec_number in ec_dict:
