@@ -568,7 +568,8 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
             except Exception as e:
                 sys.stderr.write(f'Error with the following line:\n{e}\n{line}\n')
                 continue
-            
+            import pdb
+            pdb.set_trace()    
             pathway_genomes_found.add(genome_id)
             unique_pathways.add(pathway_id)
             unique_ecs.add(ec_number)
