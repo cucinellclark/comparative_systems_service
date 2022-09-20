@@ -646,7 +646,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
             ec_denominator += 1
         ec_numerator = float(ec_numerator) * float(len(pathway_genomes_found))
         ec_denominator = float(ec_denominator) * float(len(pathway_genomes_found))
-        ec_conservation = ec_num / ec_denominator * 100.0
+        ec_conservation = ec_numerator / ec_denominator * 100.0
         # calculate gene_conservation
         gene_numerator = 0
         gene_denominator = 0
