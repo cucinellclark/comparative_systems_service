@@ -568,8 +568,6 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
             except Exception as e:
                 sys.stderr.write(f'Error with the following line:\n{e}\n{line}\n')
                 continue
-            import pdb
-            pdb.set_trace()    
             pathway_genomes_found.add(genome_id)
             unique_pathways.add(pathway_id)
             unique_ecs.add(ec_number)
@@ -622,6 +620,15 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     if not pathway_data_found:
         return None
 
+    pathway_df = pd.DataFrame(pathway_query_data,columns=pathway_header)
+    gene_df = query_dict['feature']
+
+    genes_output = pd.merge(gene_df.drop(return_columns_to_remove('pathways_genes',gene_df.columns.tolist()), axis=1),pathway_df,on=['genome_id','patric_id'],how='inner')
+
+    import pdb
+    pdb.set_trace()
+
+    # get gene data frame 
     # get conservation stats and add lines
     for pathway_id in pathway_dict:
         pathway_dict[pathway_id]['genome_count'] = len(pathway_dict[pathway_id]['genome_count'])
@@ -677,13 +684,6 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         genome_ec = ec_dict[ec_number]['genome_ec']
         ec_line = f'{annotation}\t{pathway_id}\t{pathway_name}\t{pathway_class}\t{ec_description}\t{ec_number}\t{genome_count}\t{ec_count}\t{gene_count}\t{genome_ec}'
         ec_line_list.append(ec_line)
-
-    pathway_df = pd.DataFrame(pathway_query_data,columns=pathway_header)
-
-    # get gene data frame 
-    gene_df = query_dict['feature']
-
-    genes_output = pd.merge(gene_df.drop(return_columns_to_remove('pathways_genes',gene_df.columns.tolist()), axis=1),pathway_df,on=['genome_id','patric_id'],how='inner')
 
     pathway_output = '\n'.join(pathway_line_list)
     ec_output = '\n'.join(ec_line_list)
