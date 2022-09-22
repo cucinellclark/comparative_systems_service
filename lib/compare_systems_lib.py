@@ -533,6 +533,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     pathway_genomes_found = set()
     print_one = True
     one_length = 0
+    pathway_header = None
     for gids in chunker(genome_ids, 20):
         base = "https://www.patricbrc.org/api/pathway/?http_download=true"
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+id)&eq(annotation,PATRIC)"
@@ -542,13 +543,15 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         #accession       alt_locus_tag   annotation      date_inserted   date_modified   ec_description  ec_number       feature_id      genome_ec       genome_id       genome_name     id      owner   pathway_class   pathway_ec      pathway_id   pathway_name     patric_id       product public  refseq_locus_tag        sequence_id     taxon_id        _version_
 
         result_header = True
-        pathway_header = None
+        current_header = None
         for line in getQueryData(base,query,headers):
             pathway_data_found = True
             if result_header:
                 result_header = False
                 print(line)
-                pathway_header = line.strip().replace('\"','').split('\t')
+                current_header = line.strip().replace('\"','').split('\t')
+                if pathway_header is None or len(line) > len(pathway_header):
+                    pathway_header = line.strip().replace('\"','').split('\t')
                 #pathway_query_data.append(line)
                 continue
             line = line.strip().replace('\"','').split('\t')
@@ -556,16 +559,13 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
                 print(len(line))
                 one_length = len(line)
                 print_one = False
-            if len(line) != one_length:
-                import pdb
-                pdb.set_trace()
             pathway_fields = {}
             for idx,f in enumerate(line):
                 pathway_fields[pathway_header[idx]] = f
             for field in required_fields:
                 if field not in pathway_fields:
                     pathway_fields[field] = ''
-            pathway_query_data.append(line)
+            pathway_query_data.append(pathway_fields)
             try:
                 annotation = pathway_fields['annotation'] 
                 ec_description = pathway_fields['ec_description'] 
@@ -632,6 +632,16 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
 
     if not pathway_data_found:
         return ({ 'success': False }) 
+
+    parsed_query_data = []
+    for line in pathway_query_data:
+        new_line = ''
+        for field in pathway_header:
+            if field not in line:    
+                new_line = new_line + '\t' + ''
+            else:
+                new_line = new_line + '\t' + line[field]
+        parsed_query_data.append(new_line)
 
     pathway_df = pd.DataFrame(pathway_query_data,columns=pathway_header)
     gene_df = query_dict['feature']
