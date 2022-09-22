@@ -531,7 +531,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     required_fields = ['annotation','ec_description','ec_number','feature_id','genome_id','pathway_class','pathway_id','pathway_name','patric_id','product']
     pathway_data_found = False
     pathway_genomes_found = set()
-    pathway_header = None
+    pathway_table_header = None
     for gids in chunker(genome_ids, 20):
         base = "https://www.patricbrc.org/api/pathway/?http_download=true"
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+id)&eq(annotation,PATRIC)"
@@ -548,14 +548,14 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
                 result_header = False
                 print(line)
                 current_header = line.strip().replace('\"','').split('\t')
-                if pathway_header is None or len(line) > len(pathway_header):
-                    pathway_header = line.strip().replace('\"','').split('\t')
+                if pathway_table_header is None or len(line) > len(pathway_table_header):
+                    pathway_table_header = line.strip().replace('\"','').split('\t')
                 #pathway_query_data.append(line)
                 continue
             line = line.strip().replace('\"','').split('\t')
             pathway_fields = {}
             for idx,f in enumerate(line):
-                pathway_fields[pathway_header[idx]] = f
+                pathway_fields[pathway_table_header[idx]] = f
             for field in required_fields:
                 if field not in pathway_fields:
                     pathway_fields[field] = ''
@@ -630,14 +630,14 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     parsed_query_data = []
     for line in pathway_query_data:
         new_line = ''
-        for field in pathway_header:
+        for field in pathway_table_header:
             if field not in line:    
                 new_line = new_line + '\t' + ''
             else:
                 new_line = new_line + '\t' + line[field]
         parsed_query_data.append(new_line)
 
-    pathway_df = pd.DataFrame(pathway_query_data,columns=pathway_header)
+    pathway_df = pd.DataFrame(parsed_query_data,columns=pathway_table_header)
     gene_df = query_dict['feature']
 
     genes_output = pd.merge(gene_df.drop(return_columns_to_remove('pathways_genes',gene_df.columns.tolist()), axis=1),pathway_df,on=['genome_id','patric_id'],how='inner')
@@ -1008,7 +1008,7 @@ def run_compare_systems(job_data, output_dir):
     # TODO: add recipe
     # TODO: add multithreading
     pathway_success = run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
-    subsystems_success = run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, s)
-    proteinfams_success = run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    #subsystems_success = run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    #proteinfams_success = run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
 
     # TODO: process success objects: should have data on what genome ids were found during the run
