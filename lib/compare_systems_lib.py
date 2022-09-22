@@ -631,10 +631,12 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     for line in pathway_query_data:
         new_line = ''
         for field in pathway_table_header:
+            if new_line != '':
+                new_line += '\t'
             if field not in line:    
-                new_line = new_line + '\t' + ''
+                new_line += ''
             else:
-                new_line = new_line + '\t' + line[field]
+                new_line += line[field]
         parsed_query_data.append(new_line)
 
     import pdb
