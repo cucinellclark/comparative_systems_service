@@ -531,8 +531,6 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     required_fields = ['annotation','ec_description','ec_number','feature_id','genome_id','pathway_class','pathway_id','pathway_name','patric_id','product']
     pathway_data_found = False
     pathway_genomes_found = set()
-    print_one = True
-    one_length = 0
     pathway_header = None
     for gids in chunker(genome_ids, 20):
         base = "https://www.patricbrc.org/api/pathway/?http_download=true"
@@ -555,10 +553,6 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
                 #pathway_query_data.append(line)
                 continue
             line = line.strip().replace('\"','').split('\t')
-            if print_one:
-                print(len(line))
-                one_length = len(line)
-                print_one = False
             pathway_fields = {}
             for idx,f in enumerate(line):
                 pathway_fields[pathway_header[idx]] = f
