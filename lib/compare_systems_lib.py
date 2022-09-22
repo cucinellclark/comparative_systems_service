@@ -639,6 +639,9 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
                 new_line += line[field]
         parsed_query_data.append(new_line)
 
+    import pdb
+    pdb.set_trace()
+
     pathway_df = pd.DataFrame(parsed_query_data,columns=pathway_table_header)
     gene_df = query_dict['feature']
 
