@@ -555,6 +555,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
             if print_one:
                 print(len(line))
                 one_length = len(line)
+                print_one = False
             if len(line) != one_length:
                 import pdb
                 pdb.set_trace()
