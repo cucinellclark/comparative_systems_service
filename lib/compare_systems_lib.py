@@ -68,7 +68,7 @@ def return_columns_to_remove(system,columns):
         table_columns = list(set.intersection(set(drop_pgfams_columns),set(columns))) 
         return table_columns
     elif system is 'pathways_genes':
-        drop_gene_columns = ['genome_name','accession','alt_locus_tag','refseq_locus_tag','feature_id','annotation','product','gene']
+        drop_gene_columns = ['genome_name','accession','alt_locus_tag','refseq_locus_tag','feature_id','annotation','product']
         table_columns = list(set.intersection(set(drop_gene_columns),set(columns)))
         return table_columns
     else: # pathways does not have drop columns
@@ -647,7 +647,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     pathway_df = pd.DataFrame(parsed_query_data,columns=pathway_table_header)
     gene_df = query_dict['feature']
 
-    genes_output = pd.merge(gene_df.drop(return_columns_to_remove('pathways_genes',gene_df.columns.tolist()), axis=1),pathway_df,on=['genome_id','patric_id'],how='inner')
+    genes_output = pd.merge(gene_df.drop(return_columns_to_remove('pathways_genes',gene_df.columns.tolist()), axis=1),pathway_df,on=['genome_id','patric_id','gene'],how='inner')
 
     import pdb
     pdb.set_trace()
