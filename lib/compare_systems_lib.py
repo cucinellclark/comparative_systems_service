@@ -535,7 +535,8 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     for gids in chunker(genome_ids, 20):
         #base = "https://www.patricbrc.org/api/pathway/?http_download=true"
         base = "https://www.patricbrc.org/api/pathway/?"
-        query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+id)&eq(annotation,PATRIC)"
+        #query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+id)&eq(annotation,PATRIC)"
+        query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&eq(annotation,PATRIC)"
         #headers = {"accept":"text/tsv", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
         headers = {"accept":"application/json", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
         
