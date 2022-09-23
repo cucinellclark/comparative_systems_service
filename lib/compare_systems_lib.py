@@ -543,23 +543,21 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
 
         result_header = True
         current_header = None
-        test_data = getQueryData2(base,query,headers)
-        import pdb
-        pdb.set_trace()
-        for line in getQueryData(base,query,headers):
+        all_data = getQueryData2(base,query,headers)
+        for line in all_data:
             pathway_data_found = True
             if result_header:
                 result_header = False
                 print(line)
-                current_header = line.strip().replace('\"','').split('\t')
-                if pathway_table_header is None or len(line) > len(pathway_table_header):
-                    pathway_table_header = line.strip().replace('\"','').split('\t')
+                current_header = line.keys()
+                if pathway_table_header is None or len(current_header) > len(pathway_table_header):
+                    pathway_table_header = current_header 
                 #pathway_query_data.append(line)
                 continue
-            line = line.strip().replace('\"','').split('\t')
-            pathway_fields = {}
-            for idx,f in enumerate(line):
-                pathway_fields[pathway_table_header[idx]] = f
+            #line = line.strip().replace('\"','').split('\t')
+            pathway_fields = line
+            #for idx,f in enumerate(line):
+            #    pathway_fields[pathway_table_header[idx]] = f
             for field in required_fields:
                 if field not in pathway_fields:
                     pathway_fields[field] = ''
@@ -593,10 +591,6 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
             if ec_number not in unique_pathway_ecs[pathway_id]:
                 unique_pathway_ecs[pathway_id][ec_number] = set()
             unique_pathway_ecs[pathway_id][ec_number].add(genome_id)
-
-            if pathway_id == 'Brucella abortus 33975':
-                import pdb 
-                pdb.set_trace()
 
             # pathway data
             if pathway_id not in pathway_dict:
@@ -642,7 +636,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
             if new_line != '':
                 new_line += '\t'
             if field not in line:    
-                new_line += ''
+                new_line += ' '
             else:
                 new_line += line[field]
         parsed_query_data.append(new_line.split('\t'))
@@ -940,7 +934,7 @@ def run_all_queries(genome_ids, session):
         else:
             sys.stderr.write('Subsystems dataframe is None\n')
     ### Run features query
-    if False:
+    if True:
         print('features query')
         feature_df = getFeatureDataFrame(genome_ids,session, limit=2500000)
         if not feature_df is None:
