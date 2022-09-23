@@ -18,7 +18,7 @@ import requests
 import pandas as pd
 import numpy as np
 
-from bvbrc_api import authenticateByEnv,getGenomeIdsByGenomeGroup,getFeatureDataFrame,getSubsystemsDataFrame,getPathwayDataFrame,getDataForGenomes,getQueryData
+from bvbrc_api import authenticateByEnv,getGenomeIdsByGenomeGroup,getFeatureDataFrame,getSubsystemsDataFrame,getPathwayDataFrame,getDataForGenomes,getQueryData,getQueryData2
 
 import time
 import io
