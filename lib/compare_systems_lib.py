@@ -939,7 +939,7 @@ def run_all_queries(genome_ids, session):
         else:
             sys.stderr.write('Subsystems dataframe is None\n')
     ### Run features query
-    if True:
+    if False:
         print('features query')
         feature_df = getFeatureDataFrame(genome_ids,session, limit=2500000)
         if not feature_df is None:
