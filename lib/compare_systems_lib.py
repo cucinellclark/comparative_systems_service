@@ -649,12 +649,9 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
 
     genes_output = pd.merge(gene_df.drop(return_columns_to_remove('pathways_genes',gene_df.columns.tolist()), axis=1),pathway_df,on=['genome_id','patric_id'],how='inner')
 
-    import pdb
-    pdb.set_trace()
-
     for idx in range(0,genes_output.shape[0]):
         gene = genes_output.iloc[idx].gene
-        if gene is None:
+        if gene is None or gene is np.nan:
             continue
         pathway_id = genes_output.iloc[idx].pathway_id
         genome_id = genes_output.iloc[idx].genome_id
