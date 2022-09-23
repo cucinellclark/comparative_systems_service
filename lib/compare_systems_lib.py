@@ -922,7 +922,7 @@ def run_all_queries(genome_ids, session):
         else:
             sys.stderr.write('Pathways dataframe is None\n')
     ### Run subsystems query
-    if True:
+    if False:
         print('subsystems query')
         subsystems_df = getSubsystemsDataFrame(genome_ids,session) 
         if not subsystems_df is None:
