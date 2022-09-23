@@ -590,6 +590,10 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
                 unique_pathway_ecs[pathway_id][ec_number] = set()
             unique_pathway_ecs[pathway_id][ec_number].add(genome_id)
 
+            if pathway_id == 'Brucella abortus 33975':
+                import pdb 
+                pdb.set_trace()
+
             # pathway data
             if pathway_id not in pathway_dict:
                 pathway_dict[pathway_id] = {} 
