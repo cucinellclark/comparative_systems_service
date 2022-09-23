@@ -638,6 +638,9 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
             if field not in line:    
                 new_line += ' '
             else:
+                value = line[field]
+                if not isinstance(value,str):
+                    value = str(value)
                 new_line += line[field]
         parsed_query_data.append(new_line.split('\t'))
 
