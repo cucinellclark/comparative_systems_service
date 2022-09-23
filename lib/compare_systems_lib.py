@@ -83,7 +83,7 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     pgfam_genomes = {}
     present_genome_ids = set()
     for gids in chunker(genome_ids, 20):
-        base = "https://alpha.bv-brc.org/api/genome_feature/?http_download=true"
+        base = "https://www.patricbrc.org/api/genome_feature/?http_download=true"
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+feature_id)&eq(annotation,PATRIC)"
         headers = {"accept":"text/tsv", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
         result_header = True
@@ -254,7 +254,7 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
     pgfam_dict['unique_set'] = set()
     present_genome_ids = set()
     for gids in chunker(genome_ids, 20):
-        base = "https://alpha.bv-brc.org/api/genome_feature/?http_download=true"
+        base = "https://www.patricbrc.org/api/genome_feature/?http_download=true"
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+feature_id)&eq(annotation,PATRIC)"
         headers = {"accept":"text/tsv", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
         result_header = True
@@ -386,7 +386,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
     #subsystems_df['subclass'] = subsystems_df['subclass'].str.lower()
 
     # query 
-    #base_query = "https://alpha.bv-brc.org/api/subsystem/?in(genome_id,("
+    #base_query = "https://www.patricbrc.org/api/subsystem/?in(genome_id,("
     #end_query = "))&limit(200000000)&http_accept=text/tsv"
     #query = base_query + ",".join(genome_ids) + end_query
     #print("Subsystems Query:\n{0}".format(query))
@@ -533,7 +533,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     pathway_genomes_found = set()
     pathway_table_header = None
     for gids in chunker(genome_ids, 20):
-        base = "https://alpha.bv-brc.org/api/pathway/?http_download=true"
+        base = "https://www.patricbrc.org/api/pathway/?http_download=true"
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+id)&eq(annotation,PATRIC)"
         headers = {"accept":"text/tsv", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
         #headers = {"accept":"application/json", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
