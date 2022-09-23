@@ -647,7 +647,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     pathway_df = pd.DataFrame(parsed_query_data,columns=pathway_table_header)
     gene_df = query_dict['feature']
 
-    genes_output = pd.merge(gene_df.drop(return_columns_to_remove('pathways_genes',gene_df.columns.tolist()), axis=1),pathway_df,on=['genome_id','patric_id','gene'],how='inner')
+    genes_output = pd.merge(gene_df.drop(return_columns_to_remove('pathways_genes',gene_df.columns.tolist()), axis=1),pathway_df,on=['genome_id','patric_id'],how='inner')
 
     import pdb
     pdb.set_trace()
