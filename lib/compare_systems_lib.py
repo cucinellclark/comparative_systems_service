@@ -544,10 +544,10 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         result_header = True
         current_header = None
         for line in getQueryData(base,query,headers):
-            import pdb
-            pdb.set_trace()
             pathway_data_found = True
             if result_header:
+                import pdb
+                pdb.set_trace()
                 result_header = False
                 print(line)
                 current_header = line.strip().replace('\"','').split('\t')
