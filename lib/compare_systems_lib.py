@@ -641,7 +641,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
                 value = line[field]
                 if not isinstance(value,str):
                     value = str(value)
-                new_line += line[field]
+                new_line += value 
         parsed_query_data.append(new_line.split('\t'))
 
     pathway_df = pd.DataFrame(parsed_query_data,columns=pathway_table_header)
