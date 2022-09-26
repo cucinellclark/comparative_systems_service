@@ -649,9 +649,9 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
 
     genes_output = pd.merge(gene_df.drop(return_columns_to_remove('pathways_genes',gene_df.columns.tolist()), axis=1),pathway_df,on=['genome_id','patric_id'],how='inner')
 
-    print(genes_output.head())
-    import pdb
-    pdb.set_trace()
+    if 'gene_x' in genes_output.columns:
+        genes_output['gene'] = genes_output['gene_x']
+        genes_output.drop(['gene_x','gene_y'],inplace=True)
 
     for idx in range(0,genes_output.shape[0]):
         pathway_id = genes_output.iloc[idx].pathway_id
