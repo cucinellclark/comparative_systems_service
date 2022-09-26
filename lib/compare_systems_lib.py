@@ -1009,6 +1009,10 @@ def run_compare_systems(job_data, output_dir):
         genome_ids = genome_ids + genome_group_ids
         genome_ids = list(set(genome_ids))
 
+    # TODO: genome_data returning nothing for ochrobactrum data, push trace and start here
+    import pdb
+    pdb.set_trace()
+
     # optionally add more genome info to output 
     genome_data = getDataForGenomes(genome_ids,s) 
 
