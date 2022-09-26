@@ -1011,18 +1011,17 @@ def run_compare_systems(job_data, output_dir):
 
     # TODO: genome_data returning nothing for ochrobactrum data, push trace and start here
     # TODO: rename getQueryData2
+    '''
     genome_base = "https://www.patricbrc.org/api/genome/?http_download=true"
     genome_headers = {'accept': 'text/tsv', 'content-type': 'application/rqlquery+x-www-form-urlencoded', 'Authorization': s.headers['Authorization']}
-    import pdb
-    pdb.set_trace()
     for gids in chunker(20,genome_ids):
         genome_query = "in(genome_id,({','.join(gids)}))&sort(+genome_id)&limit({len(gids)})"
         genome_text = json.loads(getQueryData2(genome_base,genome_query,genome_headers))
         import pdb
         pdb.set_trace()
-
+    '''
     # optionally add more genome info to output 
-    genome_data_text
+    #genome_data_text
     genome_data = getDataForGenomes(genome_ids,s) 
 
     query_dict = run_all_queries(genome_ids, s)
