@@ -18,7 +18,7 @@ import requests
 import pandas as pd
 import numpy as np
 
-from bvbrc_api import authenticateByEnv,getGenomeIdsByGenomeGroup,getFeatureDataFrame,getSubsystemsDataFrame,getPathwayDataFrame,getDataForGenomes,getQueryData,getQueryData2
+from bvbrc_api import authenticateByEnv,getGenomeIdsByGenomeGroup,getFeatureDataFrame,getSubsystemsDataFrame,getPathwayDataFrame,getDataForGenomes,getQueryData,getQueryDataText
 
 import time
 import io
@@ -543,7 +543,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
 
         result_header = True
         current_header = None
-        all_data = json.loads(getQueryData2(base,query,headers))
+        all_data = json.loads(getQueryDataText(base,query,headers))
         for line in all_data:
             pathway_data_found = True
             if result_header:
