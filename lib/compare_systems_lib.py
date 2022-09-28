@@ -18,7 +18,7 @@ import requests
 import pandas as pd
 import numpy as np
 
-from bvbrc_api import authenticateByEnv,getGenomeIdsByGenomeGroup,getFeatureDataFrame,getSubsystemsDataFrame,getPathwayDataFrame,getDataForGenomes,getQueryData
+from bvbrc_api import authenticateByEnv,getGenomeIdsByGenomeGroup,getFeatureDataFrame,getSubsystemsDataFrame,getPathwayDataFrame,getDataForGenomes,getQueryData,getQueryDataText
 
 import time
 import io
@@ -531,32 +531,36 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     required_fields = ['annotation','ec_description','ec_number','feature_id','genome_id','pathway_class','pathway_id','pathway_name','patric_id','product']
     pathway_data_found = False
     pathway_genomes_found = set()
+    pathway_table_header = None
     for gids in chunker(genome_ids, 20):
         base = "https://www.patricbrc.org/api/pathway/?http_download=true"
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+id)&eq(annotation,PATRIC)"
-        headers = {"accept":"text/tsv", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
+        headers = {"accept":"application/json", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
         
         print('Query = {0}\nHeaders = {1}'.format(base+'&'+query,headers))
         #accession       alt_locus_tag   annotation      date_inserted   date_modified   ec_description  ec_number       feature_id      genome_ec       genome_id       genome_name     id      owner   pathway_class   pathway_ec      pathway_id   pathway_name     patric_id       product public  refseq_locus_tag        sequence_id     taxon_id        _version_
 
         result_header = True
-        pathway_header = None
-        for line in getQueryData(base,query,headers):
+        current_header = None
+        all_data = json.loads(getQueryDataText(base,query,headers))
+        for line in all_data:
             pathway_data_found = True
             if result_header:
                 result_header = False
                 print(line)
-                pathway_header = line.strip().replace('\"','').split('\t')
+                current_header = line.keys()
+                if pathway_table_header is None or len(current_header) > len(pathway_table_header):
+                    pathway_table_header = current_header 
                 #pathway_query_data.append(line)
                 continue
-            line = line.strip().replace('\"','').split('\t')
-            pathway_fields = {}
-            for idx,f in enumerate(line):
-                pathway_fields[pathway_header[idx]] = f
+            #line = line.strip().replace('\"','').split('\t')
+            pathway_fields = line
+            #for idx,f in enumerate(line):
+            #    pathway_fields[pathway_table_header[idx]] = f
             for field in required_fields:
                 if field not in pathway_fields:
                     pathway_fields[field] = ''
-            pathway_query_data.append(line)
+            pathway_query_data.append(pathway_fields)
             try:
                 annotation = pathway_fields['annotation'] 
                 ec_description = pathway_fields['ec_description'] 
@@ -624,19 +628,38 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     if not pathway_data_found:
         return ({ 'success': False }) 
 
-    pathway_df = pd.DataFrame(pathway_query_data,columns=pathway_header)
+    parsed_query_data = []
+    for line in pathway_query_data:
+        new_line = ''
+        for field in pathway_table_header:
+            if new_line != '':
+                new_line += '\t'
+            if field not in line:    
+                new_line += ' '
+            else:
+                value = line[field]
+                if not isinstance(value,str):
+                    value = str(value)
+                new_line += value 
+        parsed_query_data.append(new_line.split('\t'))
+
+    pathway_df = pd.DataFrame(parsed_query_data,columns=pathway_table_header)
     gene_df = query_dict['feature']
 
     genes_output = pd.merge(gene_df.drop(return_columns_to_remove('pathways_genes',gene_df.columns.tolist()), axis=1),pathway_df,on=['genome_id','patric_id'],how='inner')
 
+    if 'gene_x' in genes_output.columns:
+        genes_output['gene'] = genes_output['gene_x']
+        genes_output.drop(['gene_x','gene_y'],inplace=True,axis=1)
+
     for idx in range(0,genes_output.shape[0]):
-        gene = genes_output.iloc[idx].gene
-        if gene is None:
-            continue
         pathway_id = genes_output.iloc[idx].pathway_id
-        genome_id = genes_output.iloc[idx].genome_id
         if pathway_id not in unique_pathway_features:
             unique_pathway_features[pathway_id] = {}    
+        gene = genes_output.iloc[idx].gene
+        if gene is None or gene is np.nan:
+            continue
+        genome_id = genes_output.iloc[idx].genome_id
         if gene not in unique_pathway_features[pathway_id]:
             unique_pathway_features[pathway_id][gene] = set()
         unique_pathway_features[pathway_id][gene].add(genome_id)
@@ -676,9 +699,12 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
             if len(unique_pathway_features[pathway_id][gene]) == len(pathway_genomes_found):
                 gene_numerator += 1
             gene_denominator += 1
-        gene_numerator = float(gene_numerator) * float(len(pathway_genomes_found))
-        gene_denominator = float(gene_denominator) * float(len(pathway_genomes_found))
-        gene_conservation = gene_numerator / gene_denominator * 100.0
+        if gene_denominator == 0:
+            gene_conservation = 0 
+        else:
+            gene_numerator = float(gene_numerator) * float(len(pathway_genomes_found))
+            gene_denominator = float(gene_denominator) * float(len(pathway_genomes_found))
+            gene_conservation = gene_numerator / gene_denominator * 100.0
         pathway_line = f'{annotation}\t{pathway_id}\t{pathway_name}\t{pathway_class}\t{genome_count}\t{ec_count}\t{gene_count}\t{genome_ec}\t{ec_conservation}\t{gene_conservation}'
         pathway_line_list.append(pathway_line)
     for ec_number in ec_dict:
