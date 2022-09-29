@@ -108,9 +108,6 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
             if aa_length == '':
                 continue
             present_genome_ids.add(genome_id)
-            if genome_id == '29461.19':
-                import pdb
-                pdb.set_trace()
             ### plfam counts
             if plfam_id not in data_dict['plfam']:
                 data_dict['plfam'][plfam_id] = {} 
