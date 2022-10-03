@@ -933,7 +933,7 @@ def run_all_queries(genome_ids, session):
         else:
             sys.stderr.write('Pathways dataframe is None\n')
     ### Run subsystems query
-    if False:
+    if True:
         print('subsystems query')
         subsystems_df = getSubsystemsDataFrame(genome_ids,session) 
         if not subsystems_df is None:
@@ -1020,8 +1020,8 @@ def run_compare_systems(job_data, output_dir):
     # TODO: add chunking
     # TODO: add recipe
     # TODO: add multithreading
-    #pathway_success = run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
-    #subsystems_success = run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    pathway_success = run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    subsystems_success = run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, s)
     proteinfams_success = run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
 
     # TODO: process success objects: should have data on what genome ids were found during the run
