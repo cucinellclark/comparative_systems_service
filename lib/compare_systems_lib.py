@@ -944,7 +944,7 @@ def generate_report(genome_ids, pathway_obj, subsystems_obj, proteinfams_obj, ou
     report_text = '\n'.join(report_text_list)
     report_file = os.path.join(output_dir,'report.txt')
     with open(report_file,'w') as o:
-        o.write(report_file)
+        o.write(report_text)
     
 
 # Store pathways, subsystems, and features queries in a dictionary
