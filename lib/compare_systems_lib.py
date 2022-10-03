@@ -929,8 +929,8 @@ def generate_report(genome_ids, pathway_obj, subsystems_obj, proteinfams_obj, ou
         report_text_list.append('Pathways Failed: see stdout and stderr')
     if subsystems_obj['success']:
         report_text_list.append(f"Subsystems succeeded: {len(subsystems_obj['genomes'])} out of {len(genome_ids)} genomes had subsystems data")
-        if len(subsystems['genomes']) != len(genome_ids):
-            missing_subsystems_genomes = list(set(genome_ids).difference(set(subsystems_['genomes'])))
+        if len(subsystems_obj['genomes']) != len(genome_ids):
+            missing_subsystems_genomes = list(set(genome_ids).difference(set(subsystems_obj['genomes'])))
             report_text_list.append(f"Genomes Missing from Subsystems: {','.join(missing_subsystems_genomes)}")
     else:
         report_text_list.append('Subsystems Failed: see stdout and stderr')
