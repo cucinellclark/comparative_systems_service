@@ -1053,6 +1053,6 @@ def run_compare_systems(job_data, output_dir):
     subsystems_success = run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, s)
     proteinfams_success = run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
 
-    generate_report(genome_ids,pathway_success_subsystems_success,proteinfams_success,output_dir)
+    generate_report(genome_ids,pathway_success,subsystems_success,proteinfams_success,output_dir)
 
     # TODO: process success objects: should have data on what genome ids were found during the run
