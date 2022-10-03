@@ -90,7 +90,7 @@ sub process_compsystems
         die "Command failed: @cmd\n";
     }
 
-    my @output_suffixes = ([qr/\.tsv$/, 'tsv'],[qr/\.json$/, 'json']);
+    my @output_suffixes = ([qr/\.tsv$/, 'tsv'],[qr/\.json$/, 'json'],[qr/\.txt$/, 'txt']);
     
     my $outfile;
     opendir(D, $work_dir) or die "Cannot opendir $work_dir: $!";

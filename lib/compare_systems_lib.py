@@ -918,6 +918,35 @@ def run_pathways(genome_ids, query_dict, output_file,output_dir, genome_data, se
 
     print("Pathways Complete")
 
+def generate_report(genome_ids, pathway_obj, subsystems_obj, proteinfams_obj, output_dir):
+    report_text_list = []
+    if pathway_obj['success']:
+        report_text_list.append(f"Pathways succeded: {len(pathway_obj['genomes'])} out of {len(genome_ids)} genomes had pathway data") 
+        if len(pathway_obj['genomes']) != len(genome_ids):
+            missing_pathway_genomes = list(set(genome_ids).difference(set(pathway_obj['genomes'])))
+            report_text_list.append(f"Genomes Missing from Pathways: {','.join(missing_pathway_genomes)}")
+    else:
+        report_text_list.append('Pathways Failed: see stdout and stderr')
+    if subsystems_obj['success']:
+        report_text_list.append(f"Subsystems succeeded: {len(subsystems_obj['genomes'])} out of {len(genome_ids)} genomes had subsystems data")
+        if len(subsystems_obj['genomes']) != len(genome_ids):
+            missing_subsystems_genomes = list(set(genome_ids).difference(set(subsystems_obj['genomes'])))
+            report_text_list.append(f"Genomes Missing from Subsystems: {','.join(missing_subsystems_genomes)}")
+    else:
+        report_text_list.append('Subsystems Failed: see stdout and stderr')
+    if proteinfams_obj['success']:
+        report_text_list.append(f"ProteinFamilies succeeded: {len(proteinfams_obj['genomes'])} out of {len(genome_ids)} genomes had proteinfamilies data")
+        if len(proteinfams_obj['genomes']) != len(genome_ids):
+            missing_proteinfams_genomes = list(set(genome_ids).difference(set(proteinfams_obj['genomes'])))
+            report_text_list.append(f"Genomes Missing from ProteinFamilies: {','.join(missing_proteinfams_genomes)}")
+    else:
+        report_text_list.append('ProteinFamilies Failed: see stdout and sterr')
+    report_text = '\n'.join(report_text_list)
+    report_file = os.path.join(output_dir,'report.txt')
+    with open(report_file,'w') as o:
+        o.write(report_text)
+    
+
 # Store pathways, subsystems, and features queries in a dictionary
 def run_all_queries(genome_ids, session):
     query_dict = {}
@@ -1024,4 +1053,4 @@ def run_compare_systems(job_data, output_dir):
     subsystems_success = run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, s)
     proteinfams_success = run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
 
-    # TODO: process success objects: should have data on what genome ids were found during the run
+    generate_report(genome_ids,pathway_success,subsystems_success,proteinfams_success,output_dir)
