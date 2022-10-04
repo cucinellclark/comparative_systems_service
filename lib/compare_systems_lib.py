@@ -724,7 +724,11 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
             pathway_class = ec_dict[pathway_id][ec_number]['annotation']
             ec_description = ec_dict[pathway_id][ec_number]['ec_description']
             ec_number = ec_dict[pathway_id][ec_number]['genome_count']
-            genome_count = ec_dict[pathway_id][ec_number]['genome_count']
+            try:
+                genome_count = ec_dict[pathway_id][ec_number]['genome_count']
+            except Exception as e:
+                import pdb
+                pdb.set_trace()
             ec_count = ec_dict[pathway_id][ec_number]['ec_count']
             gene_count = ec_dict[pathway_id][ec_number]['gene_count']
             genome_ec = ec_dict[pathway_id][ec_number]['genome_ec']
