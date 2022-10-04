@@ -661,10 +661,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         pathway_id = genes_output.iloc[idx].pathway_id
         if pathway_id not in unique_pathway_features:
             unique_pathway_features[pathway_id] = {}    
-        gene = genes_output.iloc[idx].gene
-        if not gene is np.nan:
-            import pdb
-            pdb.set_trace()
+        gene = genes_output.iloc[idx]['gene']
         if gene is None or gene is np.nan:
             continue
         genome_id = genes_output.iloc[idx].genome_id
