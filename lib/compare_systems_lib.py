@@ -734,14 +734,6 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     pathway_output = '\n'.join(pathway_line_list)
     ec_output = '\n'.join(ec_line_list)
 
-    upf_copy = {}
-    for pathway_id in unique_pathway_features:
-        upf_copy[pathway_id] = {}
-        for gene in unique_pathway_features[pathway_id]:
-            upf_copy[pathway_id][gene] = list(unique_pathway_features[pathway_id][gene])
-    with open(os.path.join(output_dir,'pathway_genes.json'),'w') as o:
-        json.dump(upf_copy,o)
-
     output_json = {}
     output_json['pathway'] = pathway_output
     output_json['ecnumber'] = ec_output
