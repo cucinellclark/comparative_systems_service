@@ -721,7 +721,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
             annotation = ec_dict[pathway_id][ec_number]['annotation']
             pathway_id = ec_dict[pathway_id][ec_number]['pathway_id']
             pathway_name = ec_dict[pathway_id][ec_number]['pathway_name']
-            pathway_class = ec_dict[pathway_id][ec_number]['annotation']
+            pathway_class = ec_dict[pathway_id][ec_number]['pathway_class']
             ec_description = ec_dict[pathway_id][ec_number]['ec_description']
             ec_number = ec_dict[pathway_id][ec_number]['ec_number']
             genome_count = ec_dict[pathway_id][ec_number]['genome_count']
