@@ -700,6 +700,8 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         # calculate gene_conservation
         gene_numerator = 0
         gene_denominator = 0
+        import pdb
+        pdb.set_trace()
         for gene in unique_pathway_features[pathway_id]:
             if len(unique_pathway_features[pathway_id][gene]) == len(pathway_genomes_found):
                 gene_numerator += 1
