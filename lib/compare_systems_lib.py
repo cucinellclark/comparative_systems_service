@@ -82,6 +82,7 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     plfam_genomes = {}
     pgfam_genomes = {}
     present_genome_ids = set()
+    genomes_missing_data = {}
     for gids in chunker(genome_ids, 20):
         base = "https://www.patricbrc.org/api/genome_feature/?http_download=true"
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+feature_id)&eq(annotation,PATRIC)"
@@ -108,6 +109,12 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
             if aa_length == '':
                 continue
             present_genome_ids.add(genome_id)
+            ### add to missing genomes data dict
+            if genome_id not in genomes_missing_data:
+                genomes_missing_data[genome_id] = True
+            if pgfam_id == '':
+                import pdb
+                pdb.set_trace()
             ### plfam counts
             if plfam_id not in data_dict['plfam']:
                 data_dict['plfam'][plfam_id] = {} 
