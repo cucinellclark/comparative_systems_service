@@ -112,7 +112,7 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
             ### add to missing genomes data dict
             if genome_id not in genomes_missing_data:
                 genomes_missing_data[genome_id] = True
-            if pgfam_id == '':
+            if genome_id == "29461.19":
                 import pdb
                 pdb.set_trace()
             ### plfam counts
