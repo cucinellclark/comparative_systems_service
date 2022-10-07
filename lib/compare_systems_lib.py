@@ -112,11 +112,6 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
             ### add to missing genomes data dict
             if genome_id not in genomes_missing_data:
                 genomes_missing_data[genome_id] = True
-            import pdb
-            pdb.set_trace()
-            if genome_id == "29461.19":
-                import pdb
-                pdb.set_trace()
             ### plfam counts
             if plfam_id not in data_dict['plfam']:
                 data_dict['plfam'][plfam_id] = {} 
@@ -1064,8 +1059,8 @@ def run_compare_systems(job_data, output_dir):
     # TODO: add chunking
     # TODO: add recipe
     # TODO: add multithreading
-    #pathway_success = run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
-    #subsystems_success = run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    pathway_success = run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    subsystems_success = run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, s)
     proteinfams_success = run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
 
-    #generate_report(genome_ids,pathway_success,subsystems_success,proteinfams_success,output_dir)
+    generate_report(genome_ids,pathway_success,subsystems_success,proteinfams_success,output_dir)
