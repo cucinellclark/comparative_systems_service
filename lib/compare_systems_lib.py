@@ -693,6 +693,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         genome_ec = pathway_dict[pathway_id]['genome_ec']
         # calculate ec_conservation score
         ec_numerator = 0
+        ec_denominator = 0
         for ec_number in unique_pathway_ecs[pathway_id]:
             ec_numerator += len(unique_pathway_ecs[pathway_id][ec_number])
             ec_denominator += len(pathway_genomes_found)
