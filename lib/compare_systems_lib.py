@@ -693,27 +693,19 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         genome_ec = pathway_dict[pathway_id]['genome_ec']
         # calculate ec_conservation score
         ec_numerator = 0
-        ec_denominator = 0
         for ec_number in unique_pathway_ecs[pathway_id]:
-            if len(unique_pathway_ecs[pathway_id][ec_number]) == len(pathway_genomes_found):
-                ec_numerator += 1
-            ec_denominator += 1
-        ec_numerator = float(ec_numerator) * float(len(pathway_genomes_found))
-        ec_denominator = float(ec_denominator) * float(len(pathway_genomes_found))
-        ec_conservation = ec_numerator / ec_denominator * 100.0
+            ec_numerator += len(unique_pathway_ecs[pathway_id][ec_number])
+            ec_denominator += len(pathway_genomes_found)
+        #ec_numerator = float(ec_numerator) * float(len(pathway_genomes_found))
+        #ec_denominator = float(ec_denominator) * float(len(pathway_genomes_found))
+        ec_conservation = float(ec_numerator) / float(ec_denominator) * 100.0
         # calculate gene_conservation
         gene_numerator = 0
         gene_denominator = 0
         for gene in unique_pathway_features[pathway_id]:
-            if len(unique_pathway_features[pathway_id][gene]) == len(pathway_genomes_found):
-                gene_numerator += 1
-            gene_denominator += 1
-        if gene_denominator == 0:
-            gene_conservation = 0 
-        else:
-            gene_numerator = float(gene_numerator) * float(len(pathway_genomes_found))
-            gene_denominator = float(gene_denominator) * float(len(pathway_genomes_found))
-            gene_conservation = gene_numerator / gene_denominator * 100.0
+            gene_numerator += len(unique_pathway_features[pathway_id][gene])
+            gene_denominator += len(pathway_genomes_found)
+        gene_conservation = float(gene_numerator) / float(gene_denominator) * 100.0
         pathway_line = f'{annotation}\t{pathway_id}\t{pathway_name}\t{pathway_class}\t{genome_count}\t{ec_count}\t{gene_count}\t{genome_ec}\t{ec_conservation}\t{gene_conservation}'
         pathway_line_list.append(pathway_line)
         # now EC data
