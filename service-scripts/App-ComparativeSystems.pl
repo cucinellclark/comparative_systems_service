@@ -15,6 +15,7 @@ use JSON::XS;
 use IPC::Run qw(run);
 use Cwd;
 use Clone;
+use P3DataAPI;
 
 my $script = Bio::KBase::AppService::AppScript->new(\&process_compsystems, \&preflight);
 
@@ -31,8 +32,38 @@ sub preflight
     my $token = $app->token();
     my $ws = $app->workspace();
 
-    # TODO (ask bob): estimate cpu, memory, and runtime values 
-    # TODO create group of genomes for testing
+    my $api = P3DataAPI->new();
+    my $groups = $params->{genome_groups}; 
+    my $numGenomes = 0;
+    for my $gg (@$groups) 
+    {
+        print "$gg\n";
+        my $genomes = $api->retrieve_patric_ids_from_genome_group($gg);   
+        my $n = @$genomes;
+        $numGenomes = $numGenomes + $n;
+    }
+    my $genomeList = $params->{genome_ids};
+    my $glLen = scalar @$genomeList;
+    $numGenomes = $numGenomes + $glLen;
+    print "$numGenomes genomes\n";
+
+    my $runtime = 0;
+    if ($numGenomes < 100) {
+        $runtime = 1800;
+    } elsif ($numGenomes < 300) {
+        $runtime = 10800;
+    } else {
+        $runtime = 43200;
+    }
+
+    my $pf = {
+    cpu => 1,
+    memory => '32GB',
+    runtime => $runtime,
+    storage => 0,
+    is_control_task => 0,
+    };
+    return $pf;
 }
 
 sub process_compsystems
