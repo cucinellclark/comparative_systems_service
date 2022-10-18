@@ -50,7 +50,7 @@ sub process_compsystems
     my $api = P3DataAPI->new();
     my @groups = $params->{genome_groups}; 
     my $numGenomes = 0;
-    for my $gg (@groups) 
+    for my $gg (@$groups) 
     {
         print $gg;
         my $genomes = $api->retrieve_patric_ids_from_genome_group($gg);   
