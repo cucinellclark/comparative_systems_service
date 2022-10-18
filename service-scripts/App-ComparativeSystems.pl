@@ -32,8 +32,6 @@ sub preflight
     my $token = $app->token();
     my $ws = $app->workspace();
 
-    # TODO (ask bob): estimate cpu, memory, and runtime values 
-    # TODO create group of genomes for testing
     my $api = P3DataAPI->new();
     my $groups = $params->{genome_groups}; 
     my $numGenomes = 0;
