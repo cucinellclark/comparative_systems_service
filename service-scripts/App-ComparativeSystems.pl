@@ -58,7 +58,8 @@ sub process_compsystems
         $numGenomes = $numGenomes + $n;
     }
     my $genomeList = $params->{genome_ids}
-    $numGenomes = $numGenomes + @$genomeList;
+    my $glLen = scalar @$genomeList;
+    $numGenomes = $numGenomes + $glLen;
     print "$numGenomes genomes\n"; 
     exit;
 
