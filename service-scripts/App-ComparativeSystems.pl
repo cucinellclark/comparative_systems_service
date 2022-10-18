@@ -48,7 +48,8 @@ sub process_compsystems
     # TODO: Remove
     # testing and settuping up preflight check sdtuff
     my $api = P3DataAPI->new();
-    my @groups = @$params->{genome_groups}; 
+    my @groups = $params->{genome_groups}; 
+    print "$#groups\n";
     my $numGenomes = 0;
     for my $gg (@groups) 
     {
