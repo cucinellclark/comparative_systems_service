@@ -52,10 +52,10 @@ sub process_compsystems
     my $numGenomes = 0;
     for my $gg (@groups) 
     {
-        print @$gg;
+        print "@$gg\n";
         my $genomes = $api->retrieve_patric_ids_from_genome_group(@$gg);   
         my $n = @$genomes;
-        $numGenomes = $numGenomes + $n;
+        my $numGenomes = $numGenomes + $n;
     }
     print "$numGenomes genomes\n"; 
     exit;
