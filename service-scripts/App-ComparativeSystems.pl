@@ -34,19 +34,6 @@ sub preflight
 
     # TODO (ask bob): estimate cpu, memory, and runtime values 
     # TODO create group of genomes for testing
-}
-
-sub process_compsystems
-{
-    my($app, $app_def, $raw_params, $params) = @_;   
-
-    print 'Proc comparative systems ', Dumper($app_def, $raw_params, $params);
-
-    my $token = $app->token();
-    my $ws = $app->workspace();
-
-    # TODO: Remove
-    # testing and settuping up preflight check sdtuff
     my $api = P3DataAPI->new();
     my $groups = $params->{genome_groups}; 
     my $numGenomes = 0;
@@ -60,8 +47,35 @@ sub process_compsystems
     my $genomeList = $params->{genome_ids};
     my $glLen = scalar @$genomeList;
     $numGenomes = $numGenomes + $glLen;
-    print "$numGenomes genomes\n"; 
-    exit;
+    print "$numGenomes genomes\n";
+
+    my $runtime = 0;
+    if ($numGenomes < 100) {
+        $runtime = 1800;
+    } elsif ($numGenomes < 300) {
+        $runtime = 10800;
+    } else {
+        $runtime = 43200;
+    }
+
+    my $pf = {
+    cpu => 1,
+    memory => '32GB',
+    runtime => $runtime,
+    storage => 0,
+    is_control_task => 0,
+    };
+    return $pf;
+}
+
+sub process_compsystems
+{
+    my($app, $app_def, $raw_params, $params) = @_;   
+
+    print 'Proc comparative systems ', Dumper($app_def, $raw_params, $params);
+
+    my $token = $app->token();
+    my $ws = $app->workspace();
 
     #
     # Create an output directory under the current dir. App service is meant to invoke
