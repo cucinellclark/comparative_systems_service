@@ -49,8 +49,9 @@ sub process_compsystems
     # testing and settuping up preflight check sdtuff
     my $api = P3DataAPI->new();
     my @groups = $params->{genome_groups}; 
+    print "@groups\n";
     my $numGenomes = 0;
-    for my $gg (@$groups) 
+    for my $gg (@groups) 
     {
         print $gg;
         my $genomes = $api->retrieve_patric_ids_from_genome_group($gg);   
