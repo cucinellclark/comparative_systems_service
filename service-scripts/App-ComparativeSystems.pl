@@ -54,7 +54,7 @@ sub process_compsystems
     {
         my $genomes = $api->retrieve_patric_ids_from_genome_group($gg);   
         my $n = @$genomes;
-        $numGenomes = add($numGenomes,$n);
+        $numGenomes = $numGenomes + $n;
     }
     print "$numGenomes genomes\n"; 
     exit;
