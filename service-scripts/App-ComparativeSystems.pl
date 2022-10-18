@@ -15,6 +15,7 @@ use JSON::XS;
 use IPC::Run qw(run);
 use Cwd;
 use Clone;
+use P3DataAPI;
 
 my $script = Bio::KBase::AppService::AppScript->new(\&process_compsystems, \&preflight);
 
@@ -43,6 +44,20 @@ sub process_compsystems
 
     my $token = $app->token();
     my $ws = $app->workspace();
+
+    # TODO: Remove
+    # testing and settuping up preflight check sdtuff
+    my $api = P3DataAPI->new();
+    my @groups = $params{genome_groups}; 
+    my $numGenomes = 0;
+    for my $gg (@groups) 
+    {
+        my $genomes = $api->retrieve_patric_ids_from_genome_group($gg);   
+        my $n = @$genomes;
+        $numGenomes = add($numGenomes,$n);
+    }
+    print "$numGenomes genomes\n"; 
+    exit;
 
     #
     # Create an output directory under the current dir. App service is meant to invoke
