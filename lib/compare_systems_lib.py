@@ -621,7 +621,7 @@ def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_da
         return ({ 'success': False }) 
 
     parsed_query_data = []
-    for line in subsystems_table_list:
+    for line in subsystem_query_data:
         new_line = ''
         for field in subsystem_table_header:
             if new_line != '':
