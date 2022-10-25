@@ -576,6 +576,7 @@ def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_da
             overview_counts_dict[superclass][clss] = {}
         if subclass not in subsystem_dict[superclass][clss]:
             subsystem_dict[superclass][clss][subclass] = {}
+            overview_counts_dict[superclass][clss][subclass] = {}
             overview_counts_dict[superclass][clss][subclass]['subsystem_names'] = set()
             overview_counts_dict[superclass][clss][subclass]['gene_set'] = set()
         if subsystem_name not in subsystem_dict[superclass][clss][subclass]:
