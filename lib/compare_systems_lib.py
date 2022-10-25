@@ -544,51 +544,51 @@ def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_da
                 if subsystem_table_header is None or len(current_header) > len(subsystem_table_header):
                     subsystem_table_header = current_header
                 continue
-        subsystem_fields = line
-        for field in required_fields:
-            if field not in subsystem_fields:
-                subsystem_fields[field] = ''
-        subsystem_query_data.append(subsystem_fields)
-        try:
-            active = subsystem_fields['active'] 
-            clss = subsystem_fields['class'] 
-            feature_id = subsystem_fields['feature_id'] 
-            gene = subsystem_fields['gene'] 
-            genome_id = subsystem_fields['genome_id']
-            product = subsystem_fields['product'] 
-            role_id = subsystem_fields['role_id'] 
-            role_name = subsystem_fields['role_name'] 
-            subclass = subsystem_fields['subclass'] 
-            subsystem_id = subsystem_fields['subsystem_id'] 
-            subsystem_name = subsystem_fields['subsystem_name'] 
-            superclass = subsystem_fields['superclass']
-        except Exception as e:
-            sys.stderr.write(f'Error with the following line:\n{e}\n{line}\n')
-            continue
-        subsystem_genomes_found.add(genome_id)
-        # TODO: chat with Maulik about the correct gene/role count
-        # - Do I need to keep track of unique features and their counts???
-        if superclass not in subsystem_dict:
-            subsystem_dict[superclass] = {} 
-            overview_counts_dict[superclass] = {}
-        if clss not in subsystem_dict[superclass]:
-            subsystem_dict[superclass][clss] = {}
-            overview_counts_dict[superclass][clss] = {}
-        if subclass not in subsystem_dict[superclass][clss]:
-            subsystem_dict[superclass][clss][subclass] = {}
-            overview_counts_dict[superclass][clss][subclass] = {}
-            overview_counts_dict[superclass][clss][subclass]['subsystem_names'] = set()
-            overview_counts_dict[superclass][clss][subclass]['gene_set'] = set()
-        if subsystem_name not in subsystem_dict[superclass][clss][subclass]:
-            subsystem_dict[superclass][clss][subclass][subsystem_name] = {}
-            subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'] = set()
-            subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set'] = set()
-        overview_counts_dict[superclass][clss][subclass]['subsystem_names'].add(subsystem_name)
-        if gene != '' or gene is not None:
-            subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'].add(gene)
-            overview_counts_dict[superclass][clss][subclass]['gene_set'].add(gene)
-        if role_id != '' or gene is not None: 
-            subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set'].add(role_id)
+            subsystem_fields = line
+            for field in required_fields:
+                if field not in subsystem_fields:
+                    subsystem_fields[field] = ''
+            subsystem_query_data.append(subsystem_fields)
+            try:
+                active = subsystem_fields['active'] 
+                clss = subsystem_fields['class'] 
+                feature_id = subsystem_fields['feature_id'] 
+                gene = subsystem_fields['gene'] 
+                genome_id = subsystem_fields['genome_id']
+                product = subsystem_fields['product'] 
+                role_id = subsystem_fields['role_id'] 
+                role_name = subsystem_fields['role_name'] 
+                subclass = subsystem_fields['subclass'] 
+                subsystem_id = subsystem_fields['subsystem_id'] 
+                subsystem_name = subsystem_fields['subsystem_name'] 
+                superclass = subsystem_fields['superclass']
+            except Exception as e:
+                sys.stderr.write(f'Error with the following line:\n{e}\n{line}\n')
+                continue
+            subsystem_genomes_found.add(genome_id)
+            # TODO: chat with Maulik about the correct gene/role count
+            # - Do I need to keep track of unique features and their counts???
+            if superclass not in subsystem_dict:
+                subsystem_dict[superclass] = {} 
+                overview_counts_dict[superclass] = {}
+            if clss not in subsystem_dict[superclass]:
+                subsystem_dict[superclass][clss] = {}
+                overview_counts_dict[superclass][clss] = {}
+            if subclass not in subsystem_dict[superclass][clss]:
+                subsystem_dict[superclass][clss][subclass] = {}
+                overview_counts_dict[superclass][clss][subclass] = {}
+                overview_counts_dict[superclass][clss][subclass]['subsystem_names'] = set()
+                overview_counts_dict[superclass][clss][subclass]['gene_set'] = set()
+            if subsystem_name not in subsystem_dict[superclass][clss][subclass]:
+                subsystem_dict[superclass][clss][subclass][subsystem_name] = {}
+                subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'] = set()
+                subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set'] = set()
+            overview_counts_dict[superclass][clss][subclass]['subsystem_names'].add(subsystem_name)
+            if gene != '' or gene is not None:
+                subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'].add(gene)
+                overview_counts_dict[superclass][clss][subclass]['gene_set'].add(gene)
+            if role_id != '' or gene is not None: 
+                subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set'].add(role_id)
 
     # gets counts for overview dict, any other adjustments
     # create subsystems table
