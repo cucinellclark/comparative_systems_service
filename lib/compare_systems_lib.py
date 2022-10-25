@@ -545,8 +545,8 @@ def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_da
                 continue
         subsystem_fields = line
         for field in required_fields:
-            if field not in pathway_fields:
-                pathway_fields[field] = ''
+            if field not in subsystem_fields:
+                subsystem_fields[field] = ''
         subsystem_query_data.append(subsystem_fields)
         try:
             active = subsystem_fields['active'] 
