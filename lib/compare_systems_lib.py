@@ -612,6 +612,27 @@ def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_da
                         'gene_counts': len(subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'])
                     }
                     subsystems_table_list.append(new_entry)
+
+    if not subsystem_data_found:
+        return ({ 'success': False }) 
+
+    parsed_query_data = []
+    parsed_query_data.append(subsystem_table_header)
+    for line in subsystems_table_list:
+        new_line = ''
+        for field in subsystem_table_header:
+            if new_line != '':
+                new_line += '\t'
+            if field not in line:    
+                new_line += ' '
+            else:
+                value = line[field]
+                if not isinstance(value,str):
+                    value = str(value)
+                new_line += value 
+        parsed_query_data.append(new_line.split('\t'))
+
+    subsystem_df = pd.DataFrame(parsed_query_data,columns=subsystem_table_header)
     subsystems_table = pd.DataFrame(subsystems_table_list)
     import pdb
     pdb.set_trace()
@@ -1078,7 +1099,7 @@ def run_all_queries(genome_ids, session):
         else:
             sys.stderr.write('Pathways dataframe is None\n')
     ### Run subsystems query
-    if True:
+    if False:
         print('subsystems query')
         subsystems_df = getSubsystemsDataFrame(genome_ids,session) 
         if not subsystems_df is None:
