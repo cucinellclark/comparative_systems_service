@@ -526,7 +526,7 @@ def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_da
     for gids in chunker(genome_ids, 20):
         base = "https://www.patricbrc.org/api/subsystem/?http_download=true"
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+id)"
-        headers = {"accept":"application/json", "content-type":"application/rqlquery+x-www-form-urlencoded","Authorization": session.headers['Authorization']}}
+        headers = {"accept":"application/json", "content-type":"application/rqlquery+x-www-form-urlencoded","Authorization": session.headers['Authorization']}
 
         print('Query = {0}\nHeaders = {1}'.format(base+'&'+query,headers))
         result_header = True        
