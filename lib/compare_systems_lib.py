@@ -517,6 +517,7 @@ def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_da
     subsystem_header = 'superclass\tclass\tsubclass\tsubsystem_name\tgene_count\trole_count'
     subsystem_line_list.append(subsystem_header)
     subsystem_dict = {}
+    overview_counts_dict = {}
 
     subsystem_query_data = []
     required_fields = ['superclass','class','subclass','subsystem_name','feature_id','gene','product','role_id','role_name']
@@ -553,15 +554,67 @@ def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_da
             clss = subsystem_fields['class'] 
             feature_id = subsystem_fields['feature_id'] 
             gene = subsystem_fields['gene'] 
+            genome_id = subsystem_fields['genome_id']
             product = subsystem_fields['product'] 
             role_id = subsystem_fields['role_id'] 
             role_name = subsystem_fields['role_name'] 
             subclass = subsystem_fields['subclass'] 
             subsystem_id = subsystem_fields['subsystem_id'] 
             subsystem_name = subsystem_fields['subsystem_name'] 
+            superclass = subsystem_fields['superclass']
         except Exception as e:
             sys.stderr.write(f'Error with the following line:\n{e}\n{line}\n')
             continue
+        subsystem_genomes_found.add(genome_id)
+        # TODO: chat with Maulik about the correct gene/role count
+        # - Do I need to keep track of unique features and their counts???
+        if superclass not in subsystem_dict:
+            subsystem_dict[superclass] = {} 
+            overview_counts_dict[superclass] = {}
+        if clss not in subsystem_dict[superclass]:
+            subsystem_dict[superclass][clss] = {}
+            overview_counts_dict[superclass][clss] = {}
+        if subclass not in subsystem_dict[superclass][clss]:
+            subsystem_dict[superclass][clss][subclass] = {}
+            overview_counts_dict[superclass][clss][subclass]['subsystem_names'] = set()
+            overview_counts_dict[superclass][clss][subclass]['gene_set'] = set()
+        if subsystem_name not in subsystem_dict[superclass][clss][subclass]:
+            subsystem_dict[superclass][clss][subclass][subsystem_name] = {}
+            subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'] = set()
+            subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set'] = set()
+        overview_counts_dict[superclass][clss][subclass]['subsystem_names'].add(subsystem_name)
+        if gene != '' or gene is not None:
+            subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'].add(gene)
+            overview_counts_dict[superclass][clss][subclass]['gene_set'].add(gene)
+        if role_id != '' or gene is not None: 
+            subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set'].add(role_id)
+
+        # gets counts for overview dict, any other adjustments
+        # create subsystems table
+        subsystems_table_list = []
+        overview_dict = {} 
+        for superclass in overview_counts_dict:
+            overview_dict[superclass] = {}
+            for clss in overview_counts_dict[superclass]:
+                overview_dict[superclass][clss] = {}
+                for subclass in overview_counts_dict[superclass][clss]:
+                    overview_dict[superclass][clss][subclass] = {}
+                    overview_dict[superclass][clss][subclass]['subsystem_name_counts'] = len(overview_counts_dict[superclass][clss][subclass]['subsystem_names'])
+                    overview_dict[superclass][clss][subclass]['gene_counts'] = len(overview_counts_dict[superclass][clss][subclass]['gene_set'])
+                    for subsystem_name in subsystem_dict[superclass][clss][subclass]:
+                        new_entry = {
+                            'superclass': superclass,
+                            'class': clss,
+                            'subclass': subclass,
+                            'subsystem_name': subsystem_name,
+                            'role_counts': len(subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set']),
+                            'gene_counts': len(subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'])
+                        }
+                        subsystems_table_list.append(new_entry)
+        subsystems_table = pd.DataFrame(subsystems_table_list)
+        import pdb
+        pdb.set_trace()
+        
 
 def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data, session):
     
