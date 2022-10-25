@@ -637,9 +637,24 @@ def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_da
 
     subsystem_df = pd.DataFrame(parsed_query_data,columns=subsystem_table_header)
     subsystems_table = pd.DataFrame(subsystems_table_list)
-    import pdb
-    pdb.set_trace()
+
+    gene_df = query_dict['feature']
+    gene_df = pd.merge(gene_df,subsystem_df.drop(return_columns_to_remove('subsystems_genes',subsystem_df.columns.tolist()),axis=1),on=['genome_id','feature_id'],how='inner')
     
+    output_json_file = subsystems_file.replace('.tsv','_tables.json')
+    
+    output_json = {}
+    output_json['genome_ids'] = list(subsystem_genomes_found)
+    output_json['genome_names'] = genome_data.set_index('Genome ID').loc[list(subsystem_genomes_found)]['Genome Name'].tolist() # returns a list of genome names in the same order as the genome ids
+    output_json['overview'] = overview_dict
+    output_json['job_name'] = output_file
+    output_json['subsystems'] = subsystems_table.to_csv(index=False,sep='\t')
+    output_json['genes'] = gene_df.to_csv(index=False,sep='\t')
+    with open(output_json_file,'w') as o:
+        o.write(json.dumps(output_json))
+
+    print('Subsystems complete')
+    return ({ 'success': True, 'genomes': list(subsystem_present_genomes) })
 
 def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data, session):
     
