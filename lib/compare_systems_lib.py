@@ -510,6 +510,49 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
     print('Subsystems complete')
     return ({ 'success': True, 'genomes': list(subsystem_present_genomes) })
 
+def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_data, session):
+
+    subsystems_file = os.path.join(output_dir,output_file+'_subsystems.tsv')
+    subsystem_line_list = []
+    subsystem_header = 'superclass\tclass\tsubclass\tsubsystem_name\tgene_count\trole_count'
+    subsystem_line_list.append(subsystem_header)
+    subsystem_dict = {}
+
+    subsystem_query_data = []
+    required_fields = ['superclass','class','subclass','subsystem_name']
+    subsystem_data_found = False
+    subsystem_genomes_found = set()
+    subsystem_table_header = None
+    for gids in chunker(genome_ids, 20):
+        base = "https://www.patricbrc.org/api/subsystem/?http_download=true"
+        query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+id)"
+        headers = {"accept":"application/json", "content-type":"application/rqlquery+x-www-form-urlencoded","Authorization": session.headers['Authorization']}}
+
+        print('Query = {0}\nHeaders = {1}'.format(base+'&'+query,headers))
+        result_header = True        
+        current_header = None
+        all_data = json.loads(getQueryDataText(base,query,headers))
+        for line in all_data:
+            subsystem_data_found = True
+            if result_header:
+                result_header = False
+                print(line)
+                current_header = line.keys()
+                if subsystem_table_header is None or len(current_header) > len(subsystem_table_header):
+                    subsystem_table_header = current_header
+                continue
+        subsystem_fields = line
+        import pdb
+        pdb.set_trace()
+        for field in required_fields:
+            if field not in pathway_fields:
+                pathway_fields[field] = ''
+        subsystem_query_data.append(subsystem_fields)
+        try:
+            print('yes')
+        except Exception as e:
+            print('no')
+
 def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data, session):
     
     pathways_file = os.path.join(output_dir,output_file+'_pathways.tsv')
@@ -537,7 +580,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     for gids in chunker(genome_ids, 20):
         base = "https://www.patricbrc.org/api/pathway/?http_download=true"
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+id)&eq(annotation,PATRIC)"
-        headers = {"accept":"application/json", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
+        headers = {"accept":"application/json", "content-type":"application/rqlquery+x-www-form-urlencoded", "Authorization": session.headers['Authorization']}
         
         print('Query = {0}\nHeaders = {1}'.format(base+'&'+query,headers))
         #accession       alt_locus_tag   annotation      date_inserted   date_modified   ec_description  ec_number       feature_id      genome_ec       genome_id       genome_name     id      owner   pathway_class   pathway_ec      pathway_id   pathway_name     patric_id       product public  refseq_locus_tag        sequence_id     taxon_id        _version_
@@ -1058,8 +1101,9 @@ def run_compare_systems(job_data, output_dir):
     # TODO: add chunking
     # TODO: add recipe
     # TODO: add multithreading
-    pathway_success = run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
-    subsystems_success = run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, s)
-    proteinfams_success = run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    #pathway_success = run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    #subsystems_success = run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    subsystems_success = run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    #proteinfams_success = run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
 
-    generate_report(genome_ids,pathway_success,subsystems_success,proteinfams_success,output_dir)
+    #generate_report(genome_ids,pathway_success,subsystems_success,proteinfams_success,output_dir)
