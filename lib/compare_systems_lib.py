@@ -590,32 +590,32 @@ def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_da
         if role_id != '' or gene is not None: 
             subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set'].add(role_id)
 
-        # gets counts for overview dict, any other adjustments
-        # create subsystems table
-        subsystems_table_list = []
-        overview_dict = {} 
-        for superclass in overview_counts_dict:
-            overview_dict[superclass] = {}
-            for clss in overview_counts_dict[superclass]:
-                overview_dict[superclass][clss] = {}
-                for subclass in overview_counts_dict[superclass][clss]:
-                    overview_dict[superclass][clss][subclass] = {}
-                    overview_dict[superclass][clss][subclass]['subsystem_name_counts'] = len(overview_counts_dict[superclass][clss][subclass]['subsystem_names'])
-                    overview_dict[superclass][clss][subclass]['gene_counts'] = len(overview_counts_dict[superclass][clss][subclass]['gene_set'])
-                    for subsystem_name in subsystem_dict[superclass][clss][subclass]:
-                        new_entry = {
-                            'superclass': superclass,
-                            'class': clss,
-                            'subclass': subclass,
-                            'subsystem_name': subsystem_name,
-                            'role_counts': len(subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set']),
-                            'gene_counts': len(subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'])
-                        }
-                        subsystems_table_list.append(new_entry)
-        subsystems_table = pd.DataFrame(subsystems_table_list)
-        import pdb
-        pdb.set_trace()
-        
+    # gets counts for overview dict, any other adjustments
+    # create subsystems table
+    subsystems_table_list = []
+    overview_dict = {} 
+    for superclass in overview_counts_dict:
+        overview_dict[superclass] = {}
+        for clss in overview_counts_dict[superclass]:
+            overview_dict[superclass][clss] = {}
+            for subclass in overview_counts_dict[superclass][clss]:
+                overview_dict[superclass][clss][subclass] = {}
+                overview_dict[superclass][clss][subclass]['subsystem_name_counts'] = len(overview_counts_dict[superclass][clss][subclass]['subsystem_names'])
+                overview_dict[superclass][clss][subclass]['gene_counts'] = len(overview_counts_dict[superclass][clss][subclass]['gene_set'])
+                for subsystem_name in subsystem_dict[superclass][clss][subclass]:
+                    new_entry = {
+                        'superclass': superclass,
+                        'class': clss,
+                        'subclass': subclass,
+                        'subsystem_name': subsystem_name,
+                        'role_counts': len(subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set']),
+                        'gene_counts': len(subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'])
+                    }
+                    subsystems_table_list.append(new_entry)
+    subsystems_table = pd.DataFrame(subsystems_table_list)
+    import pdb
+    pdb.set_trace()
+    
 
 def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data, session):
     
