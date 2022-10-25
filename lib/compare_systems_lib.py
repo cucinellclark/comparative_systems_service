@@ -519,7 +519,7 @@ def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_da
     subsystem_dict = {}
 
     subsystem_query_data = []
-    required_fields = ['superclass','class','subclass','subsystem_name']
+    required_fields = ['superclass','class','subclass','subsystem_name','feature_id','gene','product','role_id','role_name']
     subsystem_data_found = False
     subsystem_genomes_found = set()
     subsystem_table_header = None
@@ -527,6 +527,8 @@ def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_da
         base = "https://www.patricbrc.org/api/subsystem/?http_download=true"
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+id)"
         headers = {"accept":"application/json", "content-type":"application/rqlquery+x-www-form-urlencoded","Authorization": session.headers['Authorization']}
+
+        #dict_keys(['active', 'class', 'date_inserted', 'date_modified', 'feature_id', 'gene', 'genome_id', 'genome_name', 'id', 'owner', 'patric_id', 'product', 'public', 'refseq_locus_tag', 'role_id', 'role_name', 'subclass', 'subsystem_id', 'subsystem_name', 'superclass', 'taxon_id', '_version_'])
 
         print('Query = {0}\nHeaders = {1}'.format(base+'&'+query,headers))
         result_header = True        
@@ -542,16 +544,24 @@ def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_da
                     subsystem_table_header = current_header
                 continue
         subsystem_fields = line
-        import pdb
-        pdb.set_trace()
         for field in required_fields:
             if field not in pathway_fields:
                 pathway_fields[field] = ''
         subsystem_query_data.append(subsystem_fields)
         try:
-            print('yes')
+            active = subsystem_fields['active'] 
+            clss = subsystem_fields['class'] 
+            feature_id = subsystem_fields['feature_id'] 
+            gene = subsystem_fields['gene'] 
+            product = subsystem_fields['product'] 
+            role_id = subsystem_fields['role_id'] 
+            role_name = subsystem_fields['role_name'] 
+            subclass = subsystem_fields['subclass'] 
+            subsystem_id = subsystem_fields['subsystem_id'] 
+            subsystem_name = subsystem_fields['subsystem_name'] 
         except Exception as e:
-            print('no')
+            sys.stderr.write(f'Error with the following line:\n{e}\n{line}\n')
+            continue
 
 def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data, session):
     
