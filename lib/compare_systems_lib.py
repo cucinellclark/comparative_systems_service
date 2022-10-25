@@ -524,6 +524,7 @@ def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_da
     subsystem_data_found = False
     subsystem_genomes_found = set()
     subsystem_table_header = None
+    print_one = True
     for gids in chunker(genome_ids, 20):
         base = "https://www.patricbrc.org/api/subsystem/?http_download=true"
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+id)"
@@ -544,6 +545,9 @@ def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_da
                 if subsystem_table_header is None or len(current_header) > len(subsystem_table_header):
                     subsystem_table_header = current_header
                 continue
+            if print_one:
+                print_one = False
+                print(line)
             subsystem_fields = line
             for field in required_fields:
                 if field not in subsystem_fields:
