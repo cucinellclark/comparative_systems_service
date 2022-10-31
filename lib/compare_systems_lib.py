@@ -1198,6 +1198,9 @@ def run_compare_systems(job_data, output_dir):
 
     # optionally add more genome info to output 
     genome_data = getDataForGenomes(genome_ids,s) 
+    
+    import pdb
+    pdb.set_trace()
 
     query_dict = run_all_queries(genome_ids, s)
 
