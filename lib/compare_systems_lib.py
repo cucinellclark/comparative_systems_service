@@ -1199,17 +1199,14 @@ def run_compare_systems(job_data, output_dir):
     # optionally add more genome info to output 
     genome_data = getDataForGenomes(genome_ids,s) 
     
-    import pdb
-    pdb.set_trace()
-
     query_dict = run_all_queries(genome_ids, s)
 
     # TODO: add chunking
     # TODO: add recipe
     # TODO: add multithreading
-    pathway_success = run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    #pathway_success = run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
     #subsystems_success = run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, s)
-    subsystems_success = run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    #subsystems_success = run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
     proteinfams_success = run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
 
     generate_report(genome_ids,pathway_success,subsystems_success,proteinfams_success,output_dir)
