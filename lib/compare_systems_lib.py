@@ -143,6 +143,19 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
             data_dict['pgfam'][pgfam_id]['genome_count'] = len(pgfam_genomes[pgfam_id])
             pgfam_genomes[pgfam_id][genome_id]+=1
 
+    # TODO: https://alpha.bv-brc.org/api/protein_family_ref/
+    # - get protein family description data
+    '''
+    description_dict = {}
+    for plids_list in chunker(data['plfam'].keys(),100):
+        base = "https://alpha.bv-brc.org/api/protein_family_ref/?http_download=true"
+        query = f"in(family_id,({','.join(plids_list)}))&limit(2500000)&sort(+family_id)"
+        headers = {"accept":"text/tsv", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
+        text_data = json.loads(getQueryDataText(base,query,headers))
+        import pdb
+        pdb.set_trace()
+    '''     
+
     # go back and get the mean, max, min, std dev for each family_id
     plfam_line_list = []        
     pgfam_line_list = []
