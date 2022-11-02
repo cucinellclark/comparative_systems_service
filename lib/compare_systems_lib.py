@@ -611,6 +611,7 @@ def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_da
                 overview_dict[superclass][clss][subclass]['subsystem_name_counts'] = len(overview_counts_dict[superclass][clss][subclass]['subsystem_names'])
                 overview_dict[superclass][clss][subclass]['gene_counts'] = len(overview_counts_dict[superclass][clss][subclass]['gene_set'])
                 overview_dict[superclass][clss]['subsystem_name_counts'] += len(overview_counts_dict[superclass][clss][subclass]['subsystem_names'])
+                overview_dict[superclass][clss]['gene_counts'] += len(overview_counts_dict[superclass][clss][subclass]['gene_set'])
                 overview_dict[superclass]['gene_counts'] += len(overview_counts_dict[superclass][clss][subclass]['gene_set'])
                 overview_dict[superclass]['subsystem_name_counts'] += len(overview_counts_dict[superclass][clss][subclass]['subsystem_names'])
                 for subsystem_name in subsystem_dict[superclass][clss][subclass]:
