@@ -600,12 +600,19 @@ def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_da
     overview_dict = {} 
     for superclass in overview_counts_dict:
         overview_dict[superclass] = {}
+        overview_dict[superclass]['subsystem_name_counts'] = 0
+        overview_dict[superclass]['gene_counts'] = 0
         for clss in overview_counts_dict[superclass]:
             overview_dict[superclass][clss] = {}
+            overview_dict[superclass][clss]['subsystem_name_counts'] = 0
+            overview_dict[superclass][clss]['gene_counts'] = 0
             for subclass in overview_counts_dict[superclass][clss]:
                 overview_dict[superclass][clss][subclass] = {}
                 overview_dict[superclass][clss][subclass]['subsystem_name_counts'] = len(overview_counts_dict[superclass][clss][subclass]['subsystem_names'])
                 overview_dict[superclass][clss][subclass]['gene_counts'] = len(overview_counts_dict[superclass][clss][subclass]['gene_set'])
+                overview_dict[superclass][clss]['subsystem_name_counts'] += len(overview_counts_dict[superclass][clss][subclass]['subsystem_names'])
+                overview_dict[superclass]['gene_counts'] += len(overview_counts_dict[superclass][clss][subclass]['gene_set'])
+                overview_dict[superclass]['subsystem_name_counts'] += len(overview_counts_dict[superclass][clss][subclass]['subsystem_names'])
                 for subsystem_name in subsystem_dict[superclass][clss][subclass]:
                     new_entry = {
                         'superclass': superclass,
