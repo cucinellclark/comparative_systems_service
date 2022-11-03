@@ -145,16 +145,24 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
 
     # TODO: https://alpha.bv-brc.org/api/protein_family_ref/
     # - get protein family description data
-    description_dict = {}
+    product_dict = {}
     for plids_list in chunker(list(data_dict['plfam'].keys()),5000):
         base = "https://alpha.bv-brc.org/api/protein_family_ref/?http_download=true"
         query = f"in(family_id,({','.join(plids_list)}))&limit(2500000)&sort(+family_id)"
         headers = {"accept":"application/json", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
         #headers = {"accept":"text/tsv", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
         res_data = getQueryDataText(base,query,headers)
-        #text_data = json.loads()
-        import pdb
-        pdb.set_trace()
+        text_data = json.loads(res_data)
+        for entry in text_data:
+            product_dict[text_data['family_id']] = text_data['family_product']
+    for pgids_list in chunker(list(data_dict['pgfam'].keys()),5000):
+        base = "https://alpha.bv-brc.org/api/protein_family_ref/?http_download=true"
+        query = f"in(family_id,({','.join(pgids_list)}))&limit(2500000)&sort(+family_id)"
+        headers = {"accept":"application/json", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
+        res_data = getQueryDataText(base,query,headers)
+        text_data = json.loads(res_data)
+        for entry in text_data:
+            product_dict[text_data['family_id']] = text_data['family_product']
 
     # go back and get the mean, max, min, std dev for each family_id
     plfam_line_list = []        
@@ -185,7 +193,8 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
                 genomes_dir[gid] = '00'
         #genomes = ''.join(genomes_list)
         genome_str_dict['plfam'][plfam_id] = genomes_dir 
-        product = data_dict['plfam'][plfam_id]['product']
+        #product = data_dict['plfam'][plfam_id]['product']
+        product = product_dict[plfam_id]
         plfam_str = f'{plfam_id}\t{feature_count}\t{genome_count}\t{product}\t{aa_length_min}\t{aa_length_max}\t{aa_length_mean}\t{aa_length_std}'
         plfam_line_list.append(plfam_str)
     for pgfam_id in data_dict['pgfam']:
@@ -210,7 +219,8 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
                 genomes_dir[gid] = '00'
         #genomes = ''.join(genomes_list)
         genome_str_dict['pgfam'][pgfam_id] = genomes_dir 
-        product = data_dict['pgfam'][pgfam_id]['product']
+        #product = data_dict['pgfam'][pgfam_id]['product']
+        product = product_dict[pgfam_id]
         pgfam_str = f'{pgfam_id}\t{feature_count}\t{genome_count}\t{product}\t{aa_length_min}\t{aa_length_max}\t{aa_length_mean}\t{aa_length_std}'
         pgfam_line_list.append(pgfam_str)
 
