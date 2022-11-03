@@ -145,7 +145,6 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
 
     # TODO: https://alpha.bv-brc.org/api/protein_family_ref/
     # - get protein family description data
-    '''
     description_dict = {}
     for plids_list in chunker(data['plfam'].keys(),100):
         base = "https://alpha.bv-brc.org/api/protein_family_ref/?http_download=true"
@@ -154,7 +153,6 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         text_data = json.loads(getQueryDataText(base,query,headers))
         import pdb
         pdb.set_trace()
-    '''     
 
     # go back and get the mean, max, min, std dev for each family_id
     plfam_line_list = []        
@@ -1148,7 +1146,7 @@ def run_all_queries(genome_ids, session):
         else:
             sys.stderr.write('Subsystems dataframe is None\n')
     ### Run features query
-    if True:
+    if False:
         print('features query')
         feature_df = getFeatureDataFrame(genome_ids,session, limit=2500000)
         if not feature_df is None:
@@ -1225,9 +1223,9 @@ def run_compare_systems(job_data, output_dir):
     # TODO: add chunking
     # TODO: add recipe
     # TODO: add multithreading
-    pathway_success = run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    #pathway_success = run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
     #subsystems_success = run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, s)
-    subsystems_success = run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    #subsystems_success = run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
     proteinfams_success = run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
 
-    generate_report(genome_ids,pathway_success,subsystems_success,proteinfams_success,output_dir)
+    #generate_report(genome_ids,pathway_success,subsystems_success,proteinfams_success,output_dir)
