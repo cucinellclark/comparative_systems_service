@@ -147,20 +147,24 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     # - get protein family description data
     product_dict = {}
     for plids_list in chunker(list(data_dict['plfam'].keys()),5000):
+        print(f"plids_list has {len(plids_list)} elements")
         base = "https://alpha.bv-brc.org/api/protein_family_ref/?http_download=true"
         query = f"in(family_id,({','.join(plids_list)}))&limit(2500000)&sort(+family_id)"
         headers = {"accept":"application/json", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
         #headers = {"accept":"text/tsv", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
         res_data = getQueryDataText(base,query,headers)
         text_data = json.loads(res_data)
+        print(f"text_data has {len(res_data)} elements")
         for entry in text_data:
             product_dict[entry['family_id']] = entry['family_product']
     for pgids_list in chunker(list(data_dict['pgfam'].keys()),5000):
+        print(f"pgids_list has {len(pgids_list)} elements")
         base = "https://alpha.bv-brc.org/api/protein_family_ref/?http_download=true"
         query = f"in(family_id,({','.join(pgids_list)}))&limit(2500000)&sort(+family_id)"
         headers = {"accept":"application/json", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
         res_data = getQueryDataText(base,query,headers)
         text_data = json.loads(res_data)
+        print(f"text_data has {len(res_data)} elements")
         for entry in text_data:
             product_dict[entry['family_id']] = entry['family_product']
 
@@ -172,7 +176,6 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     genome_str_dict = {}
     genome_str_dict['plfam'] = {}
     genome_str_dict['pgfam'] = {}
-    not_present_family_ids = []
     for plfam_id in data_dict['plfam']:
         if plfam_id == '':
             continue
@@ -199,7 +202,6 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
             product = product_dict[plfam_id]
         else:
             product = 'NOTHING'
-            not_present_family_ids.append(plfam_id)
         plfam_str = f'{plfam_id}\t{feature_count}\t{genome_count}\t{product}\t{aa_length_min}\t{aa_length_max}\t{aa_length_mean}\t{aa_length_std}'
         plfam_line_list.append(plfam_str)
     for pgfam_id in data_dict['pgfam']:
@@ -229,15 +231,11 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
             product = product_dict[pgfam_id]
         else:
             product = 'NOTHING'
-            not_present_family_ids.append(pgfam_id)
         pgfam_str = f'{pgfam_id}\t{feature_count}\t{genome_count}\t{product}\t{aa_length_min}\t{aa_length_max}\t{aa_length_mean}\t{aa_length_std}'
         pgfam_line_list.append(pgfam_str)
 
     #output_json['genome_ids'] = genome_ids
     #output_json['genome_ids'] = list(set(genome_ids).intersection(present_genome_ids)) 
-
-    with open('test_output/missing_family_ids.txt','w') as o:
-        o.write('\n'.join(not_present_family_ids))
 
     unsorted_genome_ids = [gid for gid in genome_ids if gid in present_genome_ids] 
     tmp_data = genome_data.loc[genome_data['Genome ID'].isin(unsorted_genome_ids)]
