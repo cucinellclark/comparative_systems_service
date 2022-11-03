@@ -152,12 +152,9 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         query = f"in(family_id,({','.join(plids_list)}))&limit(2500000)&sort(+family_id)"
         headers = {"accept":"application/json", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
         #headers = {"accept":"text/tsv", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
-        res_data = getQueryDataText(base,query,headers)
+        res_data = getQueryDataText(base,query,headers,print_query=False)
         text_data = json.loads(res_data)
-        if len(plids_list) < 5000:
-            import pdb
-            pdb.set_trace()
-        print(f"text_data has {len(res_data)} elements")
+        print(f"text_data has {len(text_data)} elements")
         for entry in text_data:
             product_dict[entry['family_id']] = entry['family_product']
     for pgids_list in chunker(list(data_dict['pgfam'].keys()),5000):
@@ -165,9 +162,9 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         base = "https://alpha.bv-brc.org/api/protein_family_ref/?http_download=true"
         query = f"in(family_id,({','.join(pgids_list)}))&limit(2500000)&sort(+family_id)"
         headers = {"accept":"application/json", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
-        res_data = getQueryDataText(base,query,headers)
+        res_data = getQueryDataText(base,query,headers,print_query=False)
         text_data = json.loads(res_data)
-        print(f"text_data has {len(res_data)} elements")
+        print(f"text_data has {len(text_data)} elements")
         for entry in text_data:
             product_dict[entry['family_id']] = entry['family_product']
 
