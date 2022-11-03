@@ -164,9 +164,6 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         for entry in text_data:
             product_dict[entry['family_id']] = entry['family_product']
 
-    import pdb
-    pdb.set_trace()
-
     # go back and get the mean, max, min, std dev for each family_id
     plfam_line_list = []        
     pgfam_line_list = []
@@ -175,6 +172,7 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     genome_str_dict = {}
     genome_str_dict['plfam'] = {}
     genome_str_dict['pgfam'] = {}
+    not_present_family_ids = []
     for plfam_id in data_dict['plfam']:
         if plfam_id == '':
             continue
@@ -200,8 +198,8 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         if plfam_id in product_dict:
             product = product_dict[plfam_id]
         else:
-            print('{0} not in product_dict'.format(plfam_id))
             product = 'NOTHING'
+            not_present_family_ids.append(plfam_id)
         plfam_str = f'{plfam_id}\t{feature_count}\t{genome_count}\t{product}\t{aa_length_min}\t{aa_length_max}\t{aa_length_mean}\t{aa_length_std}'
         plfam_line_list.append(plfam_str)
     for pgfam_id in data_dict['pgfam']:
@@ -227,12 +225,19 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         #genomes = ''.join(genomes_list)
         genome_str_dict['pgfam'][pgfam_id] = genomes_dir 
         #product = data_dict['pgfam'][pgfam_id]['product']
-        product = product_dict[pgfam_id]
+        if pgfam_id in product_dict:
+            product = product_dict[pgfam_id]
+        else:
+            product = 'NOTHING'
+            not_present_family_ids.append(pgfam_id)
         pgfam_str = f'{pgfam_id}\t{feature_count}\t{genome_count}\t{product}\t{aa_length_min}\t{aa_length_max}\t{aa_length_mean}\t{aa_length_std}'
         pgfam_line_list.append(pgfam_str)
 
     #output_json['genome_ids'] = genome_ids
     #output_json['genome_ids'] = list(set(genome_ids).intersection(present_genome_ids)) 
+
+    with open('test_output/missing_family_ids.txt','w') as o:
+        o.write('\n'.join(not_present_family_ids))
 
     unsorted_genome_ids = [gid for gid in genome_ids if gid in present_genome_ids] 
     tmp_data = genome_data.loc[genome_data['Genome ID'].isin(unsorted_genome_ids)]
