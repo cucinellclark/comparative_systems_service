@@ -1175,7 +1175,7 @@ def run_all_queries(genome_ids, session):
         else:
             sys.stderr.write('Subsystems dataframe is None\n')
     ### Run features query
-    if False:
+    if True:
         print('features query')
         feature_df = getFeatureDataFrame(genome_ids,session, limit=2500000)
         if not feature_df is None:
@@ -1246,14 +1246,13 @@ def run_compare_systems(job_data, output_dir):
 
     # optionally add more genome info to output 
     genome_data = getDataForGenomes(genome_ids,s) 
-    
+
     query_dict = run_all_queries(genome_ids, s)
 
     # TODO: add chunking
     # TODO: add recipe
     # TODO: add multithreading
     pathway_success = run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
-    #subsystems_success = run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, s)
     subsystems_success = run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
     proteinfams_success = run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
 
