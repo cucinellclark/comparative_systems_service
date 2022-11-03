@@ -145,11 +145,7 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
                 data_dict['pgfam'][pgfam_id]['genome_count'] = len(pgfam_genomes[pgfam_id])
                 pgfam_genomes[pgfam_id][genome_id]+=1
 
-    # TODO: https://alpha.bv-brc.org/api/protein_family_ref/
     # - get protein family description data
-    # - HERE: for some reason there are empty values for plfam and pgfams
-    # - remove or go back and see why they are being added in the first place
-    # - res = list(filter(None, list2))
     product_dict = {}
     for plids_list in chunker(list(data_dict['plfam'].keys()),5000):
         print(f"plids_list has {len(plids_list)} elements")
@@ -1256,9 +1252,9 @@ def run_compare_systems(job_data, output_dir):
     # TODO: add chunking
     # TODO: add recipe
     # TODO: add multithreading
-    #pathway_success = run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    pathway_success = run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
     #subsystems_success = run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, s)
-    #subsystems_success = run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    subsystems_success = run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
     proteinfams_success = run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
 
-    #generate_report(genome_ids,pathway_success,subsystems_success,proteinfams_success,output_dir)
+    generate_report(genome_ids,pathway_success,subsystems_success,proteinfams_success,output_dir)
