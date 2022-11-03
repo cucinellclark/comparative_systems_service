@@ -154,6 +154,9 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         #headers = {"accept":"text/tsv", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
         res_data = getQueryDataText(base,query,headers)
         text_data = json.loads(res_data)
+        if len(plids_list) < 5000:
+            import pdb
+            pdb.set_trace()
         print(f"text_data has {len(res_data)} elements")
         for entry in text_data:
             product_dict[entry['family_id']] = entry['family_product']
