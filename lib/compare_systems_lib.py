@@ -146,9 +146,7 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     # TODO: https://alpha.bv-brc.org/api/protein_family_ref/
     # - get protein family description data
     description_dict = {}
-    import pdb
-    pdb.set_trace()
-    for plids_list in chunker(data['plfam'].keys(),100):
+    for plids_list in chunker(data_dict['plfam'].keys(),5000):
         base = "https://alpha.bv-brc.org/api/protein_family_ref/?http_download=true"
         query = f"in(family_id,({','.join(plids_list)}))&limit(2500000)&sort(+family_id)"
         headers = {"accept":"text/tsv", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
