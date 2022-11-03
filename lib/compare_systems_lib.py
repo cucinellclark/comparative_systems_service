@@ -113,6 +113,9 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
             if genome_id not in genomes_missing_data:
                 genomes_missing_data[genome_id] = True
             ### plfam counts
+            if len(plfam_id) < 5:
+                import pdb
+                pdb.set_trace()
             if plfam_id != '':
                 if plfam_id not in data_dict['plfam']:
                     data_dict['plfam'][plfam_id] = {} 
