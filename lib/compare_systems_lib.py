@@ -113,35 +113,37 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
             if genome_id not in genomes_missing_data:
                 genomes_missing_data[genome_id] = True
             ### plfam counts
-            if plfam_id not in data_dict['plfam'] and plfam_id != '':
-                data_dict['plfam'][plfam_id] = {} 
-                data_dict['plfam'][plfam_id]['aa_length_list'] = [] 
-                data_dict['plfam'][plfam_id]['feature_count'] = 0 
-                data_dict['plfam'][plfam_id]['genome_count'] = 0 
-                data_dict['plfam'][plfam_id]['product'] = product 
-            if plfam_id not in plfam_genomes:
-                plfam_genomes[plfam_id] = {} 
-            if genome_id not in plfam_genomes[plfam_id]:
-                plfam_genomes[plfam_id][genome_id] = 0
-            data_dict['plfam'][plfam_id]['aa_length_list'].append(int(aa_length))
-            data_dict['plfam'][plfam_id]['feature_count']+=1
-            data_dict['plfam'][plfam_id]['genome_count'] = len(plfam_genomes[plfam_id])
-            plfam_genomes[plfam_id][genome_id]+=1
+            if plfam_id != '':
+                if plfam_id not in data_dict['plfam']:
+                    data_dict['plfam'][plfam_id] = {} 
+                    data_dict['plfam'][plfam_id]['aa_length_list'] = [] 
+                    data_dict['plfam'][plfam_id]['feature_count'] = 0 
+                    data_dict['plfam'][plfam_id]['genome_count'] = 0 
+                    data_dict['plfam'][plfam_id]['product'] = product 
+                if plfam_id not in plfam_genomes:
+                    plfam_genomes[plfam_id] = {} 
+                if genome_id not in plfam_genomes[plfam_id]:
+                    plfam_genomes[plfam_id][genome_id] = 0
+                data_dict['plfam'][plfam_id]['aa_length_list'].append(int(aa_length))
+                data_dict['plfam'][plfam_id]['feature_count']+=1
+                data_dict['plfam'][plfam_id]['genome_count'] = len(plfam_genomes[plfam_id])
+                plfam_genomes[plfam_id][genome_id]+=1
             ### pgfam counts
-            if pgfam_id not in data_dict['pgfam'] and pgfam_id != '':
-                data_dict['pgfam'][pgfam_id] = {} 
-                data_dict['pgfam'][pgfam_id]['aa_length_list'] = [] 
-                data_dict['pgfam'][pgfam_id]['feature_count'] = 0 
-                data_dict['pgfam'][pgfam_id]['genome_count'] = 0 
-                data_dict['pgfam'][pgfam_id]['product'] = product 
-            if pgfam_id not in pgfam_genomes:
-                pgfam_genomes[pgfam_id] = {} 
-            if genome_id not in pgfam_genomes[pgfam_id]:
-                pgfam_genomes[pgfam_id][genome_id] = 0
-            data_dict['pgfam'][pgfam_id]['aa_length_list'].append(int(aa_length))
-            data_dict['pgfam'][pgfam_id]['feature_count']+=1
-            data_dict['pgfam'][pgfam_id]['genome_count'] = len(pgfam_genomes[pgfam_id])
-            pgfam_genomes[pgfam_id][genome_id]+=1
+            if pgfam_id != '':
+                if pgfam_id not in data_dict['pgfam']:
+                    data_dict['pgfam'][pgfam_id] = {} 
+                    data_dict['pgfam'][pgfam_id]['aa_length_list'] = [] 
+                    data_dict['pgfam'][pgfam_id]['feature_count'] = 0 
+                    data_dict['pgfam'][pgfam_id]['genome_count'] = 0 
+                    data_dict['pgfam'][pgfam_id]['product'] = product 
+                if pgfam_id not in pgfam_genomes:
+                    pgfam_genomes[pgfam_id] = {} 
+                if genome_id not in pgfam_genomes[pgfam_id]:
+                    pgfam_genomes[pgfam_id][genome_id] = 0
+                data_dict['pgfam'][pgfam_id]['aa_length_list'].append(int(aa_length))
+                data_dict['pgfam'][pgfam_id]['feature_count']+=1
+                data_dict['pgfam'][pgfam_id]['genome_count'] = len(pgfam_genomes[pgfam_id])
+                pgfam_genomes[pgfam_id][genome_id]+=1
 
     # TODO: https://alpha.bv-brc.org/api/protein_family_ref/
     # - get protein family description data
