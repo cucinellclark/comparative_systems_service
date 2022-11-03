@@ -154,7 +154,7 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         res_data = getQueryDataText(base,query,headers)
         text_data = json.loads(res_data)
         for entry in text_data:
-            product_dict[text_data['family_id']] = text_data['family_product']
+            product_dict[text_data['family_id']] = entry['family_product']
     for pgids_list in chunker(list(data_dict['pgfam'].keys()),5000):
         base = "https://alpha.bv-brc.org/api/protein_family_ref/?http_download=true"
         query = f"in(family_id,({','.join(pgids_list)}))&limit(2500000)&sort(+family_id)"
@@ -162,7 +162,7 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         res_data = getQueryDataText(base,query,headers)
         text_data = json.loads(res_data)
         for entry in text_data:
-            product_dict[text_data['family_id']] = text_data['family_product']
+            product_dict[text_data['family_id']] = entry['family_product']
 
     # go back and get the mean, max, min, std dev for each family_id
     plfam_line_list = []        
