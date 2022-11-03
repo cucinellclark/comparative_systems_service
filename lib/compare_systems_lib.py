@@ -150,7 +150,8 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         base = "https://alpha.bv-brc.org/api/protein_family_ref/?http_download=true"
         query = f"in(family_id,({','.join(plids_list)}))&limit(2500000)&sort(+family_id)"
         headers = {"accept":"text/tsv", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
-        text_data = json.loads(getQueryDataText(base,query,headers))
+        res_data = getQueryDataText(base,query,headers)
+        #text_data = json.loads()
         import pdb
         pdb.set_trace()
 
