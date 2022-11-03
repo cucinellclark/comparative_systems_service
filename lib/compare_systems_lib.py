@@ -157,6 +157,8 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         print(f"text_data has {len(text_data)} elements")
         for entry in text_data:
             product_dict[entry['family_id']] = entry['family_product']
+        if len(text_data) == 0:
+            print(query)
     for pgids_list in chunker(list(data_dict['pgfam'].keys()),5000):
         print(f"pgids_list has {len(pgids_list)} elements")
         base = "https://alpha.bv-brc.org/api/protein_family_ref/?http_download=true"
@@ -167,6 +169,8 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         print(f"text_data has {len(text_data)} elements")
         for entry in text_data:
             product_dict[entry['family_id']] = entry['family_product']
+        if len(text_data) == 0:
+            print(query)
 
     # go back and get the mean, max, min, std dev for each family_id
     plfam_line_list = []        
