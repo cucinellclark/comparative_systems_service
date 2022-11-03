@@ -589,6 +589,8 @@ def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_da
                 subsystem_id = subsystem_fields['subsystem_id'] 
                 subsystem_name = subsystem_fields['subsystem_name'] 
                 superclass = subsystem_fields['superclass']
+                # TODO: underlying issue of metadata, capitalizition of superclasses is not consistent
+                superclass = superclass.upper()
             except Exception as e:
                 sys.stderr.write(f'Error with the following line:\n{e}\n{line}\n')
                 continue
