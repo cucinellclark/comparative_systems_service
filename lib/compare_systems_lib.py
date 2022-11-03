@@ -154,6 +154,8 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         res_data = getQueryDataText(base,query,headers)
         text_data = json.loads(res_data)
         for entry in text_data:
+            import pdb
+            pdb.set_trace()
             product_dict[text_data['family_id']] = entry['family_product']
     for pgids_list in chunker(list(data_dict['pgfam'].keys()),5000):
         base = "https://alpha.bv-brc.org/api/protein_family_ref/?http_download=true"
