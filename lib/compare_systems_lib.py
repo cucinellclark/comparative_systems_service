@@ -113,7 +113,7 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
             if genome_id not in genomes_missing_data:
                 genomes_missing_data[genome_id] = True
             ### plfam counts
-            if plfam_id not in data_dict['plfam']:
+            if plfam_id not in data_dict['plfam'] and plfam_id != '':
                 data_dict['plfam'][plfam_id] = {} 
                 data_dict['plfam'][plfam_id]['aa_length_list'] = [] 
                 data_dict['plfam'][plfam_id]['feature_count'] = 0 
@@ -128,7 +128,7 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
             data_dict['plfam'][plfam_id]['genome_count'] = len(plfam_genomes[plfam_id])
             plfam_genomes[plfam_id][genome_id]+=1
             ### pgfam counts
-            if pgfam_id not in data_dict['pgfam']:
+            if pgfam_id not in data_dict['pgfam'] and pgfam_id != '':
                 data_dict['pgfam'][pgfam_id] = {} 
                 data_dict['pgfam'][pgfam_id]['aa_length_list'] = [] 
                 data_dict['pgfam'][pgfam_id]['feature_count'] = 0 
@@ -145,6 +145,9 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
 
     # TODO: https://alpha.bv-brc.org/api/protein_family_ref/
     # - get protein family description data
+    # - HERE: for some reason there are empty values for plfam and pgfams
+    # - remove or go back and see why they are being added in the first place
+    # - res = list(filter(None, list2))
     product_dict = {}
     for plids_list in chunker(list(data_dict['plfam'].keys()),5000):
         print(f"plids_list has {len(plids_list)} elements")
