@@ -164,6 +164,9 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         for entry in text_data:
             product_dict[entry['family_id']] = entry['family_product']
 
+    import pdb
+    pdb.set_trace()
+
     # go back and get the mean, max, min, std dev for each family_id
     plfam_line_list = []        
     pgfam_line_list = []
