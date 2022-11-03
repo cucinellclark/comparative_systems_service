@@ -194,7 +194,11 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
         #genomes = ''.join(genomes_list)
         genome_str_dict['plfam'][plfam_id] = genomes_dir 
         #product = data_dict['plfam'][plfam_id]['product']
-        product = product_dict[plfam_id]
+        if plfam_id in product_dict:
+            product = product_dict[plfam_id]
+        else:
+            print('{0} not in product_dict'.format(plfam_id))
+            product = 'NOTHING'
         plfam_str = f'{plfam_id}\t{feature_count}\t{genome_count}\t{product}\t{aa_length_min}\t{aa_length_max}\t{aa_length_mean}\t{aa_length_std}'
         plfam_line_list.append(plfam_str)
     for pgfam_id in data_dict['pgfam']:
