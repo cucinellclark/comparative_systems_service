@@ -113,35 +113,65 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
             if genome_id not in genomes_missing_data:
                 genomes_missing_data[genome_id] = True
             ### plfam counts
-            if plfam_id not in data_dict['plfam']:
-                data_dict['plfam'][plfam_id] = {} 
-                data_dict['plfam'][plfam_id]['aa_length_list'] = [] 
-                data_dict['plfam'][plfam_id]['feature_count'] = 0 
-                data_dict['plfam'][plfam_id]['genome_count'] = 0 
-                data_dict['plfam'][plfam_id]['product'] = product 
-            if plfam_id not in plfam_genomes:
-                plfam_genomes[plfam_id] = {} 
-            if genome_id not in plfam_genomes[plfam_id]:
-                plfam_genomes[plfam_id][genome_id] = 0
-            data_dict['plfam'][plfam_id]['aa_length_list'].append(int(aa_length))
-            data_dict['plfam'][plfam_id]['feature_count']+=1
-            data_dict['plfam'][plfam_id]['genome_count'] = len(plfam_genomes[plfam_id])
-            plfam_genomes[plfam_id][genome_id]+=1
+            if plfam_id != '':
+                if plfam_id not in data_dict['plfam']:
+                    data_dict['plfam'][plfam_id] = {} 
+                    data_dict['plfam'][plfam_id]['aa_length_list'] = [] 
+                    data_dict['plfam'][plfam_id]['feature_count'] = 0 
+                    data_dict['plfam'][plfam_id]['genome_count'] = 0 
+                    data_dict['plfam'][plfam_id]['product'] = product 
+                if plfam_id not in plfam_genomes:
+                    plfam_genomes[plfam_id] = {} 
+                if genome_id not in plfam_genomes[plfam_id]:
+                    plfam_genomes[plfam_id][genome_id] = 0
+                data_dict['plfam'][plfam_id]['aa_length_list'].append(int(aa_length))
+                data_dict['plfam'][plfam_id]['feature_count']+=1
+                data_dict['plfam'][plfam_id]['genome_count'] = len(plfam_genomes[plfam_id])
+                plfam_genomes[plfam_id][genome_id]+=1
             ### pgfam counts
-            if pgfam_id not in data_dict['pgfam']:
-                data_dict['pgfam'][pgfam_id] = {} 
-                data_dict['pgfam'][pgfam_id]['aa_length_list'] = [] 
-                data_dict['pgfam'][pgfam_id]['feature_count'] = 0 
-                data_dict['pgfam'][pgfam_id]['genome_count'] = 0 
-                data_dict['pgfam'][pgfam_id]['product'] = product 
-            if pgfam_id not in pgfam_genomes:
-                pgfam_genomes[pgfam_id] = {} 
-            if genome_id not in pgfam_genomes[pgfam_id]:
-                pgfam_genomes[pgfam_id][genome_id] = 0
-            data_dict['pgfam'][pgfam_id]['aa_length_list'].append(int(aa_length))
-            data_dict['pgfam'][pgfam_id]['feature_count']+=1
-            data_dict['pgfam'][pgfam_id]['genome_count'] = len(pgfam_genomes[pgfam_id])
-            pgfam_genomes[pgfam_id][genome_id]+=1
+            if pgfam_id != '':
+                if pgfam_id not in data_dict['pgfam']:
+                    data_dict['pgfam'][pgfam_id] = {} 
+                    data_dict['pgfam'][pgfam_id]['aa_length_list'] = [] 
+                    data_dict['pgfam'][pgfam_id]['feature_count'] = 0 
+                    data_dict['pgfam'][pgfam_id]['genome_count'] = 0 
+                    data_dict['pgfam'][pgfam_id]['product'] = product 
+                if pgfam_id not in pgfam_genomes:
+                    pgfam_genomes[pgfam_id] = {} 
+                if genome_id not in pgfam_genomes[pgfam_id]:
+                    pgfam_genomes[pgfam_id][genome_id] = 0
+                data_dict['pgfam'][pgfam_id]['aa_length_list'].append(int(aa_length))
+                data_dict['pgfam'][pgfam_id]['feature_count']+=1
+                data_dict['pgfam'][pgfam_id]['genome_count'] = len(pgfam_genomes[pgfam_id])
+                pgfam_genomes[pgfam_id][genome_id]+=1
+
+    # - get protein family description data
+    product_dict = {}
+    for plids_list in chunker(list(data_dict['plfam'].keys()),5000):
+        print(f"plids_list has {len(plids_list)} elements")
+        base = "https://alpha.bv-brc.org/api/protein_family_ref/?http_download=true"
+        query = f"in(family_id,({','.join(plids_list)}))&limit(2500000)&sort(+family_id)"
+        headers = {"accept":"application/json", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
+        #headers = {"accept":"text/tsv", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
+        res_data = getQueryDataText(base,query,headers,print_query=False)
+        text_data = json.loads(res_data)
+        print(f"text_data has {len(text_data)} elements")
+        for entry in text_data:
+            product_dict[entry['family_id']] = entry['family_product']
+        if len(text_data) == 0:
+            print(query)
+    for pgids_list in chunker(list(data_dict['pgfam'].keys()),5000):
+        print(f"pgids_list has {len(pgids_list)} elements")
+        base = "https://alpha.bv-brc.org/api/protein_family_ref/?http_download=true"
+        query = f"in(family_id,({','.join(pgids_list)}))&limit(2500000)&sort(+family_id)"
+        headers = {"accept":"application/json", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
+        res_data = getQueryDataText(base,query,headers,print_query=False)
+        text_data = json.loads(res_data)
+        print(f"text_data has {len(text_data)} elements")
+        for entry in text_data:
+            product_dict[entry['family_id']] = entry['family_product']
+        if len(text_data) == 0:
+            print(query)
 
     # go back and get the mean, max, min, std dev for each family_id
     plfam_line_list = []        
@@ -172,7 +202,11 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
                 genomes_dir[gid] = '00'
         #genomes = ''.join(genomes_list)
         genome_str_dict['plfam'][plfam_id] = genomes_dir 
-        product = data_dict['plfam'][plfam_id]['product']
+        #product = data_dict['plfam'][plfam_id]['product']
+        if plfam_id in product_dict:
+            product = product_dict[plfam_id]
+        else:
+            product = 'NOTHING'
         plfam_str = f'{plfam_id}\t{feature_count}\t{genome_count}\t{product}\t{aa_length_min}\t{aa_length_max}\t{aa_length_mean}\t{aa_length_std}'
         plfam_line_list.append(plfam_str)
     for pgfam_id in data_dict['pgfam']:
@@ -197,7 +231,11 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
                 genomes_dir[gid] = '00'
         #genomes = ''.join(genomes_list)
         genome_str_dict['pgfam'][pgfam_id] = genomes_dir 
-        product = data_dict['pgfam'][pgfam_id]['product']
+        #product = data_dict['pgfam'][pgfam_id]['product']
+        if pgfam_id in product_dict:
+            product = product_dict[pgfam_id]
+        else:
+            product = 'NOTHING'
         pgfam_str = f'{pgfam_id}\t{feature_count}\t{genome_count}\t{product}\t{aa_length_min}\t{aa_length_max}\t{aa_length_mean}\t{aa_length_std}'
         pgfam_line_list.append(pgfam_str)
 
@@ -510,6 +548,162 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
     print('Subsystems complete')
     return ({ 'success': True, 'genomes': list(subsystem_present_genomes) })
 
+def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_data, session):
+
+    subsystems_file = os.path.join(output_dir,output_file+'_subsystems.tsv')
+    subsystem_line_list = []
+    subsystem_header = 'superclass\tclass\tsubclass\tsubsystem_name\tgene_count\trole_count'
+    subsystem_line_list.append(subsystem_header)
+    subsystem_dict = {}
+    overview_counts_dict = {}
+
+    subsystem_query_data = []
+    required_fields = ['superclass','class','subclass','subsystem_name','feature_id','gene','product','role_id','role_name']
+    subsystem_data_found = False
+    subsystem_genomes_found = set()
+    subsystem_table_header = None
+    print_one = True
+    for gids in chunker(genome_ids, 20):
+        base = "https://www.patricbrc.org/api/subsystem/?http_download=true"
+        query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+id)"
+        headers = {"accept":"application/json", "content-type":"application/rqlquery+x-www-form-urlencoded","Authorization": session.headers['Authorization']}
+
+        #dict_keys(['active', 'class', 'date_inserted', 'date_modified', 'feature_id', 'gene', 'genome_id', 'genome_name', 'id', 'owner', 'patric_id', 'product', 'public', 'refseq_locus_tag', 'role_id', 'role_name', 'subclass', 'subsystem_id', 'subsystem_name', 'superclass', 'taxon_id', '_version_'])
+
+        print('Query = {0}\nHeaders = {1}'.format(base+'&'+query,headers))
+        result_header = True        
+        current_header = None
+        all_data = json.loads(getQueryDataText(base,query,headers))
+        for line in all_data:
+            subsystem_data_found = True
+            if result_header:
+                result_header = False
+                print(line)
+                current_header = line.keys()
+                if subsystem_table_header is None or len(current_header) > len(subsystem_table_header):
+                    subsystem_table_header = current_header
+                continue
+            if print_one:
+                print_one = False
+                print(line)
+            subsystem_fields = line
+            for field in required_fields:
+                if field not in subsystem_fields:
+                    subsystem_fields[field] = ''
+            subsystem_query_data.append(subsystem_fields)
+            try:
+                active = subsystem_fields['active'] 
+                clss = subsystem_fields['class'] 
+                feature_id = subsystem_fields['feature_id'] 
+                gene = subsystem_fields['gene'] 
+                genome_id = subsystem_fields['genome_id']
+                product = subsystem_fields['product'] 
+                role_id = subsystem_fields['role_id'] 
+                role_name = subsystem_fields['role_name'] 
+                subclass = subsystem_fields['subclass'] 
+                subsystem_id = subsystem_fields['subsystem_id'] 
+                subsystem_name = subsystem_fields['subsystem_name'] 
+                superclass = subsystem_fields['superclass']
+                # TODO: underlying issue of metadata, capitalizition of superclasses is not consistent
+                superclass = superclass.upper()
+            except Exception as e:
+                sys.stderr.write(f'Error with the following line:\n{e}\n{line}\n')
+                continue
+            subsystem_genomes_found.add(genome_id)
+            # TODO: chat with Maulik about the correct gene/role count
+            # - Do I need to keep track of unique features and their counts???
+            if superclass not in subsystem_dict:
+                subsystem_dict[superclass] = {} 
+                overview_counts_dict[superclass] = {}
+            if clss not in subsystem_dict[superclass]:
+                subsystem_dict[superclass][clss] = {}
+                overview_counts_dict[superclass][clss] = {}
+            if subclass not in subsystem_dict[superclass][clss]:
+                subsystem_dict[superclass][clss][subclass] = {}
+                overview_counts_dict[superclass][clss][subclass] = {}
+                overview_counts_dict[superclass][clss][subclass]['subsystem_names'] = set()
+                overview_counts_dict[superclass][clss][subclass]['gene_set'] = set()
+            if subsystem_name not in subsystem_dict[superclass][clss][subclass]:
+                subsystem_dict[superclass][clss][subclass][subsystem_name] = {}
+                subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'] = set()
+                subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set'] = set()
+            overview_counts_dict[superclass][clss][subclass]['subsystem_names'].add(subsystem_name)
+            if gene != '' or gene is not None:
+                subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'].add(gene)
+                overview_counts_dict[superclass][clss][subclass]['gene_set'].add(gene)
+            if role_id != '' or gene is not None: 
+                subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set'].add(role_id)
+
+    # gets counts for overview dict, any other adjustments
+    # create subsystems table
+    subsystems_table_list = []
+    overview_dict = {} 
+    for superclass in overview_counts_dict:
+        overview_dict[superclass] = {}
+        overview_dict[superclass]['subsystem_name_counts'] = 0
+        overview_dict[superclass]['gene_counts'] = 0
+        for clss in overview_counts_dict[superclass]:
+            overview_dict[superclass][clss] = {}
+            overview_dict[superclass][clss]['subsystem_name_counts'] = 0
+            overview_dict[superclass][clss]['gene_counts'] = 0
+            for subclass in overview_counts_dict[superclass][clss]:
+                overview_dict[superclass][clss][subclass] = {}
+                overview_dict[superclass][clss][subclass]['subsystem_name_counts'] = len(overview_counts_dict[superclass][clss][subclass]['subsystem_names'])
+                overview_dict[superclass][clss][subclass]['gene_counts'] = len(overview_counts_dict[superclass][clss][subclass]['gene_set'])
+                overview_dict[superclass][clss]['subsystem_name_counts'] += len(overview_counts_dict[superclass][clss][subclass]['subsystem_names'])
+                overview_dict[superclass][clss]['gene_counts'] += len(overview_counts_dict[superclass][clss][subclass]['gene_set'])
+                overview_dict[superclass]['gene_counts'] += len(overview_counts_dict[superclass][clss][subclass]['gene_set'])
+                overview_dict[superclass]['subsystem_name_counts'] += len(overview_counts_dict[superclass][clss][subclass]['subsystem_names'])
+                for subsystem_name in subsystem_dict[superclass][clss][subclass]:
+                    new_entry = {
+                        'superclass': superclass,
+                        'class': clss,
+                        'subclass': subclass,
+                        'subsystem_name': subsystem_name,
+                        'role_counts': len(subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set']),
+                        'gene_counts': len(subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'])
+                    }
+                    subsystems_table_list.append(new_entry)
+
+    if not subsystem_data_found:
+        return ({ 'success': False }) 
+
+    parsed_query_data = []
+    for line in subsystem_query_data:
+        new_line = ''
+        for field in subsystem_table_header:
+            if new_line != '':
+                new_line += '\t'
+            if field not in line:    
+                new_line += ' '
+            else:
+                value = line[field]
+                if not isinstance(value,str):
+                    value = str(value)
+                new_line += value 
+        parsed_query_data.append(new_line.split('\t'))
+
+    subsystem_df = pd.DataFrame(parsed_query_data,columns=subsystem_table_header)
+    subsystems_table = pd.DataFrame(subsystems_table_list)
+
+    gene_df = query_dict['feature']
+    gene_df = pd.merge(gene_df,subsystem_df.drop(return_columns_to_remove('subsystems_genes',subsystem_df.columns.tolist()),axis=1),on=['genome_id','feature_id'],how='inner')
+    
+    output_json_file = subsystems_file.replace('.tsv','_tables.json')
+    
+    output_json = {}
+    output_json['genome_ids'] = list(subsystem_genomes_found)
+    output_json['genome_names'] = genome_data.set_index('Genome ID').loc[list(subsystem_genomes_found)]['Genome Name'].tolist() # returns a list of genome names in the same order as the genome ids
+    output_json['overview'] = overview_dict
+    output_json['job_name'] = output_file
+    output_json['subsystems'] = subsystems_table.to_csv(index=False,sep='\t')
+    output_json['genes'] = gene_df.to_csv(index=False,sep='\t')
+    with open(output_json_file,'w') as o:
+        o.write(json.dumps(output_json))
+
+    print('Subsystems complete')
+    return ({ 'success': True, 'genomes': list(subsystem_genomes_found) })
+
 def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data, session):
     
     pathways_file = os.path.join(output_dir,output_file+'_pathways.tsv')
@@ -537,7 +731,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     for gids in chunker(genome_ids, 20):
         base = "https://www.patricbrc.org/api/pathway/?http_download=true"
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+id)&eq(annotation,PATRIC)"
-        headers = {"accept":"application/json", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
+        headers = {"accept":"application/json", "content-type":"application/rqlquery+x-www-form-urlencoded", "Authorization": session.headers['Authorization']}
         
         print('Query = {0}\nHeaders = {1}'.format(base+'&'+query,headers))
         #accession       alt_locus_tag   annotation      date_inserted   date_modified   ec_description  ec_number       feature_id      genome_ec       genome_id       genome_name     id      owner   pathway_class   pathway_ec      pathway_id   pathway_name     patric_id       product public  refseq_locus_tag        sequence_id     taxon_id        _version_
@@ -971,7 +1165,7 @@ def run_all_queries(genome_ids, session):
         else:
             sys.stderr.write('Pathways dataframe is None\n')
     ### Run subsystems query
-    if True:
+    if False:
         print('subsystems query')
         subsystems_df = getSubsystemsDataFrame(genome_ids,session) 
         if not subsystems_df is None:
@@ -1059,7 +1253,7 @@ def run_compare_systems(job_data, output_dir):
     # TODO: add recipe
     # TODO: add multithreading
     pathway_success = run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
-    subsystems_success = run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    subsystems_success = run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
     proteinfams_success = run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data, s)
 
     generate_report(genome_ids,pathway_success,subsystems_success,proteinfams_success,output_dir)
