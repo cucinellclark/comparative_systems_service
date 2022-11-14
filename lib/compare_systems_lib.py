@@ -700,6 +700,8 @@ def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_da
 
     # Variant matrix
     # TODO: change SS to something else
+    import pdb
+    pdb.set_trace()
     variant_mtx_header = '\t\t\t\t\t\t'
     gid_str = ''
     for genome_name in list(genome_dict.keys()).sort():
