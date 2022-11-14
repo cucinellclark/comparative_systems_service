@@ -703,7 +703,7 @@ def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_da
     # - for some reason casting genome_dict.keys() as a list returns an error
     variant_mtx_header = '\t\t\t\t\t\t'
     gid_str = ''
-    genome_name_list = [gname for gname in genome_dict.keys()]
+    genome_name_list = [gname for gname in genome_dict]
     genome_name_list = genome_name_list.sort()
     for genome_name in genome_name_list:
         variant_mtx_header += f'\t{genome_name}'
