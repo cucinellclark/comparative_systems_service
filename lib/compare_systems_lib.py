@@ -702,7 +702,7 @@ def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_da
     # TODO: change SS to something else
     variant_mtx_header = '\t\t\t\t\t\t'
     gid_str = ''
-    for genome_name in genome_dict.keys().sort():
+    for genome_name in list(genome_dict.keys()).sort():
         variant_mtx_header += f'\t{genome_name}'
         gid_str += f'\t{genome_dict[genome_name]}'
     variant_mtx_header += '\nSuperclass\tClass\tSubclass\tSS\tactive\tlikely\tinactive'
@@ -716,7 +716,7 @@ def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_da
                     sub_key = superclass + clss + subclass + subsystem_name 
                     new_var_line = f'{superclass}\t{clss}\t{subclass}\t{subsystem_name}'
                     new_var_line += f"{variant_counts_dict['active']}\t{variant_counts_dict['likely']}\t{variant_counts_dict['absent']}"
-                    for genome_name in genome_dict.keys().sort():
+                    for genome_name in list(genome_dict.keys()).sort():
                         if genome_dict[genome_name] in subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict']:
                             new_var_line += f"\t{subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict'][genome_dict[genome_name]]}" 
                         else:
