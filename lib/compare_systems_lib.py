@@ -638,11 +638,11 @@ def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_da
                 variant_counts_dict[sub_key] = {}
                 variant_counts_dict[sub_key]['active'] = 0
                 variant_counts_dict[sub_key]['likely'] = 0
-                variant_counts_dict[sub_key]['absent'] = 0
+                variant_counts_dict[sub_key]['inactive'] = 0
             if active == 'active' or active == 'likely':
                 variant_counts_dict[sub_key][active] += 1
-            else:
-                variant_counts_dict[sub_key]['absent'] += 1
+            else: # never reached, the genome just doesn't have an entry
+                variant_counts_dict[sub_key]['inactive'] += 1
             if gene != '' or gene is not None:
                 subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'].add(gene)
                 overview_counts_dict[superclass][clss][subclass]['gene_set'].add(gene)
@@ -717,13 +717,14 @@ def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_da
             for subclass in subsystem_dict[superclass][clss]: 
                 for subsystem_name in subsystem_dict[superclass][clss][subclass]:
                     sub_key = superclass + clss + subclass + subsystem_name 
+                    inactive_value = len(genome_name_list) - len(subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict'])
                     new_var_line = f'{superclass}\t{clss}\t{subclass}\t{subsystem_name}'
-                    new_var_line += f"\t{variant_counts_dict[sub_key]['active']}\t{variant_counts_dict[sub_key]['likely']}\t{variant_counts_dict[sub_key]['absent']}"
+                    new_var_line += f"\t{variant_counts_dict[sub_key]['active']}\t{variant_counts_dict[sub_key]['likely']}\t{inactive_value}"
                     for genome_name in genome_name_list:
                         if genome_dict[genome_name] in subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict']:
                             new_var_line += f"\t{subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict'][genome_dict[genome_name]]}" 
                         else:
-                            new_var_line += f"\tabsent"
+                            new_var_line += f"\tinactive"
                     variant_mtx_lines.append(new_var_line) 
     variant_mtx_text = '\n'.join(variant_mtx_lines)
     variant_mtx_file = subsystems_file.replace('.tsv','_variant_mtx.tsv') 
