@@ -717,14 +717,17 @@ def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_da
             for subclass in subsystem_dict[superclass][clss]: 
                 for subsystem_name in subsystem_dict[superclass][clss][subclass]:
                     sub_key = superclass + clss + subclass + subsystem_name 
-                    inactive_value = len(genome_name_list) - len(subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict'])
-                    new_var_line = f'{superclass}\t{clss}\t{subclass}\t{subsystem_name}'
-                    new_var_line += f"\t{variant_counts_dict[sub_key]['active']}\t{variant_counts_dict[sub_key]['likely']}\t{inactive_value}"
+                    inactive_value = 0 
+                    new_var_line_p1 = f'{superclass}\t{clss}\t{subclass}\t{subsystem_name}'
+                    new_var_line_p1 += f"\t{variant_counts_dict[sub_key]['active']}\t{variant_counts_dict[sub_key]['likely']}\t{inactive_value}"
+                    new_var_line_p2 = ''
                     for genome_name in genome_name_list:
                         if genome_dict[genome_name] in subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict']:
-                            new_var_line += f"\t{subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict'][genome_dict[genome_name]]}" 
+                            new_var_line_p2 += f"\t{subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict'][genome_dict[genome_name]]}" 
                         else:
-                            new_var_line += f"\tinactive"
+                            new_var_line_p2 += f"\tinactive"
+                            inactive_value += 1
+                    new_var_line = new_var_line_p1 + f'\t{inactive_value}' + new_var_line_p2 
                     variant_mtx_lines.append(new_var_line) 
     variant_mtx_text = '\n'.join(variant_mtx_lines)
     variant_mtx_file = subsystems_file.replace('.tsv','_variant_mtx.tsv') 
