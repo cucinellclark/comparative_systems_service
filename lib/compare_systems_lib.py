@@ -718,7 +718,7 @@ def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_da
                 for subsystem_name in subsystem_dict[superclass][clss][subclass]:
                     sub_key = superclass + clss + subclass + subsystem_name 
                     new_var_line = f'{superclass}\t{clss}\t{subclass}\t{subsystem_name}'
-                    new_var_line += f"{variant_counts_dict['active']}\t{variant_counts_dict['likely']}\t{variant_counts_dict['absent']}"
+                    new_var_line += f"{variant_counts_dict[sub_key]['active']}\t{variant_counts_dict[sub_key]['likely']}\t{variant_counts_dict[sub_key]['absent']}"
                     for genome_name in genome_name_list:
                         if genome_dict[genome_name] in subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict']:
                             new_var_line += f"\t{subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict'][genome_dict[genome_name]]}" 
