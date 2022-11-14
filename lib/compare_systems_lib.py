@@ -84,7 +84,7 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     present_genome_ids = set()
     genomes_missing_data = {}
     for gids in chunker(genome_ids, 20):
-        base = "https://www.patricbrc.org/api/genome_feature/?http_download=true"
+        base = "https://alpha.bv-brc.org/api/genome_feature/?http_download=true"
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+feature_id)&eq(annotation,PATRIC)"
         headers = {"accept":"text/tsv", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
         result_header = True
@@ -296,7 +296,7 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
     pgfam_dict['unique_set'] = set()
     present_genome_ids = set()
     for gids in chunker(genome_ids, 20):
-        base = "https://www.patricbrc.org/api/genome_feature/?http_download=true"
+        base = "https://alpha.bv-brc.org/api/genome_feature/?http_download=true"
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+feature_id)&eq(annotation,PATRIC)"
         headers = {"accept":"text/tsv", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
         result_header = True
@@ -566,7 +566,7 @@ def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_da
     genome_dict = {}
     variant_counts_dict = {}
     for gids in chunker(genome_ids, 20):
-        base = "https://www.patricbrc.org/api/subsystem/?http_download=true"
+        base = "https://alpha.bv-brc.org/api/subsystem/?http_download=true"
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+id)"
         headers = {"accept":"application/json", "content-type":"application/rqlquery+x-www-form-urlencoded","Authorization": session.headers['Authorization']}
 
@@ -718,7 +718,7 @@ def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_da
                 for subsystem_name in subsystem_dict[superclass][clss][subclass]:
                     sub_key = superclass + clss + subclass + subsystem_name 
                     new_var_line = f'{superclass}\t{clss}\t{subclass}\t{subsystem_name}'
-                    new_var_line += f"{variant_counts_dict[sub_key]['active']}\t{variant_counts_dict[sub_key]['likely']}\t{variant_counts_dict[sub_key]['absent']}"
+                    new_var_line += f"\t{variant_counts_dict[sub_key]['active']}\t{variant_counts_dict[sub_key]['likely']}\t{variant_counts_dict[sub_key]['absent']}"
                     for genome_name in genome_name_list:
                         if genome_dict[genome_name] in subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict']:
                             new_var_line += f"\t{subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict'][genome_dict[genome_name]]}" 
@@ -776,7 +776,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     pathway_genomes_found = set()
     pathway_table_header = None
     for gids in chunker(genome_ids, 20):
-        base = "https://www.patricbrc.org/api/pathway/?http_download=true"
+        base = "https://alpha.bv-brc.org/api/pathway/?http_download=true"
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+id)&eq(annotation,PATRIC)"
         headers = {"accept":"application/json", "content-type":"application/rqlquery+x-www-form-urlencoded", "Authorization": session.headers['Authorization']}
         
