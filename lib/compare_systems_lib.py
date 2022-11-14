@@ -705,6 +705,8 @@ def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_da
     gid_str = ''
     genome_name_list = [gname for gname in genome_dict]
     genome_name_list = genome_name_list.sort()
+    import pdb
+    pdb.set_trace()
     for genome_name in genome_name_list:
         variant_mtx_header += f'\t{genome_name}'
         gid_str += f'\t{genome_dict[genome_name]}'
