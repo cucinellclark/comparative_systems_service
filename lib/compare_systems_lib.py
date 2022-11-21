@@ -558,7 +558,7 @@ def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_da
     overview_counts_dict = {}
 
     subsystem_query_data = []
-    required_fields = ['superclass','class','subclass','subsystem_name','feature_id','gene','product','role_id','role_name']
+    required_fields = ['superclass','class','subclass','subsystem_name','subsystem_id','feature_id','gene','product','role_id','role_name']
     subsystem_data_found = False
     subsystem_genomes_found = set()
     subsystem_table_header = None
@@ -631,6 +631,7 @@ def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_da
                 subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'] = set()
                 subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set'] = set()
                 subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict'] = {}
+                subsystem_dict[superclass][clss][subclass][subsystem_name]['subsystem_id'] = subsystem_id
             overview_counts_dict[superclass][clss][subclass]['subsystem_names'].add(subsystem_name)
             subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict'][genome_id] = active 
             sub_key = superclass + clss + subclass + subsystem_name
