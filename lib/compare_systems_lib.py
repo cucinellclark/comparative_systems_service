@@ -676,7 +676,7 @@ def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_da
                         'class': clss,
                         'subclass': subclass,
                         'subsystem_name': subsystem_name,
-                        'subsystem_id': subsystem_dict[superclass][clss][subclass][subsystem_name]['subsystem_id']
+                        'subsystem_id': subsystem_dict[superclass][clss][subclass][subsystem_name]['subsystem_id'],
                         'role_counts': len(subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set']),
                         'gene_counts': len(subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'])
                     }
