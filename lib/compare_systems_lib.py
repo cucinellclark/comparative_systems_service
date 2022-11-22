@@ -84,7 +84,7 @@ def run_families_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     present_genome_ids = set()
     genomes_missing_data = {}
     for gids in chunker(genome_ids, 20):
-        base = "https://www.patricbrc.org/api/genome_feature/?http_download=true"
+        base = "https://alpha.bv-brc.org/api/genome_feature/?http_download=true"
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+feature_id)&eq(annotation,PATRIC)"
         headers = {"accept":"text/tsv", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
         result_header = True
@@ -296,7 +296,7 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
     pgfam_dict['unique_set'] = set()
     present_genome_ids = set()
     for gids in chunker(genome_ids, 20):
-        base = "https://www.patricbrc.org/api/genome_feature/?http_download=true"
+        base = "https://alpha.bv-brc.org/api/genome_feature/?http_download=true"
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+feature_id)&eq(annotation,PATRIC)"
         headers = {"accept":"text/tsv", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
         result_header = True
@@ -558,13 +558,15 @@ def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_da
     overview_counts_dict = {}
 
     subsystem_query_data = []
-    required_fields = ['superclass','class','subclass','subsystem_name','feature_id','gene','product','role_id','role_name']
+    required_fields = ['superclass','class','subclass','subsystem_name','subsystem_id','feature_id','gene','product','role_id','role_name']
     subsystem_data_found = False
     subsystem_genomes_found = set()
     subsystem_table_header = None
     print_one = True
+    genome_dict = {}
+    variant_counts_dict = {}
     for gids in chunker(genome_ids, 20):
-        base = "https://www.patricbrc.org/api/subsystem/?http_download=true"
+        base = "https://alpha.bv-brc.org/api/subsystem/?http_download=true"
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+id)"
         headers = {"accept":"application/json", "content-type":"application/rqlquery+x-www-form-urlencoded","Authorization": session.headers['Authorization']}
 
@@ -597,6 +599,7 @@ def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_da
                 feature_id = subsystem_fields['feature_id'] 
                 gene = subsystem_fields['gene'] 
                 genome_id = subsystem_fields['genome_id']
+                genome_name = subsystem_fields['genome_name']
                 product = subsystem_fields['product'] 
                 role_id = subsystem_fields['role_id'] 
                 role_name = subsystem_fields['role_name'] 
@@ -610,8 +613,8 @@ def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_da
                 sys.stderr.write(f'Error with the following line:\n{e}\n{line}\n')
                 continue
             subsystem_genomes_found.add(genome_id)
-            # TODO: chat with Maulik about the correct gene/role count
-            # - Do I need to keep track of unique features and their counts???
+            if genome_name not in genome_dict:
+                genome_dict[genome_name] = genome_id
             if superclass not in subsystem_dict:
                 subsystem_dict[superclass] = {} 
                 overview_counts_dict[superclass] = {}
@@ -627,7 +630,20 @@ def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_da
                 subsystem_dict[superclass][clss][subclass][subsystem_name] = {}
                 subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'] = set()
                 subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set'] = set()
+                subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict'] = {}
+                subsystem_dict[superclass][clss][subclass][subsystem_name]['subsystem_id'] = subsystem_id
             overview_counts_dict[superclass][clss][subclass]['subsystem_names'].add(subsystem_name)
+            subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict'][genome_id] = active 
+            sub_key = superclass + clss + subclass + subsystem_name
+            if sub_key not in variant_counts_dict:
+                variant_counts_dict[sub_key] = {}
+                variant_counts_dict[sub_key]['active'] = 0
+                variant_counts_dict[sub_key]['likely'] = 0
+                variant_counts_dict[sub_key]['inactive'] = 0
+            if active == 'active' or active == 'likely':
+                variant_counts_dict[sub_key][active] += 1
+            else: # never reached, the genome just doesn't have an entry
+                variant_counts_dict[sub_key]['inactive'] += 1
             if gene != '' or gene is not None:
                 subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'].add(gene)
                 overview_counts_dict[superclass][clss][subclass]['gene_set'].add(gene)
@@ -660,8 +676,10 @@ def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_da
                         'class': clss,
                         'subclass': subclass,
                         'subsystem_name': subsystem_name,
+                        'subsystem_id': subsystem_dict[superclass][clss][subclass][subsystem_name]['subsystem_id'],
                         'role_counts': len(subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set']),
-                        'gene_counts': len(subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'])
+                        'gene_counts': len(subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set']),
+                        'genome_count': len(subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict'])
                     }
                     subsystems_table_list.append(new_entry)
 
@@ -682,6 +700,42 @@ def run_subsystems_v2(genome_ids, query_dict, output_file, output_dir, genome_da
                     value = str(value)
                 new_line += value 
         parsed_query_data.append(new_line.split('\t'))
+
+    # Variant matrix
+    # TODO: change SS to something else
+    # - for some reason casting genome_dict.keys() as a list returns an error
+    variant_mtx_header = '\t\t\t\t\t\t'
+    gid_str = ''
+    genome_name_list = list(genome_dict.keys())
+    genome_name_list.sort()
+    for genome_name in genome_name_list:
+        variant_mtx_header += f'\t{genome_name}'
+        gid_str += f'\t{genome_dict[genome_name]}'
+    variant_mtx_header += '\nSuperclass\tClass\tSubclass\tSS\tactive\tlikely\tinactive'
+    variant_mtx_header += gid_str
+    variant_mtx_lines = []
+    variant_mtx_lines.append(variant_mtx_header)
+    for superclass in subsystem_dict:
+        for clss in subsystem_dict[superclass]:
+            for subclass in subsystem_dict[superclass][clss]: 
+                for subsystem_name in subsystem_dict[superclass][clss][subclass]:
+                    sub_key = superclass + clss + subclass + subsystem_name 
+                    inactive_value = 0 
+                    new_var_line_p1 = f'{superclass}\t{clss}\t{subclass}\t{subsystem_name}'
+                    new_var_line_p1 += f"\t{variant_counts_dict[sub_key]['active']}\t{variant_counts_dict[sub_key]['likely']}\t{inactive_value}"
+                    new_var_line_p2 = ''
+                    for genome_name in genome_name_list:
+                        if genome_dict[genome_name] in subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict']:
+                            new_var_line_p2 += f"\t{subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict'][genome_dict[genome_name]]}" 
+                        else:
+                            new_var_line_p2 += f"\tinactive"
+                            inactive_value += 1
+                    new_var_line = new_var_line_p1 + f'\t{inactive_value}' + new_var_line_p2 
+                    variant_mtx_lines.append(new_var_line) 
+    variant_mtx_text = '\n'.join(variant_mtx_lines)
+    variant_mtx_file = subsystems_file.replace('.tsv','_variant_mtx.tsv') 
+    with open(variant_mtx_file,'w') as o:
+        o.write(variant_mtx_text)
 
     subsystem_df = pd.DataFrame(parsed_query_data,columns=subsystem_table_header)
     subsystems_table = pd.DataFrame(subsystems_table_list)
@@ -729,7 +783,7 @@ def run_pathways_v2(genome_ids, query_dict, output_file, output_dir, genome_data
     pathway_genomes_found = set()
     pathway_table_header = None
     for gids in chunker(genome_ids, 20):
-        base = "https://www.patricbrc.org/api/pathway/?http_download=true"
+        base = "https://alpha.bv-brc.org/api/pathway/?http_download=true"
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+id)&eq(annotation,PATRIC)"
         headers = {"accept":"application/json", "content-type":"application/rqlquery+x-www-form-urlencoded", "Authorization": session.headers['Authorization']}
         
