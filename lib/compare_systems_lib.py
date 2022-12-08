@@ -385,9 +385,10 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
                 variant_counts_dict[sub_key][active] += 1
             else: # never reached, the genome just doesn't have an entry
                 variant_counts_dict[sub_key]['inactive'] += 1
-            if feature_id in subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set']:
-                with open('repeated_feature_ids.txt','a') as o:
-                    o.write(f'{feature_id}\n') 
+            # TODO: repeated features; do I count these towards the gene counts?
+            #if feature_id in subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set']:
+            #    with open('repeated_feature_ids.txt','a') as o:
+            #       o.write(f'{feature_id}\n') 
             subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'].add(feature_id)
             overview_counts_dict[superclass][clss][subclass]['gene_set'].add(feature_id)
             if role_id != '' or gene is not None: 
@@ -483,6 +484,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
         o.write(variant_mtx_text)
 
     subsystem_df = pd.DataFrame(parsed_query_data,columns=subsystem_table_header)
+    subsystem_df.to_csv(subsystems_file,index=False,sep='\t')
     subsystems_table = pd.DataFrame(subsystems_table_list)
 
     gene_df = query_dict['feature']
