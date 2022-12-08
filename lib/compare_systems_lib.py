@@ -388,6 +388,9 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
             if feature_id is not None or feature_id is not '':
                 subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'].add(feature_id)
                 overview_counts_dict[superclass][clss][subclass]['gene_set'].add(feature_id)
+            else:
+                import pdb
+                pdb.set_trace()
             if role_id != '' or gene is not None: 
                 subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set'].add(role_id)
 
