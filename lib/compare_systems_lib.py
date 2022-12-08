@@ -386,8 +386,8 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
             else: # never reached, the genome just doesn't have an entry
                 variant_counts_dict[sub_key]['inactive'] += 1
             if feature_id in subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set']:
-                import pdb
-                pdb.set_trace()
+                with open('repeated_feature_ids.txt','a') as o:
+                    o.write(f'{feature_id}\n') 
             subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'].add(feature_id)
             overview_counts_dict[superclass][clss][subclass]['gene_set'].add(feature_id)
             if role_id != '' or gene is not None: 
