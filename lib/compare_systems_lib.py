@@ -479,6 +479,8 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
     with open(variant_mtx_file,'w') as o:
         o.write(variant_mtx_text)
 
+    import pdb
+    pdb.set_trace()
     subsystem_table_header += ['prop_active']
     subsystem_df = pd.DataFrame(parsed_query_data,columns=subsystem_table_header)
     subsystems_table = pd.DataFrame(subsystems_table_list)
