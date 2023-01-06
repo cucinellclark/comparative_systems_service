@@ -365,15 +365,15 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
             if subclass not in subsystem_dict[superclass][clss]:
                 subsystem_dict[superclass][clss][subclass] = {}
                 overview_counts_dict[superclass][clss][subclass] = {}
-                overview_counts_dict[superclass][clss][subclass]['subsystem_names'] = set()
-                overview_counts_dict[superclass][clss][subclass]['gene_set'] = set()
+                overview_counts_dict[superclass][clss][subclass]['subsystem_names'] = []
+                overview_counts_dict[superclass][clss][subclass]['gene_set'] = [] 
             if subsystem_name not in subsystem_dict[superclass][clss][subclass]:
                 subsystem_dict[superclass][clss][subclass][subsystem_name] = {}
                 subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'] = [] 
                 subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set'] = [] 
                 subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict'] = {}
                 subsystem_dict[superclass][clss][subclass][subsystem_name]['subsystem_id'] = subsystem_id
-            overview_counts_dict[superclass][clss][subclass]['subsystem_names'].add(subsystem_name)
+            overview_counts_dict[superclass][clss][subclass]['subsystem_names'].append(subsystem_name)
             subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict'][genome_id] = active 
             sub_key = superclass + clss + subclass + subsystem_name
             if sub_key not in variant_counts_dict:
@@ -390,7 +390,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
             #    with open('repeated_feature_ids.txt','a') as o:
             #       o.write(f'{feature_id}\n') 
             subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'].append(feature_id)
-            overview_counts_dict[superclass][clss][subclass]['gene_set'].add(feature_id)
+            overview_counts_dict[superclass][clss][subclass]['gene_set'].append(feature_id)
             if role_id != '' or gene is not None: 
                 subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set'].append(role_id)
 
