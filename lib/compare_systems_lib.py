@@ -369,8 +369,8 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
                 overview_counts_dict[superclass][clss][subclass]['gene_set'] = set()
             if subsystem_name not in subsystem_dict[superclass][clss][subclass]:
                 subsystem_dict[superclass][clss][subclass][subsystem_name] = {}
-                subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'] = set()
-                subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set'] = set()
+                subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'] = [] 
+                subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set'] = [] 
                 subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict'] = {}
                 subsystem_dict[superclass][clss][subclass][subsystem_name]['subsystem_id'] = subsystem_id
             overview_counts_dict[superclass][clss][subclass]['subsystem_names'].add(subsystem_name)
@@ -389,10 +389,10 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
             #if feature_id in subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set']:
             #    with open('repeated_feature_ids.txt','a') as o:
             #       o.write(f'{feature_id}\n') 
-            subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'].add(feature_id)
+            subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'].append(feature_id)
             overview_counts_dict[superclass][clss][subclass]['gene_set'].add(feature_id)
             if role_id != '' or gene is not None: 
-                subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set'].add(role_id)
+                subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set'].append(role_id)
 
     # gets counts for overview dict, any other adjustments
     # create subsystems table
