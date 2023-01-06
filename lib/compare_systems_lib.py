@@ -430,7 +430,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
                         'role_counts': len(subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set']),
                         'gene_counts': len(subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set']),
                         'genome_count': len(subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict']),
-                        'prop_active': float(variant_counts_dict[sub_key]['active'])
+                        'prop_active': float(variant_counts_dict[sub_key]['active'])/float(len(subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set']))
                     }
                     subsystems_table_list.append(new_entry)
 
