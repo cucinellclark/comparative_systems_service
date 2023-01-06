@@ -48,10 +48,12 @@ sub preflight
     print "$numGenomes genomes\n";
 
     my $runtime = 0;
-    if ($numGenomes < 100) {
+    if ($numGenomes < 10) {
         $runtime = 1800;
+    } elsif ($numGenomes < 100) {
+        $runtime = 3 * 3600;
     } elsif ($numGenomes < 300) {
-        $runtime = 10800;
+        $runtime = 6 * 3600;
     } else {
         $runtime = 43200;
     }
