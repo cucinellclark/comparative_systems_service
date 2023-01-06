@@ -305,6 +305,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
     print_one = True
     genome_dict = {}
     variant_counts_dict = {}
+    genome_data_dict = {}
     for gids in chunker(genome_ids, 20):
         base = "https://alpha.bv-brc.org/api/subsystem/?http_download=true"
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+id)"
@@ -356,6 +357,8 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
             subsystem_genomes_found.add(genome_id)
             if genome_name not in genome_dict:
                 genome_dict[genome_name] = genome_id
+                genome_data_dict[genome_id] = {}
+                genome_data_dict[genome_id]["genes"] = [] 
             if superclass not in subsystem_dict:
                 subsystem_dict[superclass] = {} 
                 overview_counts_dict[superclass] = {}
@@ -389,8 +392,10 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
             #if feature_id in subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set']:
             #    with open('repeated_feature_ids.txt','a') as o:
             #       o.write(f'{feature_id}\n') 
-            subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'].append(feature_id)
-            overview_counts_dict[superclass][clss][subclass]['gene_set'].append(feature_id)
+            if feature_id not in genome_data_dict[genome_id]["genes"]:
+                subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'].append(feature_id)
+                genome_data_dict[genome_id]["genes"].append(feature_id)
+                overview_counts_dict[superclass][clss][subclass]['gene_set'].append(feature_id)
             if role_id != '' or gene is not None: 
                 subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set'].append(role_id)
 
