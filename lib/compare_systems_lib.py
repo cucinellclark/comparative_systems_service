@@ -355,7 +355,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
                 sys.stderr.write(f'Error with the following line:\n{e}\n{line}\n')
                 continue
             subsystem_genomes_found.add(genome_id)
-            if genome_name not in genome_dict:
+            if genome_id not in genome_dict:
                 genome_dict[genome_name] = genome_id
                 genome_data_dict[genome_id] = {}
                 genome_data_dict[genome_id]["genes"] = [] 
