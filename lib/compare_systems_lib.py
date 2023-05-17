@@ -84,7 +84,7 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
     present_genome_ids = set()
     genomes_missing_data = {}
     for gids in chunker(genome_ids, 20):
-        base = "https://alpha.bv-brc.org/api/genome_feature/?http_download=true"
+        base = "https://www.bv-brc.org/api/genome_feature/?http_download=true"
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+feature_id)&eq(annotation,PATRIC)"
         headers = {"accept":"text/tsv", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
         result_header = True
@@ -149,7 +149,7 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
     product_dict = {}
     for plids_list in chunker(list(data_dict['plfam'].keys()),5000):
         print(f"plids_list has {len(plids_list)} elements")
-        base = "https://alpha.bv-brc.org/api/protein_family_ref/?http_download=true"
+        base = "https://www.bv-brc.org/api/protein_family_ref/?http_download=true"
         query = f"in(family_id,({','.join(plids_list)}))&limit(2500000)&sort(+family_id)"
         headers = {"accept":"application/json", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
         #headers = {"accept":"text/tsv", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
@@ -162,7 +162,7 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
             print(query)
     for pgids_list in chunker(list(data_dict['pgfam'].keys()),5000):
         print(f"pgids_list has {len(pgids_list)} elements")
-        base = "https://alpha.bv-brc.org/api/protein_family_ref/?http_download=true"
+        base = "https://www.bv-brc.org/api/protein_family_ref/?http_download=true"
         query = f"in(family_id,({','.join(pgids_list)}))&limit(2500000)&sort(+family_id)"
         headers = {"accept":"application/json", "content-type":"application/rqlquery+x-www-form-urlencoded", 'Authorization': session.headers['Authorization']}
         res_data = getQueryDataText(base,query,headers,print_query=False)
@@ -307,7 +307,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
     variant_counts_dict = {}
     genome_data_dict = {}
     for gids in chunker(genome_ids, 20):
-        base = "https://alpha.bv-brc.org/api/subsystem/?http_download=true"
+        base = "https://www.bv-brc.org/api/subsystem/?http_download=true"
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+id)"
         headers = {"accept":"application/json", "content-type":"application/rqlquery+x-www-form-urlencoded","Authorization": session.headers['Authorization']}
 
@@ -535,7 +535,7 @@ def run_pathways(genome_ids, query_dict, output_file, output_dir, genome_data, s
     pathway_genomes_found = set()
     pathway_table_header = None
     for gids in chunker(genome_ids, 20):
-        base = "https://alpha.bv-brc.org/api/pathway/?http_download=true"
+        base = "https://www.bv-brc.org/api/pathway/?http_download=true"
         query = f"in(genome_id,({','.join(gids)}))&limit(2500000)&sort(+id)&eq(annotation,PATRIC)"
         headers = {"accept":"application/json", "content-type":"application/rqlquery+x-www-form-urlencoded", "Authorization": session.headers['Authorization']}
         
