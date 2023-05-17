@@ -45,29 +45,29 @@ def get_maximum_value(df, col):
     return max_label
 
 def return_columns_to_remove(system,columns):
-    if system is 'subsystems_genes':
+    if system == 'subsystems_genes':
         drop_subsystem_columns = ['date_inserted','date_modified','genome_name','gene','owner','patric_id','public','product','refseq_locus_tag','taxon_id','_version_']
         table_columns = list(set.intersection(set(drop_subsystem_columns),set(columns))) 
         return table_columns
-    elif system is 'subsystems_subsystems':
+    elif system == 'subsystems_subsystems':
         drop_subsystem_columns = ['feature_id','public','role_id','genome_id','taxon_id','role_name','owner','product','patric_id','genome_name','id','_version_','date_inserted','date_modified']
         table_columns = list(set.intersection(set(drop_subsystem_columns),set(columns))) 
         return table_columns
-    elif system is 'proteinfamilies_plfams':
+    elif system == 'proteinfamilies_plfams':
         drop_plfams_columns = ['genome_name','accession','patric_id','refseq_locus_tag',
                                     'alt_locus_tag','feature_id','annotation','feature_type',
                                     'start','end','strand','figfam_id','pgfam_id','protein_id',
                                     'aa_length','gene','go']
         table_columns = list(set.intersection(set(drop_plfams_columns),set(columns))) 
         return table_columns
-    elif system is 'proteinfamilies_pgfams':
+    elif system == 'proteinfamilies_pgfams':
         drop_pgfams_columns = ['genome_name','accession','patric_id','refseq_locus_tag',
                                     'alt_locus_tag','feature_id','annotation','feature_type',
                                     'start','end','strand','figfam_id','plfam_id','protein_id',
                                     'aa_length','gene','go']
         table_columns = list(set.intersection(set(drop_pgfams_columns),set(columns))) 
         return table_columns
-    elif system is 'pathways_genes':
+    elif system == 'pathways_genes':
         drop_gene_columns = ['genome_name','accession','alt_locus_tag','refseq_locus_tag','feature_id','annotation','product']
         table_columns = list(set.intersection(set(drop_gene_columns),set(columns)))
         return table_columns
