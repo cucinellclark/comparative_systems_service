@@ -75,7 +75,7 @@ def return_columns_to_remove(system,columns):
         sys.stderr.write("Error, system is not a valid type\n")
         return [] 
 
-def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, session):
+def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, genome_group_dict, session):
     data_dict = {} 
     data_dict['plfam'] = {}
     data_dict['pgfam'] = {}
@@ -266,7 +266,6 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
             genome_str+=genomes_dir[gid]
         line_parts.append(genome_str)
         pgfam_line_list[x] = '\t'.join(line_parts)
-
     
     header = 'family_id\tfeature_count\tgenome_count\tproduct\taa_length_min\taa_length_max\taa_length_mean\taa_length_std\tgenomes'
     plfam_line_list.insert(0,header)
@@ -280,6 +279,12 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s
     output_json['job_name'] = output_file
     output_json['plfam_genomes'] = plfam_genome_list 
     output_json['pgfam_genomes'] = pgfam_genome_list 
+
+    # add genome groups for genome ids to output json
+    out_genome_groups = []
+    for gi in sorted_genome_ids:
+        out_genome_groups.append(genome_group_dict[gi])
+    output_json['genome_groups'] = out_genome_groups
 
     output_json_file = os.path.join(output_dir,output_file+'_proteinfams_tables.json')
     with open(output_json_file,"w") as o:
@@ -897,9 +902,6 @@ def run_compare_systems(job_data, output_dir):
     # optionally add more genome info to output 
     genome_data = getDataForGenomes(genome_ids,s) 
 
-    import pdb
-    pdb.set_trace()
-
     query_dict = run_all_queries(genome_ids, s)
 
     # TODO: add chunking
@@ -907,6 +909,6 @@ def run_compare_systems(job_data, output_dir):
     # TODO: add multithreading
     pathway_success = run_pathways(genome_ids, query_dict, output_file, output_dir, genome_data, s)
     subsystems_success = run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, s)
-    proteinfams_success = run_families(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    proteinfams_success = run_families(genome_ids, query_dict, output_file, output_dir, genome_data, genome_group_dict, s)
 
     generate_report(genome_ids,pathway_success,subsystems_success,proteinfams_success,output_dir)
