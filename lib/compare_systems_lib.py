@@ -873,7 +873,7 @@ def run_compare_systems(job_data, output_dir):
     print("output_dir = {0}".format(output_dir)) 
     
     # TODO: Testing adding genome groups to genomeData
-    genome_ids = genome_ids + job_data["genome_ids"]
+    genome_ids = job_data["genome_ids"]
     genome_group_list = ['None']*len(genome_ids)
     if len(job_data["genome_groups"]) > 0:
         genome_group_ids, curr_genome_group_list = get_genome_group_ids(job_data["genome_groups"],s)
