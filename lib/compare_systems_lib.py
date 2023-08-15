@@ -887,7 +887,7 @@ def run_compare_systems(job_data, output_dir):
     # create genome group dictionary
     genome_group_dict = {}
     for idx,gi in enumerate(genome_ids):
-        gg = genome_group_list[idx]
+        gg = os.path.basename(genome_group_list[idx])
         if gi in genome_group_dict:
             genome_group_dict[gi] = genome_group_dict[gi] + ',' + gg 
         else:
