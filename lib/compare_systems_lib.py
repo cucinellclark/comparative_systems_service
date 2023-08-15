@@ -884,12 +884,22 @@ def run_compare_systems(job_data, output_dir):
         genome_ids = genome_ids + genome_group_ids
         genome_group_list += curr_genome_group_list
 
+    # create genome group dictionary
+    genome_group_dict = {}
+    for idx,gi in enumerate(genome_ids):
+        gg = genome_group_list[idx]
+        if gi in genome_group_dict:
+            genome_group_dict[gi] = genome_group_dict[gi] + ',' + gg 
+        else:
+            genome_group_dict[gi] = gg
+
+    genome_ids = list(set(genome_ids))
     # optionally add more genome info to output 
     genome_data = getDataForGenomes(genome_ids,s) 
+
     import pdb
     pdb.set_trace()
 
-    genome_ids = list(set(genome_ids))
     query_dict = run_all_queries(genome_ids, s)
 
     # TODO: add chunking
