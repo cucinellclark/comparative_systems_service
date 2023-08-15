@@ -883,14 +883,13 @@ def run_compare_systems(job_data, output_dir):
         # make ids unique 
         genome_ids = genome_ids + genome_group_ids
         genome_group_list += curr_genome_group_list
-        import pdb
-        pdb.set_trace()
-        genome_ids = list(set(genome_ids))
 
     # optionally add more genome info to output 
     genome_data = getDataForGenomes(genome_ids,s) 
-    # TODO: add genome group to genome data 
+    import pdb
+    pdb.set_trace()
 
+    genome_ids = list(set(genome_ids))
     query_dict = run_all_queries(genome_ids, s)
 
     # TODO: add chunking
