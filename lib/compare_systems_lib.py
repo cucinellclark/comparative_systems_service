@@ -855,7 +855,7 @@ def get_genome_group_ids(group_list,session):
         genome_id_list = getGenomeIdsByGenomeGroup(genome_group,session,genomeGroupPath=True)
         genome_group_ids = genome_group_ids + genome_id_list
         genome_group_list += [genome_group]*len(genome_id_list)
-    return genome_group_ids
+    return (genome_group_ids,genome_group_list)
 
 def run_compare_systems(job_data, output_dir):
 
