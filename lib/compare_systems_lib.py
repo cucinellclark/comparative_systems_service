@@ -850,9 +850,11 @@ def run_all_queries(genome_ids, session):
 
 def get_genome_group_ids(group_list,session):
     genome_group_ids = []
+    genome_group_list = []
     for genome_group in group_list:
         genome_id_list = getGenomeIdsByGenomeGroup(genome_group,session,genomeGroupPath=True)
         genome_group_ids = genome_group_ids + genome_id_list
+        genome_group_list += [genome_group]*len(genome_id_list)
     return genome_group_ids
 
 def run_compare_systems(job_data, output_dir):
@@ -870,18 +872,24 @@ def run_compare_systems(job_data, output_dir):
     print("Run ComparativeSystems:\njob_data = {0}".format(job_data)) 
     print("output_dir = {0}".format(output_dir)) 
     
-    genome_ids = job_data["genome_ids"]
+    # TODO: Testing adding genome groups to genomeData
+    genome_ids = genome_ids + job_data["genome_ids"]
+    genome_group_list = ['None']*len(genome_ids)
     if len(job_data["genome_groups"]) > 0:
-        genome_group_ids = get_genome_group_ids(job_data["genome_groups"],s)
+        genome_group_ids, curr_genome_group_list = get_genome_group_ids(job_data["genome_groups"],s)
         if len(genome_group_ids) == 0:
             sys.stderr.write('FAILED to get genome ids for genome groups: exiting')
             sys.exit(-1)
         # make ids unique 
         genome_ids = genome_ids + genome_group_ids
+        genome_group_list += curr_genome_group_list
+        import pdb
+        pdb.set_trace()
         genome_ids = list(set(genome_ids))
 
     # optionally add more genome info to output 
     genome_data = getDataForGenomes(genome_ids,s) 
+    # TODO: add genome group to genome data 
 
     query_dict = run_all_queries(genome_ids, s)
 
