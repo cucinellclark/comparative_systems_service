@@ -287,16 +287,13 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, g
         field_key = field.lower().replace(' ','_')
         output_json['genome_data'][field_key] = []
     tmp_data = genome_data.set_index('Genome ID')
-    print(tmp_data)
-    import pdb
-    pdb.set_trace()
     #562.86167
     out_genome_groups = []
     for gi in sorted_genome_ids:
         out_genome_groups.append(genome_group_dict[gi])
         for field in extra_fields:
             field_key = field.lower().replace(' ','_')
-            output_json['genome_data'][field_key].append(tmp_data[gi][field])
+            output_json['genome_data'][field_key].append(tmp_data.loc[gi][field])
     output_json['genome_data']['genome_groups'] = out_genome_groups
 
     output_json_file = os.path.join(output_dir,output_file+'_proteinfams_tables.json')
