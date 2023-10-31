@@ -287,6 +287,7 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, g
         field_key = field.lower().replace(' ','_')
         output_json['genome_data'][field_key] = []
     tmp_data = genome_data.set_index('Genome ID')
+    print(tmp_data)
     out_genome_groups = []
     for gi in sorted_genome_ids:
         out_genome_groups.append(genome_group_dict[gi])
