@@ -286,6 +286,10 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, g
         out_genome_groups.append(genome_group_dict[gi])
     output_json['genome_groups'] = out_genome_groups
 
+    # add other metadata
+    import pdb
+    pdb.set_trace()
+
     output_json_file = os.path.join(output_dir,output_file+'_proteinfams_tables.json')
     with open(output_json_file,"w") as o:
         o.write(json.dumps(output_json))
