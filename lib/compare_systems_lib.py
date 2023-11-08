@@ -294,7 +294,7 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, g
             field_key = field.lower().replace(' ','_')
             value = tmp_data.loc[gi][field]
             try:
-                if np.isnan(value):
+                if isinstance(value,(int,float)) and  np.isnan(value):
                     value = ''
             except Exception as e:
                 import pdb
