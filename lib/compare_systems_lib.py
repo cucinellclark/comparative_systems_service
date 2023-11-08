@@ -293,8 +293,12 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, g
         for field in extra_fields:
             field_key = field.lower().replace(' ','_')
             value = tmp_data.loc[gi][field]
-            if np.isnan(value):
-                value = ''
+            try:
+                if np.isnan(value):
+                    value = ''
+            except Exception as e:
+                import pdb
+                pdb.set_trace()
             output_json['genome_data'][field_key].append(value)
     output_json['genome_data']['genome_groups'] = out_genome_groups
 
