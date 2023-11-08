@@ -293,12 +293,8 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, g
         for field in extra_fields:
             field_key = field.lower().replace(' ','_')
             value = tmp_data.loc[gi][field]
-            try:
-                if isinstance(value,(int,float)) and  np.isnan(value):
-                    value = ''
-            except Exception as e:
-                import pdb
-                pdb.set_trace()
+            if isinstance(value,(int,float)) and  np.isnan(value):
+                value = ''
             output_json['genome_data'][field_key].append(value)
     output_json['genome_data']['genome_groups'] = out_genome_groups
 
@@ -923,8 +919,8 @@ def run_compare_systems(job_data, output_dir):
     # TODO: add chunking
     # TODO: add recipe
     # TODO: add multithreading
-    #pathway_success = run_pathways(genome_ids, query_dict, output_file, output_dir, genome_data, s)
-    #subsystems_success = run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    pathway_success = run_pathways(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    subsystems_success = run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, s)
     proteinfams_success = run_families(genome_ids, query_dict, output_file, output_dir, genome_data, genome_group_dict, s)
 
     generate_report(genome_ids,pathway_success,subsystems_success,proteinfams_success,output_dir)
