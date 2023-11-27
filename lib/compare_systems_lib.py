@@ -293,8 +293,8 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, g
         for field in extra_fields:
             field_key = field.lower().replace(' ','_')
             value = tmp_data.loc[gi][field]
-            if isinstance(value,(int,float)) and  np.isnan(value):
-                value = ''
+            if isinstance(value,(int,float)) and np.isnan(value):
+                value = 'n/a'
             output_json['genome_data'][field_key].append(value)
     output_json['genome_data']['genome_group'] = out_genome_groups
 
