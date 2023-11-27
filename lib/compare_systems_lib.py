@@ -280,11 +280,23 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, g
     output_json['plfam_genomes'] = plfam_genome_list 
     output_json['pgfam_genomes'] = pgfam_genome_list 
 
-    # add genome groups for genome ids to output json
+    # add genome groups and other metadata for genome ids to output json
+    output_json['genome_data'] = {}
+    extra_fields = ['Isolation Country','Collection Year','Geographic Group','Host Group','Genome Status']
+    for field in extra_fields:
+        field_key = field.lower().replace(' ','_')
+        output_json['genome_data'][field_key] = []
+    tmp_data = genome_data.set_index('Genome ID')
     out_genome_groups = []
     for gi in sorted_genome_ids:
         out_genome_groups.append(genome_group_dict[gi])
-    output_json['genome_groups'] = out_genome_groups
+        for field in extra_fields:
+            field_key = field.lower().replace(' ','_')
+            value = tmp_data.loc[gi][field]
+            if isinstance(value,(int,float)) and  np.isnan(value):
+                value = ''
+            output_json['genome_data'][field_key].append(value)
+    output_json['genome_data']['genome_group'] = out_genome_groups
 
     output_json_file = os.path.join(output_dir,output_file+'_proteinfams_tables.json')
     with open(output_json_file,"w") as o:
