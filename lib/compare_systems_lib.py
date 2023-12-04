@@ -313,6 +313,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
     subsystem_line_list.append(subsystem_header)
     subsystem_dict = {}
     overview_counts_dict = {}
+    unique_subsystem_features = {}
 
     subsystem_query_data = []
     required_fields = ['superclass','class','subclass','subsystem_name','subsystem_id','feature_id','gene','product','role_id','role_name']
@@ -416,6 +417,32 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
             if role_id != '' or gene is not None: 
                 subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set'].append(role_id)
 
+    if not subsystem_data_found:
+        return ({ 'success': False }) 
+
+    parsed_query_data = []
+    for line in subsystem_query_data:
+        new_line = ''
+        for field in subsystem_table_header:
+            if new_line != '':
+                new_line += '\t'
+            if field not in line:    
+                new_line += ' '
+            else:
+                value = line[field]
+                if not isinstance(value,str):
+                    value = str(value)
+                new_line += value 
+        parsed_query_data.append(new_line.split('\t'))
+    
+    subsystem_df = pd.DataFrame(parsed_query_data,columns=subsystem_table_header)
+    subsystem_df.to_csv(subsystems_file,index=False,sep='\t')
+    subsystems_table = pd.DataFrame(subsystems_table_list)
+
+    gene_df = query_dict['feature']
+    gene_df = pd.merge(gene_df,subsystem_df.drop(return_columns_to_remove('subsystems_genes',subsystem_df.columns.tolist()),axis=1),on=['genome_id','feature_id'],how='inner')
+
+    # conservation scores
     # gets counts for overview dict, any other adjustments
     # create subsystems table
     subsystems_table_list = []
@@ -449,29 +476,13 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
                         'genome_count': len(subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict']),
                         'prop_active': float(variant_counts_dict[sub_key]['active'])/float(len(subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set']))
                     }
+                    # conservation scores
+                    import pdb
+                    pdb.set_trace()
                     subsystems_table_list.append(new_entry)
-
-    if not subsystem_data_found:
-        return ({ 'success': False }) 
-
-    parsed_query_data = []
-    for line in subsystem_query_data:
-        new_line = ''
-        for field in subsystem_table_header:
-            if new_line != '':
-                new_line += '\t'
-            if field not in line:    
-                new_line += ' '
-            else:
-                value = line[field]
-                if not isinstance(value,str):
-                    value = str(value)
-                new_line += value 
-        parsed_query_data.append(new_line.split('\t'))
+    # here1
 
     # Variant matrix
-    # TODO: change SS to something else
-    # - for some reason casting genome_dict.keys() as a list returns an error
     variant_mtx_header = '\t\t\t\t\t\t'
     gid_str = ''
     genome_name_list = list(genome_dict.keys())
@@ -504,14 +515,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
     variant_mtx_file = subsystems_file.replace('.tsv','_variant_mtx.tsv') 
     with open(variant_mtx_file,'w') as o:
         o.write(variant_mtx_text)
-
-    subsystem_df = pd.DataFrame(parsed_query_data,columns=subsystem_table_header)
-    subsystem_df.to_csv(subsystems_file,index=False,sep='\t')
-    subsystems_table = pd.DataFrame(subsystems_table_list)
-
-    gene_df = query_dict['feature']
-    gene_df = pd.merge(gene_df,subsystem_df.drop(return_columns_to_remove('subsystems_genes',subsystem_df.columns.tolist()),axis=1),on=['genome_id','feature_id'],how='inner')
-    
+ 
     output_json_file = subsystems_file.replace('.tsv','_tables.json')
     
     output_json = {}
@@ -716,6 +720,7 @@ def run_pathways(genome_ids, query_dict, output_file, output_dir, genome_data, s
             ec_denominator += len(pathway_genomes_found)
         #ec_numerator = float(ec_numerator) * float(len(pathway_genomes_found))
         #ec_denominator = float(ec_denominator) * float(len(pathway_genomes_found))
+        # here2
         if ec_denominator == 0:
             ec_conservation = 0
         else:
