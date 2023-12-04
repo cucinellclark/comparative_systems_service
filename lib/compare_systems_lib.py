@@ -437,7 +437,6 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
     
     subsystem_df = pd.DataFrame(parsed_query_data,columns=subsystem_table_header)
     subsystem_df.to_csv(subsystems_file,index=False,sep='\t')
-    subsystems_table = pd.DataFrame(subsystems_table_list)
 
     gene_df = query_dict['feature']
     gene_df = pd.merge(gene_df,subsystem_df.drop(return_columns_to_remove('subsystems_genes',subsystem_df.columns.tolist()),axis=1),on=['genome_id','feature_id'],how='inner')
@@ -480,6 +479,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
                     import pdb
                     pdb.set_trace()
                     subsystems_table_list.append(new_entry)
+    subsystems_table = pd.DataFrame(subsystems_table_list)
     # here1
 
     # Variant matrix
