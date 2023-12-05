@@ -444,6 +444,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
     # get data for conservation scores 
     unique_subsystem_features = {}
     unique_subsystem_roles = {}
+    import pdb
     for idx in range(0,gene_df.shape[0]):
         subsytem_id = gene_df.iloc[idx].subsystem_id
         if subsystem_id not in unique_subsystem_features:
@@ -452,6 +453,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
             unique_subsystem_roles[subsystem_id] = {}
         gene = gene_df.iloc[idx]['gene']
         role = gene_df.iloc[idx]['role_id']
+        pdb.set_trace()
         genome_id = gene_df.iloc[idx].genome_id
         if not gene is None and not gene is np.nan:
             if gene not in unique_subsystem_features[subsystem_id]:
@@ -467,7 +469,6 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
     # create subsystems table
     subsystems_table_list = []
     overview_dict = {} 
-    import pdb
     for superclass in overview_counts_dict:
         overview_dict[superclass] = {}
         overview_dict[superclass]['subsystem_name_counts'] = 0
@@ -505,7 +506,6 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
                             role_numerator += len(unique_subsystem_roles[subsystem_id][role])
                             role_denominator += len(subsystem_genomes_found)
                     role_conservation = 0
-                    pdb.set_trace()
                     if role_denominator > 0:
                         role_conservation = float(role_numerator) / float(role_denominator) * 100
                     new_entry = {
