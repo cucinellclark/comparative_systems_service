@@ -467,6 +467,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
     # create subsystems table
     subsystems_table_list = []
     overview_dict = {} 
+    import pdb
     for superclass in overview_counts_dict:
         overview_dict[superclass] = {}
         overview_dict[superclass]['subsystem_name_counts'] = 0
@@ -504,6 +505,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
                             role_numerator += len(unique_subsystem_roles[subsystem_id][role])
                             role_denominator += len(subsystem_genomes_found)
                     role_conservation = 0
+                    pdb.set_trace()
                     if role_denominator > 0:
                         role_conservation = float(role_numerator) / float(role_denominator) * 100
                     new_entry = {
