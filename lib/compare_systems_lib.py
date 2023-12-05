@@ -449,7 +449,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
         if subsystem_id not in unique_subsystem_features:
             unique_subsystem_features[subsystem_id] = {}
         gene = gene_df.iloc[idx]['gene']
-        role = gene_df.iloc[idx]['rold_id']
+        role = gene_df.iloc[idx]['role_id']
         genome_id = gene_df.iloc[idx].genome_id
         if not gene is None and not gene is np.nan:
             if gene not in unique_subsystem_features[subsystem_id]:
