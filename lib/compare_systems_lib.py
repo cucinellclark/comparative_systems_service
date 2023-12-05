@@ -448,6 +448,8 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
         subsytem_id = gene_df.iloc[idx].subsystem_id
         if subsystem_id not in unique_subsystem_features:
             unique_subsystem_features[subsystem_id] = {}
+        if subsystem_id not in unique_subsystem_roles:
+            unique_subsystem_roles[subsystem_id] = {}
         gene = gene_df.iloc[idx]['gene']
         role = gene_df.iloc[idx]['role_id']
         genome_id = gene_df.iloc[idx].genome_id
@@ -962,8 +964,8 @@ def run_compare_systems(job_data, output_dir):
     # TODO: add chunking
     # TODO: add recipe
     # TODO: add multithreading
-    pathway_success = run_pathways(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    #pathway_success = run_pathways(genome_ids, query_dict, output_file, output_dir, genome_data, s)
     subsystems_success = run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, s)
-    proteinfams_success = run_families(genome_ids, query_dict, output_file, output_dir, genome_data, genome_group_dict, s)
+    #proteinfams_success = run_families(genome_ids, query_dict, output_file, output_dir, genome_data, genome_group_dict, s)
 
     generate_report(genome_ids,pathway_success,subsystems_success,proteinfams_success,output_dir)
