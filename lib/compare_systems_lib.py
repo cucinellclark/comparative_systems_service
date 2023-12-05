@@ -441,6 +441,25 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
     gene_df = query_dict['feature']
     gene_df = pd.merge(gene_df,subsystem_df.drop(return_columns_to_remove('subsystems_genes',subsystem_df.columns.tolist()),axis=1),on=['genome_id','feature_id'],how='inner')
 
+    # get data for conservation scores 
+    unique_subsystem_features = {}
+    unique_subsystem_roles = {}
+    for idx in range(0,genes_df.shape[0]):
+        subsytem_id = genes_output.iloc[idx].subsystem_id
+        if subsystem_id not in unique_subsystem_features:
+            unique_subsystem_features[subsystem_id] = {}
+        gene = gene_df.iloc[idx]['gene']
+        role = gene_df.iloc[idx]['rold_id']
+        genome_id = gene_df.iloc[idx].genome_id
+        if not gene is None and not gene is np.nan:
+            if gene not in unique_subsystem_features[subsystem_id]:
+                unique_subsystem_features[subsystem_id][gene] = set()
+            unique_subsystem_features[subsystem_id][gene].add(genome_id)
+        if not role is None and not role is np.nan:
+            if role not in unique_subsystem_roles[subsystem_id]:    
+                unique_subsystem_roles[subsystem_id][role] = set()
+            unique_subsystem_roles[subsystem_id][role].add(genome_id)
+
     # conservation scores
     # gets counts for overview dict, any other adjustments
     # create subsystems table
@@ -464,23 +483,42 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
                 overview_dict[superclass]['subsystem_name_counts'] += len(overview_counts_dict[superclass][clss][subclass]['subsystem_names'])
                 for subsystem_name in subsystem_dict[superclass][clss][subclass]:
                     sub_key = superclass + clss + subclass + subsystem_name
+                    subsystem_id = subsystem_dict[superclass][clss][subclass][subsystem_name]['subsystem_id']
+                    # gene conservation
+                    gene_numerator = 0
+                    gene_denominator = 0
+                    if subsystem_id in unique_subsystem_features:
+                        for gene in unique_subsystem_features:
+                            gene_numerator += len(unique_subsystem_features[subsystem_id][gene])
+                            gene_denominator += len(subsystem_genomes_found)
+                    gene_conservation = 0
+                    if gene_denominator > 0:
+                        gene_conservation = float(gene_numerator) / float(gene_denominator) * 100
+                    # role conservation
+                    role_numerator = 0
+                    role_denominator = 0
+                    if subsystem_id in unique_subsystem_roles:
+                        for role in unique_subsystem_roles:
+                            role_numerator += len(unique_subsystem_roles[subsystem_id][role])
+                            role_denominator += len(subsystem_genomes_found)
+                    role_conservation = 0
+                    if role_denominator > 0:
+                        role_conservation = float(role_numerator) / float(role_denominator) * 100
                     new_entry = {
                         'superclass': superclass,
                         'class': clss,
                         'subclass': subclass,
                         'subsystem_name': subsystem_name,
-                        'subsystem_id': subsystem_dict[superclass][clss][subclass][subsystem_name]['subsystem_id'],
+                        'subsystem_id': subsystem_id,
                         'role_counts': len(subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set']),
                         'gene_counts': len(subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set']),
                         'genome_count': len(subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict']),
+                        'gene_conservation': gene_conservation,
+                        'role_conservation': role_conservation,
                         'prop_active': float(variant_counts_dict[sub_key]['active'])/float(len(subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set']))
                     }
-                    # conservation scores
-                    import pdb
-                    pdb.set_trace()
                     subsystems_table_list.append(new_entry)
     subsystems_table = pd.DataFrame(subsystems_table_list)
-    # here1
 
     # Variant matrix
     variant_mtx_header = '\t\t\t\t\t\t'
@@ -720,7 +758,6 @@ def run_pathways(genome_ids, query_dict, output_file, output_dir, genome_data, s
             ec_denominator += len(pathway_genomes_found)
         #ec_numerator = float(ec_numerator) * float(len(pathway_genomes_found))
         #ec_denominator = float(ec_denominator) * float(len(pathway_genomes_found))
-        # here2
         if ec_denominator == 0:
             ec_conservation = 0
         else:
