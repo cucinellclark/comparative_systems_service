@@ -444,7 +444,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
     # get data for conservation scores 
     unique_subsystem_features = {}
     unique_subsystem_roles = {}
-    for idx in range(0,genes_df.shape[0]):
+    for idx in range(0,gene_df.shape[0]):
         subsytem_id = genes_output.iloc[idx].subsystem_id
         if subsystem_id not in unique_subsystem_features:
             unique_subsystem_features[subsystem_id] = {}
