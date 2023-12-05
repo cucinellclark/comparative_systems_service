@@ -490,7 +490,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
                     gene_numerator = 0
                     gene_denominator = 0
                     if subsystem_id in unique_subsystem_features:
-                        for gene in unique_subsystem_features:
+                        for gene in unique_subsystem_features[subsystem_id]:
                             gene_numerator += len(unique_subsystem_features[subsystem_id][gene])
                             gene_denominator += len(subsystem_genomes_found)
                     gene_conservation = 0
@@ -500,7 +500,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
                     role_numerator = 0
                     role_denominator = 0
                     if subsystem_id in unique_subsystem_roles:
-                        for role in unique_subsystem_roles:
+                        for role in unique_subsystem_roles[subsystem_id]:
                             role_numerator += len(unique_subsystem_roles[subsystem_id][role])
                             role_denominator += len(subsystem_genomes_found)
                     role_conservation = 0
