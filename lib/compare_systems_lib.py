@@ -453,7 +453,6 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
             unique_subsystem_roles[subsystem_id] = {}
         gene = gene_df.iloc[idx]['gene']
         role = gene_df.iloc[idx]['role_id']
-        pdb.set_trace()
         genome_id = gene_df.iloc[idx].genome_id
         if not gene is None and not gene is np.nan:
             if gene not in unique_subsystem_features[subsystem_id]:
@@ -463,6 +462,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
             if role not in unique_subsystem_roles[subsystem_id]:    
                 unique_subsystem_roles[subsystem_id][role] = set()
             unique_subsystem_roles[subsystem_id][role].add(genome_id)
+    pdb.set_trace()
 
     # conservation scores
     # gets counts for overview dict, any other adjustments
