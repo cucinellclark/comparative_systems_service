@@ -445,7 +445,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
     unique_subsystem_features = {}
     unique_subsystem_roles = {}
     for idx in range(0,gene_df.shape[0]):
-        curr_sub_id = gene_df.iloc[idx].curr_sub_id
+        curr_sub_id = gene_df.iloc[idx].subsystem_id
         if curr_sub_id not in unique_subsystem_features:
             unique_subsystem_features[curr_sub_id] = {}
         if curr_sub_id not in unique_subsystem_roles:
