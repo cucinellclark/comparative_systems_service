@@ -444,25 +444,23 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
     # get data for conservation scores 
     unique_subsystem_features = {}
     unique_subsystem_roles = {}
-    import pdb
     for idx in range(0,gene_df.shape[0]):
-        subsytem_id = gene_df.iloc[idx].subsystem_id
-        if subsystem_id not in unique_subsystem_features:
-            unique_subsystem_features[subsystem_id] = {}
-        if subsystem_id not in unique_subsystem_roles:
-            unique_subsystem_roles[subsystem_id] = {}
+        curr_sub_id = gene_df.iloc[idx].curr_sub_id
+        if curr_sub_id not in unique_subsystem_features:
+            unique_subsystem_features[curr_sub_id] = {}
+        if curr_sub_id not in unique_subsystem_roles:
+            unique_subsystem_roles[curr_sub_id] = {}
         gene = gene_df.iloc[idx]['gene']
         role = gene_df.iloc[idx]['role_id']
         genome_id = gene_df.iloc[idx].genome_id
         if not gene is None and not gene is np.nan:
-            if gene not in unique_subsystem_features[subsystem_id]:
-                pdb.set_trace()
-                unique_subsystem_features[subsystem_id][gene] = set()
-            unique_subsystem_features[subsystem_id][gene].add(genome_id)
+            if gene not in unique_subsystem_features[curr_sub_id]:
+                unique_subsystem_features[curr_sub_id][gene] = set()
+            unique_subsystem_features[curr_sub_id][gene].add(genome_id)
         if not role is None and not role is np.nan:
-            if role not in unique_subsystem_roles[subsystem_id]:    
-                unique_subsystem_roles[subsystem_id][role] = set()
-            unique_subsystem_roles[subsystem_id][role].add(genome_id)
+            if role not in unique_subsystem_roles[curr_sub_id]:    
+                unique_subsystem_roles[curr_sub_id][role] = set()
+            unique_subsystem_roles[curr_sub_id][role].add(genome_id)
 
     # conservation scores
     # gets counts for overview dict, any other adjustments
