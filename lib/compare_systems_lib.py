@@ -295,10 +295,10 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, g
             value = tmp_data.loc[gi][field]
             if isinstance(value,(int,float)) and np.isnan(value):
                 value = 'n/a'
+            elif isinstance(value,(int,float)):
+                value = str(value)
             output_json['genome_data'][field_key].append(value)
     output_json['genome_data']['genome_group'] = out_genome_groups
-    import pdb
-    pdb.set_trace()
 
     output_json_file = os.path.join(output_dir,output_file+'_proteinfams_tables.json')
     with open(output_json_file,"w") as o:
