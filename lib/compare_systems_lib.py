@@ -389,14 +389,14 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
                 subsystem_dict[superclass][clss][subclass] = {}
                 overview_counts_dict[superclass][clss][subclass] = {}
                 overview_counts_dict[superclass][clss][subclass]['subsystem_names'] = []
-                overview_counts_dict[superclass][clss][subclass]['gene_set'] = [] 
+                overview_counts_dict[superclass][clss][subclass]['gene_set'] = set() 
             if subsystem_name not in subsystem_dict[superclass][clss][subclass]:
                 subsystem_dict[superclass][clss][subclass][subsystem_name] = {}
-                subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'] = [] 
-                subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set'] = [] 
+                subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'] = set()
+                subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set'] = set() 
                 subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict'] = {}
                 subsystem_dict[superclass][clss][subclass][subsystem_name]['subsystem_id'] = subsystem_id
-            overview_counts_dict[superclass][clss][subclass]['subsystem_names'].append(subsystem_name)
+            overview_counts_dict[superclass][clss][subclass]['subsystem_names'].add(subsystem_name)
             subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict'][genome_id] = active 
             sub_key = superclass + clss + subclass + subsystem_name
             if sub_key not in variant_counts_dict:
@@ -413,11 +413,11 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
             #    with open('repeated_feature_ids.txt','a') as o:
             #       o.write(f'{feature_id}\n') 
             if feature_id not in genome_data_dict[genome_id]["genes"]:
-                subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'].append(feature_id)
+                subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'].add(feature_id)
                 genome_data_dict[genome_id]["genes"].append(feature_id)
-                overview_counts_dict[superclass][clss][subclass]['gene_set'].append(feature_id)
+                overview_counts_dict[superclass][clss][subclass]['gene_set'].add(feature_id)
             if role_id != '' or gene is not None: 
-                subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set'].append(role_id)
+                subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set'].add(role_id)
 
     if not subsystem_data_found:
         return ({ 'success': False }) 
@@ -966,8 +966,8 @@ def run_compare_systems(job_data, output_dir):
     # TODO: add chunking
     # TODO: add recipe
     # TODO: add multithreading
-    pathway_success = run_pathways(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    #pathway_success = run_pathways(genome_ids, query_dict, output_file, output_dir, genome_data, s)
     subsystems_success = run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, s)
-    proteinfams_success = run_families(genome_ids, query_dict, output_file, output_dir, genome_data, genome_group_dict, s)
+    #proteinfams_success = run_families(genome_ids, query_dict, output_file, output_dir, genome_data, genome_group_dict, s)
 
     generate_report(genome_ids,pathway_success,subsystems_success,proteinfams_success,output_dir)
