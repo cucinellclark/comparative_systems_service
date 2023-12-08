@@ -414,14 +414,13 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
             #    with open('repeated_feature_ids.txt','a') as o:
             #       o.write(f'{feature_id}\n') 
             #if feature_id not in genome_data_dict[genome_id]["genes"]:
-            if gene is not None and gene != '':
                 #subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'].add(feature_id)
-                subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'].add(gene)
-                #genome_data_dict[genome_id]["genes"].append(feature_id)
-                #overview_counts_dict[superclass][clss][subclass]['gene_set'].add(feature_id)
-                overview_counts_dict[superclass][clss][subclass]['gene_set'].add(gene)
-            if role_id is not None and role_id != '': 
-                subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set'].add(role_id)
+            subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'].add(feature_id)
+            #genome_data_dict[genome_id]["genes"].append(feature_id)
+            #overview_counts_dict[superclass][clss][subclass]['gene_set'].add(feature_id)
+            overview_counts_dict[superclass][clss][subclass]['gene_set'].add(feature_id)
+            #if role_id is not None and role_id != '': 
+            subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set'].add(role_id)
 
     if not subsystem_data_found:
         return ({ 'success': False }) 
@@ -971,8 +970,8 @@ def run_compare_systems(job_data, output_dir):
     # TODO: add chunking
     # TODO: add recipe
     # TODO: add multithreading
-    pathway_success = run_pathways(genome_ids, query_dict, output_file, output_dir, genome_data, s)
+    #pathway_success = run_pathways(genome_ids, query_dict, output_file, output_dir, genome_data, s)
     subsystems_success = run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, s)
-    proteinfams_success = run_families(genome_ids, query_dict, output_file, output_dir, genome_data, genome_group_dict, s)
+    #proteinfams_success = run_families(genome_ids, query_dict, output_file, output_dir, genome_data, genome_group_dict, s)
 
     generate_report(genome_ids,pathway_success,subsystems_success,proteinfams_success,output_dir)
