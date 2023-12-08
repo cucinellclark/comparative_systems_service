@@ -492,12 +492,11 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
                     sub_key = superclass + clss + subclass + subsystem_name
                     subsystem_id = subsystem_dict[superclass][clss][subclass][subsystem_name]['subsystem_id']
                     # gene conservation
-                    gene_numerator = 0
-                    gene_denominator = 0
-                    if subsystem_id in unique_subsystem_features:
-                        for gene in unique_subsystem_features[subsystem_id]:
-                            gene_numerator += len(unique_subsystem_features[subsystem_id][gene])
-                        gene_denominator = len(unique_subsystem_roles)*len(subsystem_genomes_found)
+                    #if subsystem_id in unique_subsystem_features:
+                    #for gene in unique_subsystem_features[subsystem_id]:
+                    #    gene_numerator += len(unique_subsystem_features[subsystem_id][gene])
+                    gene_numerator = len(subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'])
+                    gene_denominator = len(subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set'])*len(subsystem_genomes_found)
                     gene_conservation = 0
                     if gene_denominator > 0:
                         gene_conservation = float(gene_numerator) / float(gene_denominator) * 100
