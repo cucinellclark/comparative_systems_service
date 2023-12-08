@@ -46,7 +46,8 @@ def get_maximum_value(df, col):
 
 def return_columns_to_remove(system,columns):
     if system == 'subsystems_genes':
-        drop_subsystem_columns = ['date_inserted','date_modified','genome_name','gene','owner','patric_id','public','product','refseq_locus_tag','taxon_id','_version_']
+        #drop_subsystem_columns = ['date_inserted','date_modified','genome_name','gene','owner','patric_id','public','product','refseq_locus_tag','taxon_id','_version_']
+        drop_subsystem_columns = ['date_inserted','date_modified','genome_name','owner','patric_id','public','product','refseq_locus_tag','taxon_id','_version_']
         table_columns = list(set.intersection(set(drop_subsystem_columns),set(columns))) 
         return table_columns
     elif system == 'subsystems_subsystems':
