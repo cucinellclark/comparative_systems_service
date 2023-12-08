@@ -413,11 +413,14 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
             #if feature_id in subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set']:
             #    with open('repeated_feature_ids.txt','a') as o:
             #       o.write(f'{feature_id}\n') 
-            if feature_id not in genome_data_dict[genome_id]["genes"]:
-                subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'].add(feature_id)
-                genome_data_dict[genome_id]["genes"].append(feature_id)
-                overview_counts_dict[superclass][clss][subclass]['gene_set'].add(feature_id)
-            if role_id != '' or gene is not None: 
+            #if feature_id not in genome_data_dict[genome_id]["genes"]:
+            if gene is not None and gene != '':
+                #subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'].add(feature_id)
+                subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'].add(gene)
+                #genome_data_dict[genome_id]["genes"].append(feature_id)
+                #overview_counts_dict[superclass][clss][subclass]['gene_set'].add(feature_id)
+                overview_counts_dict[superclass][clss][subclass]['gene_set'].add(gene)
+            if role_id is not None and role_id != '': 
                 subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set'].add(role_id)
 
     if not subsystem_data_found:
@@ -440,11 +443,9 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
     
     subsystem_df = pd.DataFrame(parsed_query_data,columns=subsystem_table_header)
     subsystem_df.to_csv(subsystems_file,index=False,sep='\t')
-    import pdb
+
     gene_df = query_dict['feature']
-    pdb.set_trace()
     gene_df = pd.merge(gene_df,subsystem_df.drop(return_columns_to_remove('subsystems_genes',subsystem_df.columns.tolist()),axis=1),on=['genome_id','feature_id'],how='inner')
-    pdb.set_trace()
 
     # get data for conservation scores 
     unique_subsystem_features = {}
@@ -497,11 +498,12 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
                     if subsystem_id in unique_subsystem_features:
                         for gene in unique_subsystem_features[subsystem_id]:
                             gene_numerator += len(unique_subsystem_features[subsystem_id][gene])
-                            gene_denominator += len(subsystem_genomes_found)
+                        gene_denominator = len(unique_subsystem_roles)*len(subsystem_genomes_found)
                     gene_conservation = 0
                     if gene_denominator > 0:
                         gene_conservation = float(gene_numerator) / float(gene_denominator) * 100
                     # role conservation
+                    '''
                     role_numerator = 0
                     role_denominator = 0
                     if subsystem_id in unique_subsystem_roles:
@@ -511,6 +513,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
                     role_conservation = 0
                     if role_denominator > 0:
                         role_conservation = float(role_numerator) / float(role_denominator) * 100
+                    '''
                     new_entry = {
                         'superclass': superclass,
                         'class': clss,
@@ -521,7 +524,6 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
                         'gene_counts': len(subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set']),
                         'genome_count': len(subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict']),
                         'gene_conservation': gene_conservation,
-                        'role_conservation': role_conservation,
                         'prop_active': float(variant_counts_dict[sub_key]['active'])/float(len(subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set']))
                     }
                     subsystems_table_list.append(new_entry)
