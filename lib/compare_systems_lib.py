@@ -506,7 +506,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
                     if subsystem_id in unique_subsystem_roles:
                         for role in unique_subsystem_roles[subsystem_id]:
                             role_numerator += len(unique_subsystem_roles[subsystem_id][role])
-                        role_denominator += len(subsystem_genomes_found)
+                        role_denominator = len(subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set'])*len(subsystem_genomes_found) 
                     role_conservation = 0
                     if role_denominator > 0:
                         role_conservation = float(role_numerator) / float(role_denominator) * 100
