@@ -447,8 +447,6 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
 
     gene_df = query_dict['feature']
     gene_df = pd.merge(gene_df,subsystem_df.drop(return_columns_to_remove('subsystems_genes',subsystem_df.columns.tolist()),axis=1),on=['genome_id','feature_id'],how='inner')
-    import pdb
-    pdb.set_trace()
 
     # get data for conservation scores 
     unique_subsystem_features = {}
@@ -459,8 +457,12 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
             unique_subsystem_features[curr_sub_id] = {}
         if curr_sub_id not in unique_subsystem_roles:
             unique_subsystem_roles[curr_sub_id] = {}
-        gene = gene_df.iloc[idx]['gene']
-        role = gene_df.iloc[idx]['role_id']
+        try:
+            gene = gene_df.iloc[idx]['gene']
+            role = gene_df.iloc[idx]['role_id']
+        except Exception as e:
+            import pdb
+            pdb.set_trace()
         genome_id = gene_df.iloc[idx].genome_id
         if not gene is None and not gene is np.nan:
             if gene not in unique_subsystem_features[curr_sub_id]:
