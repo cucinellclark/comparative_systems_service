@@ -776,7 +776,7 @@ def run_pathways(genome_ids, query_dict, output_file, output_dir, genome_data, s
         if pathway_id in unique_pathway_features:
             for gene in unique_pathway_features[pathway_id]:
                 gene_numerator += len(unique_pathway_features[pathway_id][gene])
-                gene_denominator += len(pathway_genomes_found)
+            gene_denominator = len(unique_pathway_features[pathway_id])*len(pathway_genomes_found)
         if gene_denominator == 0:
             gene_conservation = 0
         else:
