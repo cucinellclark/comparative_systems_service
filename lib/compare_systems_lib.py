@@ -771,10 +771,8 @@ def run_pathways(genome_ids, query_dict, output_file, output_dir, genome_data, s
         else:
             ec_conservation = float(ec_numerator) / float(ec_denominator) * 100.0
         # calculate gene_conservation
-        gene_numerator = 0
-        gene_denominator = 0
-            gene_numerator += len(gene_count)
-        gene_denominator = len(ec_count)*len(pathway_genomes_found)
+        gene_numerator = gene_count
+        gene_denominator = ec_count*len(pathway_genomes_found)
         if gene_denominator == 0:
             gene_conservation = 0
         else:
