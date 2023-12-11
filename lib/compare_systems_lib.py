@@ -773,17 +773,12 @@ def run_pathways(genome_ids, query_dict, output_file, output_dir, genome_data, s
         # calculate gene_conservation
         gene_numerator = 0
         gene_denominator = 0
-        if pathway_id in unique_pathway_features:
-            for gene in unique_pathway_features[pathway_id]:
-                gene_numerator += len(unique_pathway_features[pathway_id][gene])
-            if pathway_id == '00061':
-                import pdb
-                pdb.set_trace()
-            gene_denominator = len(unique_pathway_features[pathway_id])*len(pathway_genomes_found)
+            gene_numerator += len(gene_count)
+        gene_denominator = len(ec_count)*len(pathway_genomes_found)
         if gene_denominator == 0:
             gene_conservation = 0
         else:
-            gene_conservation = float(gene_numerator) / float(gene_denominator) * 100.0
+            gene_conservation = float(gene_numerator) / float(gene_denominator)
         pathway_line = f'{annotation}\t{pathway_id}\t{pathway_name}\t{pathway_class}\t{genome_count}\t{ec_count}\t{gene_count}\t{genome_ec}\t{ec_conservation}\t{gene_conservation}'
         pathway_line_list.append(pathway_line)
         # now EC data
