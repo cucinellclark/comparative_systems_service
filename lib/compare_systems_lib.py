@@ -397,6 +397,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
                 subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set'] = set() 
                 subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict'] = {}
                 subsystem_dict[superclass][clss][subclass][subsystem_name]['subsystem_id'] = subsystem_id
+                subsystem_dict[superclass][clss][subclass][subsystem_name]['subsystem_counts'] = 0 
             overview_counts_dict[superclass][clss][subclass]['subsystem_names'].add(subsystem_name)
             subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict'][genome_id] = active 
             #sub_key = superclass + clss + subclass + subsystem_name
@@ -421,6 +422,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
             overview_counts_dict[superclass][clss][subclass]['gene_set'].add(feature_id)
             #if role_id is not None and role_id != '': 
             subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set'].add(role_id)
+            subsystem_dict[superclass][clss][subclass][subsystem_name]['subsystem_counts']+=1
 
     if not subsystem_data_found:
         return ({ 'success': False }) 
@@ -510,9 +512,6 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
                     role_conservation = 0
                     if role_denominator > 0:
                         role_conservation = float(role_numerator) / float(role_denominator) * 100
-                    if subsystem_id == 'Fatty_Acid_Biosynthesis_cluster':
-                        import pdb
-                        pdb.set_trace()
                     new_entry = {
                         'superclass': superclass,
                         'class': clss,
@@ -524,7 +523,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
                         'genome_count': len(subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict']),
                         'gene_conservation': gene_conservation,
                         'role_conservation': role_conservation,
-                        'prop_active': float(variant_counts_dict[subsystem_id]['active'])/float(len(subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set']))
+                        'prop_active': float(variant_counts_dict[subsystem_id]['active'])/float(subsystem_dict[superclass][clss][subclass][subsystem_name]['subsystem_counts'])
                     }
                     subsystems_table_list.append(new_entry)
     subsystems_table = pd.DataFrame(subsystems_table_list)
@@ -545,10 +544,11 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
         for clss in subsystem_dict[superclass]:
             for subclass in subsystem_dict[superclass][clss]: 
                 for subsystem_name in subsystem_dict[superclass][clss][subclass]:
-                    sub_key = superclass + clss + subclass + subsystem_name 
+                    #sub_key = superclass + clss + subclass + subsystem_name 
+                    subsystem_id = subsystem_dict[superclass][clss][subclass][subsystem_name]['subsystem_id']
                     inactive_value = 0 
                     new_var_line_p1 = f'{superclass}\t{clss}\t{subclass}\t{subsystem_name}'
-                    new_var_line_p1 += f"\t{variant_counts_dict[sub_key]['active']}\t{variant_counts_dict[sub_key]['likely']}\t{inactive_value}"
+                    new_var_line_p1 += f"\t{variant_counts_dict[subsystem_id]['active']}\t{variant_counts_dict[subsystem_id]['likely']}\t{inactive_value}"
                     new_var_line_p2 = ''
                     for genome_name in genome_name_list:
                         if genome_dict[genome_name] in subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict']:
