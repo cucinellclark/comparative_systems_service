@@ -46,8 +46,7 @@ def get_maximum_value(df, col):
 
 def return_columns_to_remove(system,columns):
     if system == 'subsystems_genes':
-        #drop_subsystem_columns = ['date_inserted','date_modified','genome_name','gene','owner','patric_id','public','product','refseq_locus_tag','taxon_id','_version_']
-        drop_subsystem_columns = ['date_inserted','date_modified','genome_name','owner','patric_id','public','product','refseq_locus_tag','taxon_id','_version_']
+        drop_subsystem_columns = ['date_inserted','date_modified','genome_name','gene','owner','patric_id','public','product','refseq_locus_tag','taxon_id','_version_']
         table_columns = list(set.intersection(set(drop_subsystem_columns),set(columns))) 
         return table_columns
     elif system == 'subsystems_subsystems':
@@ -457,12 +456,8 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
             unique_subsystem_features[curr_sub_id] = {}
         if curr_sub_id not in unique_subsystem_roles:
             unique_subsystem_roles[curr_sub_id] = {}
-        try:
-            gene = gene_df.iloc[idx]['gene']
-            role = gene_df.iloc[idx]['role_id']
-        except Exception as e:
-            import pdb
-            pdb.set_trace()
+        gene = gene_df.iloc[idx]['gene']
+        role = gene_df.iloc[idx]['role_id']
         genome_id = gene_df.iloc[idx].genome_id
         if not gene is None and not gene is np.nan:
             if gene not in unique_subsystem_features[curr_sub_id]:
