@@ -399,16 +399,16 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
                 subsystem_dict[superclass][clss][subclass][subsystem_name]['subsystem_id'] = subsystem_id
             overview_counts_dict[superclass][clss][subclass]['subsystem_names'].add(subsystem_name)
             subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict'][genome_id] = active 
-            sub_key = superclass + clss + subclass + subsystem_name
-            if sub_key not in variant_counts_dict:
-                variant_counts_dict[sub_key] = {}
-                variant_counts_dict[sub_key]['active'] = 0
-                variant_counts_dict[sub_key]['likely'] = 0
-                variant_counts_dict[sub_key]['inactive'] = 0
+            #sub_key = superclass + clss + subclass + subsystem_name
+            if subsystem_id not in variant_counts_dict:
+                variant_counts_dict[subsystem_id] = {}
+                variant_counts_dict[subsystem_id]['active'] = 0
+                variant_counts_dict[subsystem_id]['likely'] = 0
+                variant_counts_dict[subsystem_id]['inactive'] = 0
             if active == 'active' or active == 'likely':
-                variant_counts_dict[sub_key][active] += 1
+                variant_counts_dict[subsystem_id][active] += 1
             else: # never reached, the genome just doesn't have an entry
-                variant_counts_dict[sub_key]['inactive'] += 1
+                variant_counts_dict[subsystem_id]['inactive'] += 1
             # TODO: repeated features; do I count these towards the gene counts?
             #if feature_id in subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set']:
             #    with open('repeated_feature_ids.txt','a') as o:
@@ -489,7 +489,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
                 overview_dict[superclass]['gene_counts'] += len(overview_counts_dict[superclass][clss][subclass]['gene_set'])
                 overview_dict[superclass]['subsystem_name_counts'] += len(overview_counts_dict[superclass][clss][subclass]['subsystem_names'])
                 for subsystem_name in subsystem_dict[superclass][clss][subclass]:
-                    sub_key = superclass + clss + subclass + subsystem_name
+                    #sub_key = superclass + clss + subclass + subsystem_name
                     subsystem_id = subsystem_dict[superclass][clss][subclass][subsystem_name]['subsystem_id']
                     # gene conservation
                     #if subsystem_id in unique_subsystem_features:
@@ -510,6 +510,9 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
                     role_conservation = 0
                     if role_denominator > 0:
                         role_conservation = float(role_numerator) / float(role_denominator) * 100
+                    if subsystem_id == '':
+                        import pdb
+                        pdb.set_trace()
                     new_entry = {
                         'superclass': superclass,
                         'class': clss,
@@ -521,7 +524,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
                         'genome_count': len(subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict']),
                         'gene_conservation': gene_conservation,
                         'role_conservation': role_conservation,
-                        'prop_active': float(variant_counts_dict[sub_key]['active'])/float(len(subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set']))
+                        'prop_active': float(variant_counts_dict[subsystem_id]['active'])/float(len(subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set']))
                     }
                     subsystems_table_list.append(new_entry)
     subsystems_table = pd.DataFrame(subsystems_table_list)
