@@ -293,8 +293,10 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, g
         for field in extra_fields:
             field_key = field.lower().replace(' ','_')
             value = tmp_data.loc[gi][field]
-            if isinstance(value,(int,float)) and  np.isnan(value):
-                value = ''
+            if isinstance(value,(int,float)) and np.isnan(value):
+                value = 'n/a'
+            elif not isinstance(value,str):
+                value = str(value)
             output_json['genome_data'][field_key].append(value)
     output_json['genome_data']['genome_group'] = out_genome_groups
 
@@ -313,6 +315,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
     subsystem_line_list.append(subsystem_header)
     subsystem_dict = {}
     overview_counts_dict = {}
+    unique_subsystem_features = {}
 
     subsystem_query_data = []
     required_fields = ['superclass','class','subclass','subsystem_name','subsystem_id','feature_id','gene','product','role_id','role_name']
@@ -385,37 +388,86 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
             if subclass not in subsystem_dict[superclass][clss]:
                 subsystem_dict[superclass][clss][subclass] = {}
                 overview_counts_dict[superclass][clss][subclass] = {}
-                overview_counts_dict[superclass][clss][subclass]['subsystem_names'] = []
-                overview_counts_dict[superclass][clss][subclass]['gene_set'] = [] 
+                overview_counts_dict[superclass][clss][subclass]['subsystem_names'] = set()
+                overview_counts_dict[superclass][clss][subclass]['gene_set'] = set() 
             if subsystem_name not in subsystem_dict[superclass][clss][subclass]:
                 subsystem_dict[superclass][clss][subclass][subsystem_name] = {}
-                subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'] = [] 
-                subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set'] = [] 
+                subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'] = set()
+                subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set'] = set() 
                 subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict'] = {}
                 subsystem_dict[superclass][clss][subclass][subsystem_name]['subsystem_id'] = subsystem_id
-            overview_counts_dict[superclass][clss][subclass]['subsystem_names'].append(subsystem_name)
+                subsystem_dict[superclass][clss][subclass][subsystem_name]['subsystem_counts'] = 0 
+            overview_counts_dict[superclass][clss][subclass]['subsystem_names'].add(subsystem_name)
             subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict'][genome_id] = active 
-            sub_key = superclass + clss + subclass + subsystem_name
-            if sub_key not in variant_counts_dict:
-                variant_counts_dict[sub_key] = {}
-                variant_counts_dict[sub_key]['active'] = 0
-                variant_counts_dict[sub_key]['likely'] = 0
-                variant_counts_dict[sub_key]['inactive'] = 0
+            #sub_key = superclass + clss + subclass + subsystem_name
+            if subsystem_id not in variant_counts_dict:
+                variant_counts_dict[subsystem_id] = {}
+                variant_counts_dict[subsystem_id]['active'] = 0
+                variant_counts_dict[subsystem_id]['likely'] = 0
+                variant_counts_dict[subsystem_id]['inactive'] = 0
             if active == 'active' or active == 'likely':
-                variant_counts_dict[sub_key][active] += 1
+                variant_counts_dict[subsystem_id][active] += 1
             else: # never reached, the genome just doesn't have an entry
-                variant_counts_dict[sub_key]['inactive'] += 1
+                variant_counts_dict[subsystem_id]['inactive'] += 1
             # TODO: repeated features; do I count these towards the gene counts?
             #if feature_id in subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set']:
             #    with open('repeated_feature_ids.txt','a') as o:
             #       o.write(f'{feature_id}\n') 
-            if feature_id not in genome_data_dict[genome_id]["genes"]:
-                subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'].append(feature_id)
-                genome_data_dict[genome_id]["genes"].append(feature_id)
-                overview_counts_dict[superclass][clss][subclass]['gene_set'].append(feature_id)
-            if role_id != '' or gene is not None: 
-                subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set'].append(role_id)
+            #if feature_id not in genome_data_dict[genome_id]["genes"]:
+                #subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'].add(feature_id)
+            subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'].add(feature_id)
+            #genome_data_dict[genome_id]["genes"].append(feature_id)
+            overview_counts_dict[superclass][clss][subclass]['gene_set'].add(feature_id)
+            #if role_id is not None and role_id != '': 
+            subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set'].add(role_id)
+            subsystem_dict[superclass][clss][subclass][subsystem_name]['subsystem_counts']+=1
 
+    if not subsystem_data_found:
+        return ({ 'success': False }) 
+
+    parsed_query_data = []
+    for line in subsystem_query_data:
+        new_line = ''
+        for field in subsystem_table_header:
+            if new_line != '':
+                new_line += '\t'
+            if field not in line:    
+                new_line += ' '
+            else:
+                value = line[field]
+                if not isinstance(value,str):
+                    value = str(value)
+                new_line += value 
+        parsed_query_data.append(new_line.split('\t'))
+    
+    subsystem_df = pd.DataFrame(parsed_query_data,columns=subsystem_table_header)
+    subsystem_df.to_csv(subsystems_file,index=False,sep='\t')
+
+    gene_df = query_dict['feature']
+    gene_df = pd.merge(gene_df,subsystem_df.drop(return_columns_to_remove('subsystems_genes',subsystem_df.columns.tolist()),axis=1),on=['genome_id','feature_id'],how='inner')
+
+    # get data for conservation scores 
+    unique_subsystem_features = {}
+    unique_subsystem_roles = {}
+    for idx in range(0,gene_df.shape[0]):
+        curr_sub_id = gene_df.iloc[idx].subsystem_id
+        if curr_sub_id not in unique_subsystem_features:
+            unique_subsystem_features[curr_sub_id] = {}
+        if curr_sub_id not in unique_subsystem_roles:
+            unique_subsystem_roles[curr_sub_id] = {}
+        gene = gene_df.iloc[idx]['gene']
+        role = gene_df.iloc[idx]['role_id']
+        genome_id = gene_df.iloc[idx].genome_id
+        if not gene is None and not gene is np.nan:
+            if gene not in unique_subsystem_features[curr_sub_id]:
+                unique_subsystem_features[curr_sub_id][gene] = set()
+            unique_subsystem_features[curr_sub_id][gene].add(genome_id)
+        if not role is None and not role is np.nan:
+            if role not in unique_subsystem_roles[curr_sub_id]:    
+                unique_subsystem_roles[curr_sub_id][role] = set()
+            unique_subsystem_roles[curr_sub_id][role].add(genome_id)
+
+    # conservation scores
     # gets counts for overview dict, any other adjustments
     # create subsystems table
     subsystems_table_list = []
@@ -437,41 +489,44 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
                 overview_dict[superclass]['gene_counts'] += len(overview_counts_dict[superclass][clss][subclass]['gene_set'])
                 overview_dict[superclass]['subsystem_name_counts'] += len(overview_counts_dict[superclass][clss][subclass]['subsystem_names'])
                 for subsystem_name in subsystem_dict[superclass][clss][subclass]:
-                    sub_key = superclass + clss + subclass + subsystem_name
+                    #sub_key = superclass + clss + subclass + subsystem_name
+                    subsystem_id = subsystem_dict[superclass][clss][subclass][subsystem_name]['subsystem_id']
+                    # gene conservation
+                    #if subsystem_id in unique_subsystem_features:
+                    #for gene in unique_subsystem_features[subsystem_id]:
+                    #    gene_numerator += len(unique_subsystem_features[subsystem_id][gene])
+                    gene_numerator = len(subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set'])
+                    gene_denominator = len(subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set'])*len(subsystem_genomes_found)
+                    gene_conservation = 0
+                    if gene_denominator > 0:
+                        gene_conservation = float(gene_numerator) / float(gene_denominator)
+                    # role conservation
+                    role_numerator = 0
+                    role_denominator = 0
+                    if subsystem_id in unique_subsystem_roles:
+                        for role in unique_subsystem_roles[subsystem_id]:
+                            role_numerator += len(unique_subsystem_roles[subsystem_id][role])
+                        role_denominator = len(subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set'])*len(subsystem_genomes_found) 
+                    role_conservation = 0
+                    if role_denominator > 0:
+                        role_conservation = float(role_numerator) / float(role_denominator) * 100
                     new_entry = {
                         'superclass': superclass,
                         'class': clss,
                         'subclass': subclass,
                         'subsystem_name': subsystem_name,
-                        'subsystem_id': subsystem_dict[superclass][clss][subclass][subsystem_name]['subsystem_id'],
+                        'subsystem_id': subsystem_id,
                         'role_counts': len(subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set']),
                         'gene_counts': len(subsystem_dict[superclass][clss][subclass][subsystem_name]['gene_set']),
                         'genome_count': len(subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict']),
-                        'prop_active': float(variant_counts_dict[sub_key]['active'])/float(len(subsystem_dict[superclass][clss][subclass][subsystem_name]['role_set']))
+                        'gene_conservation': gene_conservation,
+                        'role_conservation': role_conservation,
+                        'prop_active': float(variant_counts_dict[subsystem_id]['active'])/float(subsystem_dict[superclass][clss][subclass][subsystem_name]['subsystem_counts'])
                     }
                     subsystems_table_list.append(new_entry)
-
-    if not subsystem_data_found:
-        return ({ 'success': False }) 
-
-    parsed_query_data = []
-    for line in subsystem_query_data:
-        new_line = ''
-        for field in subsystem_table_header:
-            if new_line != '':
-                new_line += '\t'
-            if field not in line:    
-                new_line += ' '
-            else:
-                value = line[field]
-                if not isinstance(value,str):
-                    value = str(value)
-                new_line += value 
-        parsed_query_data.append(new_line.split('\t'))
+    subsystems_table = pd.DataFrame(subsystems_table_list)
 
     # Variant matrix
-    # TODO: change SS to something else
-    # - for some reason casting genome_dict.keys() as a list returns an error
     variant_mtx_header = '\t\t\t\t\t\t'
     gid_str = ''
     genome_name_list = list(genome_dict.keys())
@@ -487,10 +542,11 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
         for clss in subsystem_dict[superclass]:
             for subclass in subsystem_dict[superclass][clss]: 
                 for subsystem_name in subsystem_dict[superclass][clss][subclass]:
-                    sub_key = superclass + clss + subclass + subsystem_name 
+                    #sub_key = superclass + clss + subclass + subsystem_name 
+                    subsystem_id = subsystem_dict[superclass][clss][subclass][subsystem_name]['subsystem_id']
                     inactive_value = 0 
                     new_var_line_p1 = f'{superclass}\t{clss}\t{subclass}\t{subsystem_name}'
-                    new_var_line_p1 += f"\t{variant_counts_dict[sub_key]['active']}\t{variant_counts_dict[sub_key]['likely']}\t{inactive_value}"
+                    new_var_line_p1 += f"\t{variant_counts_dict[subsystem_id]['active']}\t{variant_counts_dict[subsystem_id]['likely']}\t{inactive_value}"
                     new_var_line_p2 = ''
                     for genome_name in genome_name_list:
                         if genome_dict[genome_name] in subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict']:
@@ -504,14 +560,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
     variant_mtx_file = subsystems_file.replace('.tsv','_variant_mtx.tsv') 
     with open(variant_mtx_file,'w') as o:
         o.write(variant_mtx_text)
-
-    subsystem_df = pd.DataFrame(parsed_query_data,columns=subsystem_table_header)
-    subsystem_df.to_csv(subsystems_file,index=False,sep='\t')
-    subsystems_table = pd.DataFrame(subsystems_table_list)
-
-    gene_df = query_dict['feature']
-    gene_df = pd.merge(gene_df,subsystem_df.drop(return_columns_to_remove('subsystems_genes',subsystem_df.columns.tolist()),axis=1),on=['genome_id','feature_id'],how='inner')
-    
+ 
     output_json_file = subsystems_file.replace('.tsv','_tables.json')
     
     output_json = {}
@@ -721,15 +770,12 @@ def run_pathways(genome_ids, query_dict, output_file, output_dir, genome_data, s
         else:
             ec_conservation = float(ec_numerator) / float(ec_denominator) * 100.0
         # calculate gene_conservation
-        gene_numerator = 0
-        gene_denominator = 0
-        for gene in unique_pathway_features[pathway_id]:
-            gene_numerator += len(unique_pathway_features[pathway_id][gene])
-            gene_denominator += len(pathway_genomes_found)
+        gene_numerator = gene_count
+        gene_denominator = ec_count*len(pathway_genomes_found)
         if gene_denominator == 0:
             gene_conservation = 0
         else:
-            gene_conservation = float(gene_numerator) / float(gene_denominator) * 100.0
+            gene_conservation = float(gene_numerator) / float(gene_denominator)
         pathway_line = f'{annotation}\t{pathway_id}\t{pathway_name}\t{pathway_class}\t{genome_count}\t{ec_count}\t{gene_count}\t{genome_ec}\t{ec_conservation}\t{gene_conservation}'
         pathway_line_list.append(pathway_line)
         # now EC data
