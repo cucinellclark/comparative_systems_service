@@ -879,9 +879,9 @@ def run_all_queries(genome_ids, session):
         try:
             feature_df = getFeatureDataFrame(genome_ids,session, limit=2500000)
         except Exception as e:
-            print(e)
             import pdb
             pdb.set_trace()
+            print(e)
         if not feature_df is None:
             column_map = {
                 'Genome': 'genome_name',
