@@ -510,6 +510,9 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
                     role_conservation = 0
                     if role_denominator > 0:
                         role_conservation = float(role_numerator) / float(role_denominator) * 100
+                    if subsystem_id == 'Folate_biosynthesis_cluster':
+                        import pdb
+                        pdb.set_trace()
                     new_entry = {
                         'superclass': superclass,
                         'class': clss,
