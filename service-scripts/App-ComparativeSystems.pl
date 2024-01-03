@@ -126,7 +126,7 @@ sub process_compsystems
 
     # testing codon tree
     if (1) {
-
+        print "Run codon tree\n";
         my %phylo_fields = (
             'genome_ids' => $params->{genome_ids},
             'genome_group' => $params->{genome_groups}
@@ -150,7 +150,7 @@ sub process_compsystems
         
     }
 
-    die 'here';
+    die "here\n";
 
     my @output_suffixes = ([qr/\.tsv$/, 'tsv'],[qr/\.json$/, 'json'],[qr/\.txt$/, 'txt']);
     
