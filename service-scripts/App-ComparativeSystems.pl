@@ -149,6 +149,8 @@ sub process_compsystems
         
     }
 
+    die 'here';
+
     my @output_suffixes = ([qr/\.tsv$/, 'tsv'],[qr/\.json$/, 'json'],[qr/\.txt$/, 'txt']);
     
     my $outfile;
