@@ -117,6 +117,7 @@ sub process_compsystems
     warn Dumper (\@cmd, $params_to_app);
 
     # my $ok = run(\@cmd);
+    my $ok = 1;
 
     if (!$ok)
     {
@@ -130,7 +131,7 @@ sub process_compsystems
             'genome_ids' => $params->{genome_ids},
             'genome_group' => $params->{genome_groups}
         );  
-        my $output_json = encode_json(\%selected_fields);
+        my $output_json = encode_json(\%phylo_fields);
         open(my $file, '>', "$work_dir/file.json") or die "Couldn't open file.json: $!";
         print $file $output_json;
         close($file);
