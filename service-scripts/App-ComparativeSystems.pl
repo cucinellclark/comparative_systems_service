@@ -186,14 +186,12 @@ sub process_compsystems
 
         my $phylo_ok = IPC::Run::run([@phylo_cmd, @options]);
         if ($phylo_ok) {
-            die "codon tree succeeded\n";
+            warn "codon tree succeeded\n";
         } else {
-            die "codon tree failed\n";
+            warn "codon tree failed\n";
         } 
 
     }
-
-    die "here\n";
 
     my @output_suffixes = ([qr/\.tsv$/, 'tsv'],[qr/\.json$/, 'json'],[qr/\.txt$/, 'txt']);
     
@@ -201,6 +199,12 @@ sub process_compsystems
     opendir(D, $work_dir) or die "Cannot opendir $work_dir: $!";
     # TODO: not sure what this does?
     my @files = sort {$a cmp $b } grep { -f "$work_dir/$_" } readdir(D);
+
+    foreach my $f (@files) {
+        print "$f\n";
+    }
+
+    die "here\n";
 
     my $output = 1;
     my $output_dir = "$params->{output_path}/.$params->{output_file}";
