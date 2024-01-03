@@ -522,7 +522,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
                         'genome_count': len(subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict']),
                         'gene_conservation': gene_conservation,
                         'role_conservation': role_conservation,
-                        'prop_active': float(active_num)/float(subsystem_genomes_found)
+                        'prop_active': float(active_num)/float(len(subsystem_genomes_found))
                     }
                     subsystems_table_list.append(new_entry)
     subsystems_table = pd.DataFrame(subsystems_table_list)
