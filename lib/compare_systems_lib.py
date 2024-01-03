@@ -405,6 +405,9 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
                 variant_counts_dict[subsystem_id]['active'] = 0
                 variant_counts_dict[subsystem_id]['likely'] = 0
                 variant_counts_dict[subsystem_id]['inactive'] = 0
+            if subsystem_id == 'Folate_biosynthesis_cluster':
+                import pdb
+                pdb.set_trace()
             if active == 'active' or active == 'likely':
                 variant_counts_dict[subsystem_id][active] += 1
             else: # never reached, the genome just doesn't have an entry
