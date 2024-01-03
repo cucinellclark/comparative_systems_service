@@ -177,7 +177,7 @@ sub process_compsystems
         
         push(@options,
          @figtree_jar,
-         '--parametersJson', $output_json,
+         '--parametersJson', "$work_dir/file.json",
          '--maxGenes', $n_genes,
          '--bootstrapReps', $bootstraps,
          '--maxGenomesMissing', $max_missing,
