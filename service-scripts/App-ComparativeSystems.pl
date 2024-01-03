@@ -11,6 +11,7 @@ use File::Basename;
 use File::Slurp;
 use File::Temp;
 use File::Path 'make_path';
+use File::Find;
 use LWP::UserAgent;
 use JSON::XS;
 use IPC::Run qw(run);
@@ -196,9 +197,17 @@ sub process_compsystems
     my @output_suffixes = ([qr/\.tsv$/, 'tsv'],[qr/\.json$/, 'json'],[qr/\.txt$/, 'txt']);
     
     my $outfile;
-    opendir(D, $work_dir) or die "Cannot opendir $work_dir: $!";
-    # TODO: not sure what this does?
-    my @files = sort {$a cmp $b } grep { -f "$work_dir/$_" } readdir(D);
+    #opendir(D, $work_dir) or die "Cannot opendir $work_dir: $!";
+
+    my @files;
+
+    find(sub {
+        if (-f $_) {
+            push @files, $File::Find::name;
+        }
+    }, $work_dir);
+
+    @files = sort { $a cmp $b } @files; 
 
     foreach my $f (@files) {
         print "$f\n";
