@@ -122,6 +122,7 @@ sub process_compsystems
     {
         die "Command failed: @cmd\n";
     }
+    die "here\n";
 
     my @output_suffixes = ([qr/\.tsv$/, 'tsv'],[qr/\.json$/, 'json'],[qr/\.txt$/, 'txt']);
     
