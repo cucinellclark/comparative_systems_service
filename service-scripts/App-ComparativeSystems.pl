@@ -116,11 +116,37 @@ sub process_compsystems
 
     warn Dumper (\@cmd, $params_to_app);
 
-    my $ok = run(\@cmd);
+    # my $ok = run(\@cmd);
 
     if (!$ok)
     {
         die "Command failed: @cmd\n";
+    }
+
+    # testing codon tree
+    if (1) {
+
+        my %phylo_fields = (
+            'genome_ids' => $params->{genome_ids},
+            'genome_group' => $params->{genome_groups}
+        );  
+        my $output_json = encode_json(\%selected_fields);
+        open(my $file, '>', "$work_dir/file.json") or die "Couldn't open file.json: $!";
+        print $file $output_json;
+        close($file);
+
+        # my @cmd; 
+        # my @options;
+        # my $cpu = $ENV{P3_ALLOCATED_CPU};
+
+        # @cmd = ("p3x-build-codon-tree");
+        # if ($cpu)
+        # {
+        #     push(@options, "--threads", $cpu);
+        # }
+
+        #push(@options,''    
+        
     }
 
     my @output_suffixes = ([qr/\.tsv$/, 'tsv'],[qr/\.json$/, 'json'],[qr/\.txt$/, 'txt']);
