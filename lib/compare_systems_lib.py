@@ -405,9 +405,6 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
                 variant_counts_dict[subsystem_id]['active'] = 0
                 variant_counts_dict[subsystem_id]['likely'] = 0
                 variant_counts_dict[subsystem_id]['inactive'] = 0
-            if subsystem_id == 'Folate_biosynthesis_cluster':
-                import pdb
-                pdb.set_trace()
             if active == 'active' or active == 'likely':
                 variant_counts_dict[subsystem_id][active] += 1
             else: # never reached, the genome just doesn't have an entry
@@ -513,9 +510,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
                     role_conservation = 0
                     if role_denominator > 0:
                         role_conservation = float(role_numerator) / float(role_denominator) * 100
-                    if subsystem_id == 'Folate_biosynthesis_cluster':
-                        import pdb
-                        pdb.set_trace()
+                    active_num = variant_counts_dict[subsystem_id]['active'] + variant_counts_dict[subsystem_id]['likely']
                     new_entry = {
                         'superclass': superclass,
                         'class': clss,
@@ -527,7 +522,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
                         'genome_count': len(subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict']),
                         'gene_conservation': gene_conservation,
                         'role_conservation': role_conservation,
-                        'prop_active': float(variant_counts_dict[subsystem_id]['active'])/float(subsystem_dict[superclass][clss][subclass][subsystem_name]['subsystem_counts'])
+                        'prop_active': float(active_num)/float(subsystem_dict[superclass][clss][subclass][subsystem_name]['subsystem_counts'])
                     }
                     subsystems_table_list.append(new_entry)
     subsystems_table = pd.DataFrame(subsystems_table_list)
