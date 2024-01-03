@@ -137,18 +137,58 @@ sub process_compsystems
         print $file $output_json;
         close($file);
 
-        # my @cmd; 
-        # my @options;
-        # my $cpu = $ENV{P3_ALLOCATED_CPU};
+        my @phylo_cmd = ("p3x-build-codon-tree"); 
+        my @options;
+        my $cpu = $ENV{P3_ALLOCATED_CPU};
 
-        # @cmd = ("p3x-build-codon-tree");
-        # if ($cpu)
-        # {
-        #     push(@options, "--threads", $cpu);
-        # }
+        if ($cpu)
+        {
+            push(@options, "--threads", $cpu);
+        }
 
-        #push(@options,''    
+        my $phylo_dir = "$work_dir/phylotree";
+        make_path($phylo_dir);
+        push(@options,'--outputDirectory',$phylo_dir);   
+        push(@options, "--writePhyloxml");
+
+        # my $n_genes = $params->{number_of_genes};
+        # my $bootstraps = $params->{bootstraps};
+        # my $max_missing = $params->{max_genomes_missing};
+        # my $max_allowed_dups = $params->{max_allowed_dups};
+    
+        my $n_genes = 5;
+        my $bootstraps = 5;
+        my $max_missing = 3;
+        my $max_allowed_dups = 2;
         
+        my $raxml = "raxmlHPC-PTHREADS-SSE3";
+
+        my @figtrees = grep { -f $_ } sort { $b <=> $a }  <$ENV{KB_RUNTIME}/FigTree*/lib/figtree.jar>;
+        my @figtree_jar;
+        if (@figtrees)
+        {
+        @figtree_jar = ("--pathToFigtreeJar", $figtrees[0]);
+        }
+        else
+        {
+        warn "Cannot find figtree in $ENV{KB_RUNTIME}\n";
+        }
+        
+        push(@options,
+         @figtree_jar,
+         '--maxGenes', $n_genes,
+         '--bootstrapReps', $bootstraps,
+         '--maxGenomesMissing', $max_missing,
+         '--maxAllowedDups', $max_allowed_dups,
+         '--raxmlExecutable', $raxml);
+
+        my $phylo_ok = IPC::Run::run([@phylo_cmd, @options]);
+        if ($phylo_ok) {
+            die "codon tree succeeded\n";
+        } else {
+            die "codon tree failed\n";
+        } 
+
     }
 
     die "here\n";
