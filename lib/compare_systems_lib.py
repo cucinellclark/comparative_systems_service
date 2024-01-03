@@ -510,10 +510,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
                     role_conservation = 0
                     if role_denominator > 0:
                         role_conservation = float(role_numerator) / float(role_denominator) * 100
-                    active_num = variant_counts_dict[subsystem_id]['active'] + variant_counts_dict[subsystem_id]['likely']
-                    #if subsystem_id == 'Folate_biosynthesis_cluster':
-                    import pdb
-                    pdb.set_trace()
+                    active_num = len(subsystem_df[subsystem_df.subsystem_id == subsystem_id].genome_id.unique()) 
                     new_entry = {
                         'superclass': superclass,
                         'class': clss,
