@@ -222,7 +222,7 @@ sub process_compsystems
     # save codon tree output
     if ($run_codon_tree) {
        my $phylo_dir = "$work_dir/phylotree"; 
-       my $codon_output = "$app->result_folder/.codon_tree";
+       my $codon_output = "$output_dir/.codon_tree";
        save_output_files($codon_output, $phylo_dir);
     }
 }
