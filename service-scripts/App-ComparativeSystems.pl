@@ -185,13 +185,13 @@ sub run_codon_tree {
     #close($tmp);
 
     my $output_json = encode_json(\%phylo_fields);
-    open(my $file, '>', "$work_dir/file.json") or die "Couldn't open $file: $!";
+    open(my $file, '>', "$work_dir/file.json") or die "Couldn't open $work_dir/file.json: $!";
     print $file $output_json;
     close($file);
 
     my $codon_app = "CodonTree";
     my $app_spec = find_app_spec($codon_app);
-    my @phylo_cmd = ("App-CodonTree","https://p3.theseed.org/services/app_service",$app_spec,$file); 
+    my @phylo_cmd = ("App-CodonTree","https://p3.theseed.org/services/app_service",$app_spec,"$work_dir/file.json"); 
     #push(@phylo_cmd,"https://p3.theseed.org/services/app_service");
     #push(@phylo_cmd,$app_spec,"$work_dir/file.json");
 
