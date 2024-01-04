@@ -154,7 +154,7 @@ sub process_compsystems
     my $codon_tree_flag = $params->{codon_flag} ? $params->{codon_flag} : 0;
     if ($codon_tree_flag) {
         print STDOUT "work_dir1 = $work_dir\n";
-        run_codon_tree("$work_dir", $app, $params);
+        run_codon_tree(5, $app, $params);
         warn "Finished running codon tree\n";
     } else{
         warn "Codon tree flag false or doesn't exist\n";
