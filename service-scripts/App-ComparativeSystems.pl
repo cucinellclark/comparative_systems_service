@@ -131,6 +131,7 @@ sub process_compsystems
     my $run_codon_tree = $params->{codon_flag} ? $params->{codon_flag} : 0;
     if ($run_codon_tree) {
         print "Run codon tree\n";
+        die "terminating for check\n";
         my %phylo_fields = (
             'genome_ids' => $params->{genome_ids},
             'genome_group' => $params->{genome_groups}
