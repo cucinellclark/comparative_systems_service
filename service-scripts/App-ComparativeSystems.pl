@@ -274,10 +274,8 @@ sub save_output_files
 
     my $files = $app->workspace->ls({ paths => [ $codon_output ], recursive => 1});
 
-    foreach my $f (@{$files}) {
-        print "$f\n";
-    }
-    
+    print Dumper($files);
+ 
     #my $job_obj = {
     #    id => $app->task_id,
     #    app => $app->app_definition,
