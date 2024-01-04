@@ -226,16 +226,17 @@ sub process_compsystems
        eval {
         $app->workspace->create( { objects => [[$codon_output, 'folder']] } );
        };
-       eval {
-        $app->workspace->create( { objects => [["$output_dir/codon_tree", 'job_result']] } );
-       };
-       save_output_files($codon_output, $phylo_dir);
+       #eval {
+       # $app->workspace->create( { objects => [["$output_dir/codon_tree", 'job_result']] } );
+       #};
+       #setup_codon_tree_job($app, $phylo_dir);
+       save_output_files($app, $codon_output, $phylo_dir);
     }
 }
 
 sub save_output_files
 {
-    my($codon_output, $phylo_dir) = @_;
+    my($app, $codon_output, $phylo_dir) = @_;
     
     my %suffix_map = (fastq => 'reads',
               phyloxml => 'phyloxml',
@@ -270,4 +271,34 @@ sub save_output_files
     {
     warn "Output directory $phylo_dir does not exist\n";
     }
+
+    my $files = $app->workspace->ls({ paths => [ $codon_output ], recursive => 1});
+
+    foreach my $f (@{$files}) {
+        print "$f\n";
+    }
+    
+    =begin comment
+    my $job_obj = {
+        id => $app->task_id,
+        app => $app->app_definition,
+        parameters => {},
+        hostname => $app->host,
+        output_files => [ map { [ $_->[2] . $_->[0], $_->[4] ] } @{$files->{$phylo_dir}}],
+        job_output => $job_output,
+    };
+    
+
+    my $file = $self->params->{output_path} . "/" . $self->params->{output_file};
+    my $meta = { task_data => {
+        success => ($success ? 1 : 0),
+        task_id => $self->task_id,
+        start_time => $start_time,
+        end_time => $end_time,
+        elapsed_time => $elap,
+        app_id => $self->app_definition->{id},
+    }};
+    =end comment
+    =cut
+
 }
