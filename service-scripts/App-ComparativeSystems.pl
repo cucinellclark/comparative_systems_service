@@ -4,6 +4,7 @@
 
 use Bio::KBase::AppService::AppScript;
 use Bio::KBase::AppService::AppConfig;
+use Bio::KBase::AppService::AppSpecs;
 
 use strict;
 use Data::Dumper;
