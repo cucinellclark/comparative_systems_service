@@ -167,7 +167,7 @@ sub run_codon_tree {
     my $phylo_folder = "$params->{output_path}/.$params->{output_file}";
     my %phylo_fields = (
         'genome_ids' => $params->{genome_ids},
-        'genome_group' => $params->{genome_groups},
+        'genome_groups' => $params->{genome_groups},
         'number_of_genes' => '5',
         'max_genomes_missing' => '3',
         'max_allowed_dups' => '2',
