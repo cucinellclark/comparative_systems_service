@@ -224,10 +224,10 @@ sub process_compsystems
        my $phylo_dir = "$work_dir/phylotree"; 
        my $codon_output = "$output_dir/.codon_tree";
        eval {
-        $app->workspace->create( { objects => [["$output_dir/codon_tree", 'job_result']] } );
+        $app->workspace->create( { objects => [[$codon_output, 'folder']] } );
        };
        eval {
-        $app->workspace->create( { objects => [[$codon_output, 'folder']] } );
+        $app->workspace->create( { objects => [["$output_dir/codon_tree", 'job_result']] } );
        };
        save_output_files($codon_output, $phylo_dir);
     }
