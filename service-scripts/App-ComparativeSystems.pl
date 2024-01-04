@@ -193,6 +193,7 @@ sub run_codon_tree {
 
     my $codon_app = "CodonTree";
     my $app_spec = find_app_spec($codon_app);
+    print Dumper($app_spec);
     my @phylo_cmd = ("App-CodonTree","https://p3.theseed.org/services/app_service",$app_spec,$tmp); 
     #push(@phylo_cmd,"https://p3.theseed.org/services/app_service");
     #push(@phylo_cmd,$app_spec,"$work_dir/file.json");
