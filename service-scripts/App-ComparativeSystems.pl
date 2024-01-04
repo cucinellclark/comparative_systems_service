@@ -184,7 +184,7 @@ sub run_codon_tree {
     #print $tmp encode_json(\%phylo_fields);
     #close($tmp);
 
-    my $tmp = File::Temp->new();
+    my $tmp = File::Temp->new( CLEANUP => 0);
     my $output_json = encode_json(\%phylo_fields);
     #"$work_dir/file.json"
     open(my $file, '>', $tmp) or die "Couldn't open $tmp: $!";
