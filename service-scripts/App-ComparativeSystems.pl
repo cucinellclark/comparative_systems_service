@@ -127,11 +127,10 @@ sub process_compsystems
         die "Command failed: @cmd\n";
     }
 
-    # testing codon tree
+    # run codon tree
     my $run_codon_tree = $params->{codon_flag} ? $params->{codon_flag} : 0;
     if ($run_codon_tree) {
         print "Run codon tree\n";
-        die "terminating for check\n";
         my %phylo_fields = (
             'genome_ids' => $params->{genome_ids},
             'genome_group' => $params->{genome_groups}
@@ -201,25 +200,9 @@ sub process_compsystems
     my @output_suffixes = ([qr/\.tsv$/, 'tsv'],[qr/\.json$/, 'json'],[qr/\.txt$/, 'txt']);
     
     my $outfile;
-    #opendir(D, $work_dir) or die "Cannot opendir $work_dir: $!";
+    opendir(D, $work_dir) or die "Cannot opendir $work_dir: $!";
+    my @files = sort {$a cmp $b } grep { -f "$work_dir/$_" } readdir(D); 
 
-    my @files;
-
-    find(sub {
-        if (-f $_) {
-            push @files, $File::Find::name;
-        }
-    }, $work_dir);
-
-    @files = sort { $a cmp $b } @files; 
-
-    foreach my $f (@files) {
-        print "$f\n";
-    }
-
-    die "here\n";
-
-    my $output = 1;
     my $output_dir = "$params->{output_path}/.$params->{output_file}";
     for my $file (@files)
     {
@@ -227,7 +210,6 @@ sub process_compsystems
         {
             if ($file =~ $suf->[0])
             {
-                $output = 0;
                 my $type = $suf->[1];
 
                 $app->workspace->save_file_to_file("$work_dir/$file", {}, "$output_dir/$file", $type, 1, 
@@ -235,5 +217,51 @@ sub process_compsystems
                                                     $token);                                                   
             }
         }
+    }
+
+    # save codon tree output
+    if ($run_codon_tree) {
+       my $phylo_dir = "$work_dir/phylotree"; 
+       my $codon_output = "$app->result_folder/.codon_tree";
+       save_output_files($codon_output, $phylo_dir);
+    }
+}
+
+sub save_output_files
+{
+    my($codon_output, $phylo_dir) = @_;
+    
+    my %suffix_map = (fastq => 'reads',
+              phyloxml => 'phyloxml',
+              xml => 'phyloxml',
+              txt => 'txt',
+              png => 'png',
+              svg => 'svg',
+              nwk => 'nwk',
+              out => 'txt',
+              err => 'txt',
+              html => 'html');
+
+    my @suffix_map = map { ("--map-suffix", "$_=$suffix_map{$_}") } keys %suffix_map;
+
+    if (opendir(my $dh, $phylo_dir))
+    {
+    while (my $p = readdir($dh))
+    {
+        next if $p =~ /^\./;
+        
+        my @cmd = ("p3-cp", "-r", @suffix_map, "$phylo_dir/$p", "ws:" . $codon_output);
+        print "@cmd\n";
+        my $ok = IPC::Run::run(\@cmd);
+        if (!$ok)
+        {
+        warn "Error $? copying phylo_dir with @cmd\n";
+        }
+    }
+    closedir($dh);
+    }
+    else
+    {
+    warn "Output directory $phylo_dir does not exist\n";
     }
 }
