@@ -165,7 +165,6 @@ sub run_codon_tree {
     my ($app, $params, $dir) = @_;
     print "Run codon tree\n";
     my $phylo_folder = "$params->{output_path}/.$params->{output_file}";
-    die "phylo_folder = $phylo_folder\n";
     my %phylo_fields = (
         'genome_ids' => $params->{genome_ids},
         'genome_group' => $params->{genome_groups},
@@ -185,11 +184,12 @@ sub run_codon_tree {
     );  
     #print $tmp encode_json(\%phylo_fields);
     #close($tmp);
-    print STDOUT "work_dir2 = $dir\n";
     my $output_json = encode_json(\%phylo_fields);
     open(my $file, '>', "$dir/file.json") or die "Couldn't open $dir/file.json: $!";
     print $file $output_json;
     close($file);
+
+    die Dumper("$dir/file.json")."\n";
 
     my $codon_app = "CodonTree";
     my $app_spec = find_app_spec($codon_app);
