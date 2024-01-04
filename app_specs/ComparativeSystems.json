@@ -38,6 +38,14 @@
         "required": 0,
         "default": [],
         "type": "list"
+    },
+    {
+        "id": "codon_flag",
+        "label": "Codon tree flag",
+        "allow_multiple": false,
+        "required": 0,
+        "default": false,
+        "type": "bool"
     }
   ]
 }
