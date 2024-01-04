@@ -193,7 +193,7 @@ sub run_codon_tree {
 
     #my $codon_app = "CodonTree";
     my $codon_app = "GenomeAnnotation";
-    my $app_spec = find_app_spec(undef,$codon_app);
+    my $app_spec = find_app_spec($codon_app);
     print Dumper($app_spec);
     my @phylo_cmd = ("App-CodonTree","https://p3.theseed.org/services/app_service",$app_spec,$tmp); 
     #push(@phylo_cmd,"https://p3.theseed.org/services/app_service");
