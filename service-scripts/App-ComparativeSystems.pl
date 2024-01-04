@@ -210,6 +210,7 @@ sub find_app_spec
     my $specs = Bio::KBase::AppService::AppSpecs->new;
 
     my($spec, $spec_file) = $specs->find($app);
+    print Dumper($spec_file);
 
     return $spec_file;
 
