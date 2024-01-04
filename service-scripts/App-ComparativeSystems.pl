@@ -189,7 +189,7 @@ sub run_codon_tree {
     print $file $output_json;
     close($file);
     print "here\n";
-    die Dumper("$dir/file.json")."\n";
+    die Dumper($file)."\n";
 
     my $codon_app = "CodonTree";
     my $app_spec = find_app_spec($codon_app);
