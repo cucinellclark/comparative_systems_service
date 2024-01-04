@@ -226,6 +226,9 @@ sub process_compsystems
        eval {
         $app->workspace->create( { objects => [["$output_dir/codon_tree", 'job_result']] } );
        };
+       eval {
+        $app->workspace->create( { objects => [[$codon_output, 'folder']] } );
+       };
        save_output_files($codon_output, $phylo_dir);
     }
 }
