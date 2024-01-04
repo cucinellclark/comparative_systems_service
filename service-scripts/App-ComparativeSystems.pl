@@ -128,16 +128,6 @@ sub process_compsystems
         die "Command failed: @cmd\n";
     }
 
-    # run codon tree
-    my $codon_tree_flag = $params->{codon_flag} ? $params->{codon_flag} : 0;
-    if ($codon_tree_flag) {
-        run_codon_tree($app, $params, $work_dir);
-    } else{
-        warn "Codon tree flag false or doesn't exist\n";
-    }
-
-    die "stopping for testing\n";
-
     my @output_suffixes = ([qr/\.tsv$/, 'tsv'],[qr/\.json$/, 'json'],[qr/\.txt$/, 'txt']);
     
     my $outfile;
@@ -158,6 +148,15 @@ sub process_compsystems
                                                     $token);                                                   
             }
         }
+    }
+
+    # run codon tree
+    my $codon_tree_flag = $params->{codon_flag} ? $params->{codon_flag} : 0;
+    if ($codon_tree_flag) {
+        run_codon_tree($app, $params, $work_dir);
+        warn "Finished running codon tree\n";
+    } else{
+        warn "Codon tree flag false or doesn't exist\n";
     }
 }
 
@@ -193,13 +192,16 @@ sub run_codon_tree {
 
     my $codon_app = "CodonTree";
     my $app_spec = find_app_spec($codon_app);
-    print Dumper($app_spec);
     my @phylo_cmd = ("App-CodonTree","https://p3.theseed.org/services/app_service",$app_spec,$tmp); 
     #push(@phylo_cmd,"https://p3.theseed.org/services/app_service");
     #push(@phylo_cmd,$app_spec,"$work_dir/file.json");
 
     print STDERR "inline phylotree: @phylo_cmd\n";
 
+    my $phylo_ok = run(\@phylo_cmd);
+    if (!$phylo_ok) {
+        warn "codon tree failed with error $!";
+    }
 }
 
 sub find_app_spec
@@ -209,8 +211,6 @@ sub find_app_spec
     my $specs = Bio::KBase::AppService::AppSpecs->new;
 
     my($spec, $spec_file) = $specs->find($app);
-    print Dumper($spec);
-    print Dumper($spec_file);
 
     return $spec_file;
 
