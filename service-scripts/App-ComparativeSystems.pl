@@ -120,7 +120,7 @@ sub process_compsystems
 
     warn Dumper (\@cmd, $params_to_app);
 
-    # my $ok = run(\@cmd);
+    my $ok = run(\@cmd);
     my $ok = 1;
 
     if (!$ok)
