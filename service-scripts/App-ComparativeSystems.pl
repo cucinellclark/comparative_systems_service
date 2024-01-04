@@ -154,8 +154,7 @@ sub process_compsystems
     my $codon_tree_flag = $params->{codon_flag} ? $params->{codon_flag} : 0;
     if ($codon_tree_flag) {
         print STDOUT "work_dir1 = $work_dir\n";
-        $params->{work_dir} = $work_dir;
-        run_codon_tree($app, $params);
+        run_codon_tree($app, $params, 'test');
         warn "Finished running codon tree\n";
     } else{
         warn "Codon tree flag false or doesn't exist\n";
@@ -163,8 +162,8 @@ sub process_compsystems
 }
 
 sub run_codon_tree {
-    my ($app, $params) = $_;
-    my $dir = $params->{work_dir};
+    my ($app, $params, $dir) = $_;
+    die "dir is $dir\n";
     print "Run codon tree\n";
     my $phylo_folder = $params->{output_folder} . '/' . $params->{output_file};
     my %phylo_fields = (
