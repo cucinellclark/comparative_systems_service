@@ -191,9 +191,8 @@ sub run_codon_tree {
     #print $file $output_json;
     #close($file);
 
-    #my $codon_app = "CodonTree";
-    my $codon_app = "GenomeAnnotation";
-    my $app_spec = find_app_spec(undef,$codon_app);
+    my $codon_app = "CodonTree";
+    my $app_spec = find_app_spec($codon_app);
     print Dumper($app_spec);
     my @phylo_cmd = ("App-CodonTree","https://p3.theseed.org/services/app_service",$app_spec,$tmp); 
     #push(@phylo_cmd,"https://p3.theseed.org/services/app_service");
@@ -207,7 +206,6 @@ sub find_app_spec
 {
     my($self, $app) = @_;
 
-    print "KB_TOP = $ENV{KB_TOP}\n";
     my $specs = Bio::KBase::AppService::AppSpecs->new;
 
     my($spec, $spec_file) = $specs->find($app);
