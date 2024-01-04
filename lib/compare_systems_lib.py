@@ -510,6 +510,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
                     role_conservation = 0
                     if role_denominator > 0:
                         role_conservation = float(role_numerator) / float(role_denominator) * 100
+                    active_num = len(subsystem_df[subsystem_df.subsystem_id == subsystem_id].genome_id.unique()) 
                     new_entry = {
                         'superclass': superclass,
                         'class': clss,
@@ -521,7 +522,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
                         'genome_count': len(subsystem_dict[superclass][clss][subclass][subsystem_name]['active_genome_dict']),
                         'gene_conservation': gene_conservation,
                         'role_conservation': role_conservation,
-                        'prop_active': float(variant_counts_dict[subsystem_id]['active'])/float(subsystem_dict[superclass][clss][subclass][subsystem_name]['subsystem_counts'])
+                        'prop_active': float(active_num)/float(len(subsystem_genomes_found))
                     }
                     subsystems_table_list.append(new_entry)
     subsystems_table = pd.DataFrame(subsystems_table_list)
@@ -850,33 +851,16 @@ def generate_report(genome_ids, pathway_obj, subsystems_obj, proteinfams_obj, ou
     
 
 # Store pathways, subsystems, and features queries in a dictionary
-def run_all_queries(genome_ids, session):
+def run_feature_queries(genome_ids, session):
     query_dict = {}
-    ### Run pathways query
-    if False:
-        print('pathways query')
-        pathway_df = getPathwayDataFrame(genome_ids,session, limit=2500000)
-        if not pathway_df is None:
-            pathway_df['pathway_index'] = pathway_df['pathway_id']
-            pathway_df['ec_index'] = pathway_df['ec_number']
-            pathway_df.set_index('pathway_index', inplace=True)
-            query_dict['pathway'] = pathway_df
-        else:
-            sys.stderr.write('Pathways dataframe is None\n')
-    ### Run subsystems query
-    if False:
-        print('subsystems query')
-        subsystems_df = getSubsystemsDataFrame(genome_ids,session) 
-        if not subsystems_df is None:
-            subsystems_df['subsystem_index'] = subsystems_df['subsystem_id']
-            subsystems_df.set_index('subsystem_index', inplace=True)
-            query_dict['subsystems'] = subsystems_df
-        else:
-            sys.stderr.write('Subsystems dataframe is None\n')
     ### Run features query
     if True:
         print('features query')
-        feature_df = getFeatureDataFrame(genome_ids,session, limit=2500000)
+        try:
+            feature_df = getFeatureDataFrame(genome_ids,session, limit=2500000)
+        except Exception as e:
+            print(f'Error running features query:\n{e}\n')
+            return None
         if not feature_df is None:
             column_map = {
                 'Genome': 'genome_name',
@@ -960,7 +944,14 @@ def run_compare_systems(job_data, output_dir):
     # optionally add more genome info to output 
     genome_data = getDataForGenomes(genome_ids,s) 
 
-    query_dict = run_all_queries(genome_ids, s)
+    query_dict = run_feature_queries(genome_ids, s)
+    if not query_dict:
+        sys.stderr.write('Error running features queries: terminating\n')
+        report_text = 'Error running features queries: see stdout and stderr'
+        report_file = os.path.join(output_dir,'report.txt')
+        with open(report_file,'w') as o:
+            o.write(report_text)
+        sys.exit(0)
 
     # TODO: add chunking
     # TODO: add recipe
