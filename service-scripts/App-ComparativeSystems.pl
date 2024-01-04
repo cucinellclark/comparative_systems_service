@@ -153,6 +153,7 @@ sub process_compsystems
     # run codon tree
     my $codon_tree_flag = $params->{codon_flag} ? $params->{codon_flag} : 0;
     if ($codon_tree_flag) {
+        print STDOUT "work_dir1 = $work_dir\n";
         run_codon_tree($app, $params, $work_dir);
         warn "Finished running codon tree\n";
     } else{
@@ -183,7 +184,7 @@ sub run_codon_tree {
     );  
     #print $tmp encode_json(\%phylo_fields);
     #close($tmp);
-    print STDOUT "work_dir = $work_dir\n";
+    print STDOUT "work_dir2 = $work_dir\n";
     my $output_json = encode_json(\%phylo_fields);
     open(my $file, '>', "$work_dir/file.json") or die "Couldn't open $work_dir/file.json: $!";
     print $file $output_json;
