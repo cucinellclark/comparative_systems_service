@@ -207,7 +207,7 @@ sub find_app_spec
 {
     my($self, $app) = @_;
 
-
+    print "KB_TOP = $ENV{KB_TOP}\n";
     my $specs = Bio::KBase::AppService::AppSpecs->new;
 
     my($spec, $spec_file) = $specs->find($app);
