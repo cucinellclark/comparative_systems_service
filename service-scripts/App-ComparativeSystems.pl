@@ -278,27 +278,24 @@ sub save_output_files
         print "$f\n";
     }
     
-    =begin comment
-    my $job_obj = {
-        id => $app->task_id,
-        app => $app->app_definition,
-        parameters => {},
-        hostname => $app->host,
-        output_files => [ map { [ $_->[2] . $_->[0], $_->[4] ] } @{$files->{$phylo_dir}}],
-        job_output => $job_output,
-    };
-    
-
-    my $file = $self->params->{output_path} . "/" . $self->params->{output_file};
-    my $meta = { task_data => {
-        success => ($success ? 1 : 0),
-        task_id => $self->task_id,
-        start_time => $start_time,
-        end_time => $end_time,
-        elapsed_time => $elap,
-        app_id => $self->app_definition->{id},
-    }};
-    =end comment
-    =cut
+    #my $job_obj = {
+    #    id => $app->task_id,
+    #    app => $app->app_definition,
+    #    parameters => {},
+    #    hostname => $app->host,
+    #    output_files => [ map { [ $_->[2] . $_->[0], $_->[4] ] } @{$files->{$phylo_dir}}],
+    #    job_output => $job_output,
+    #};
+    #
+    #
+    #my $file = $self->params->{output_path} . "/" . $self->params->{output_file};
+    #my $meta = { task_data => {
+    #    success => ($success ? 1 : 0),
+    #    task_id => $self->task_id,
+    #    start_time => $start_time,
+    #    end_time => $end_time,
+    #    elapsed_time => $elap,
+    #    app_id => $self->app_definition->{id},
+    #}};
 
 }
