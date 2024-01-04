@@ -204,7 +204,7 @@ sub run_codon_tree {
 
 sub find_app_spec
 {
-    my($self, $app) = @_;
+    my($app) = @_;
 
     my $specs = Bio::KBase::AppService::AppSpecs->new;
 
