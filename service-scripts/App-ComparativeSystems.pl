@@ -91,8 +91,8 @@ sub process_compsystems
     # TODO: may not need a staging directory
     
     # my $cwd = getcwd();
-    # my $cwd = File::Temp->newdir( CLEANUP => 1 ); 
-    my $cwd = File::Temp->newdir( CLEANUP => 0 ); 
+    my $cwd = File::Temp->newdir( CLEANUP => 1 ); 
+    # my $cwd = File::Temp->newdir( CLEANUP => 0 ); 
     my $work_dir = "$cwd/work";
     my $stage_dir = "$cwd/stage";
 
