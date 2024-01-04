@@ -198,8 +198,6 @@ sub run_codon_tree {
 
     print STDERR "inline phylotree: @phylo_cmd\n";
 
-    print Dumper($tmp);
-
     my $phylo_ok = run(\@phylo_cmd);
     if (!$phylo_ok) {
         warn "codon tree failed with error $!";
