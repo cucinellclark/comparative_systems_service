@@ -223,9 +223,9 @@ sub process_compsystems
     if ($run_codon_tree) {
        my $phylo_dir = "$work_dir/phylotree"; 
        my $codon_output = "$output_dir/.codon_tree";
-       eval {
-        $app->workspace->create( { objects => [[$codon_output, 'job_result']] } );
-       };
+       #eval {
+       # $app->workspace->create( { objects => [[$codon_output, 'job_result']] } );
+       #};
        save_output_files($codon_output, $phylo_dir);
     }
 }
