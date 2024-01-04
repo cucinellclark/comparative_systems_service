@@ -163,7 +163,6 @@ sub process_compsystems
 
 sub run_codon_tree {
     my ($app, $params, $dir) = @_;
-    die "dir is $dir\n";
     print "Run codon tree\n";
     my $phylo_folder = $params->{output_folder} . '/' . $params->{output_file};
     my %phylo_fields = (
