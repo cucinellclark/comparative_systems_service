@@ -128,7 +128,8 @@ sub process_compsystems
     }
 
     # testing codon tree
-    if (1) {
+    my $run_codon_tree = $params->{codon_flag} ? $params->{codon_flag} : 0;
+    if ($run_codon_tree) {
         print "Run codon tree\n";
         my %phylo_fields = (
             'genome_ids' => $params->{genome_ids},
@@ -192,6 +193,8 @@ sub process_compsystems
             warn "codon tree failed\n";
         } 
 
+    } else{
+        warn "Codon tree flag false or doesn't exist\n";
     }
 
     my @output_suffixes = ([qr/\.tsv$/, 'tsv'],[qr/\.json$/, 'json'],[qr/\.txt$/, 'txt']);
