@@ -181,16 +181,20 @@ sub run_codon_tree {
         "output_path" => $phylo_folder,
         "output_file" => 'codon_tree'
     );  
-    my $output_json = encode_json(\%phylo_fields);
-    open(my $file, '>', "$work_dir/file.json") or die "Couldn't open file.json: $!";
-    print $file $output_json;
-    close($file);
+    my $tmp = File::Temp->new();
+    print $tmp encode_json(\%phylo_fields);
+    close($tmp);
+
+    #my $output_json = encode_json(\%phylo_fields);
+    #open(my $file, '>', "$work_dir/file.json") or die "Couldn't open file.json: $!";
+    #print $file $output_json;
+    #close($file);
 
     my $codon_app = "CodonTree";
     my $app_spec = $app->find_app_spec($codon_app);
-    my @phylo_cmd = ("App-CodonTree"); 
-    push(@phylo_cmd,"https://p3.theseed.org/services/app_service");
-    push(@phylo_cmd,$app_spec,"$work_dir/file.json");
+    my @phylo_cmd = ("App-CodonTree","https://p3.theseed.org/services/app_service",$app_spec,$tmp); 
+    #push(@phylo_cmd,"https://p3.theseed.org/services/app_service");
+    #push(@phylo_cmd,$app_spec,"$work_dir/file.json");
 
     print STDERR "inline phylotree: @phylo_cmd\n";
 
