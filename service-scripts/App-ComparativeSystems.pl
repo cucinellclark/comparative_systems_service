@@ -197,12 +197,12 @@ sub run_codon_tree {
     #push(@phylo_cmd,"https://p3.theseed.org/services/app_service");
     #push(@phylo_cmd,$app_spec,"$work_dir/file.json");
 
-    print STDERR "inline phylotree: @phylo_cmd\n";
+    print STDOUT "inline phylotree: @phylo_cmd\n";
 
-    my $phylo_ok = run(\@phylo_cmd);
-    if (!$phylo_ok) {
-        warn "codon tree failed with error $!";
-    }
+    #my $phylo_ok = run(\@phylo_cmd);
+    #if (!$phylo_ok) {
+    #    warn "codon tree failed with error $!";
+    #}
 }
 
 sub find_app_spec
