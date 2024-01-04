@@ -128,74 +128,14 @@ sub process_compsystems
     }
 
     # run codon tree
-    my $run_codon_tree = $params->{codon_flag} ? $params->{codon_flag} : 0;
-    if ($run_codon_tree) {
-        print "Run codon tree\n";
-        my %phylo_fields = (
-            'genome_ids' => $params->{genome_ids},
-            'genome_group' => $params->{genome_groups}
-        );  
-        my $output_json = encode_json(\%phylo_fields);
-        open(my $file, '>', "$work_dir/file.json") or die "Couldn't open file.json: $!";
-        print $file $output_json;
-        close($file);
-
-        my @phylo_cmd = ("p3x-build-codon-tree"); 
-        my @options;
-        my $cpu = $ENV{P3_ALLOCATED_CPU};
-
-        if ($cpu)
-        {
-            push(@options, "--threads", $cpu);
-        }
-
-        my $phylo_dir = "$work_dir/phylotree";
-        make_path($phylo_dir);
-        push(@options,'--outputDirectory',$phylo_dir);   
-        push(@options, "--writePhyloxml");
-
-        # my $n_genes = $params->{number_of_genes};
-        # my $bootstraps = $params->{bootstraps};
-        # my $max_missing = $params->{max_genomes_missing};
-        # my $max_allowed_dups = $params->{max_allowed_dups};
-    
-        my $n_genes = 5;
-        my $bootstraps = 5;
-        my $max_missing = 3;
-        my $max_allowed_dups = 2;
-        
-        my $raxml = "raxmlHPC-PTHREADS-SSE3";
-
-        my @figtrees = grep { -f $_ } sort { $b <=> $a }  <$ENV{KB_RUNTIME}/FigTree*/lib/figtree.jar>;
-        my @figtree_jar;
-        if (@figtrees)
-        {
-        @figtree_jar = ("--pathToFigtreeJar", $figtrees[0]);
-        }
-        else
-        {
-        warn "Cannot find figtree in $ENV{KB_RUNTIME}\n";
-        }
-        
-        push(@options,
-         @figtree_jar,
-         '--parametersJson', "$work_dir/file.json",
-         '--maxGenes', $n_genes,
-         '--bootstrapReps', $bootstraps,
-         '--maxGenomesMissing', $max_missing,
-         '--maxAllowedDups', $max_allowed_dups,
-         '--raxmlExecutable', $raxml);
-
-        my $phylo_ok = IPC::Run::run([@phylo_cmd, @options]);
-        if ($phylo_ok) {
-            warn "codon tree succeeded\n";
-        } else {
-            warn "codon tree failed\n";
-        } 
-
+    my $codon_tree_flag = $params->{codon_flag} ? $params->{codon_flag} : 0;
+    if ($codon_tree_flag) {
+        run_codon_tree($app, $params, $work_dir);
     } else{
         warn "Codon tree flag false or doesn't exist\n";
     }
+
+    die "stopping for testing\n";
 
     my @output_suffixes = ([qr/\.tsv$/, 'tsv'],[qr/\.json$/, 'json'],[qr/\.txt$/, 'txt']);
     
@@ -218,82 +158,53 @@ sub process_compsystems
             }
         }
     }
-
-    # save codon tree output
-    if ($run_codon_tree) {
-       my $phylo_dir = "$work_dir/phylotree"; 
-       my $codon_output = "$output_dir/.codon_tree";
-       eval {
-        $app->workspace->create( { objects => [[$codon_output, 'folder']] } );
-       };
-       #eval {
-       # $app->workspace->create( { objects => [["$output_dir/codon_tree", 'job_result']] } );
-       #};
-       #setup_codon_tree_job($app, $phylo_dir);
-       save_output_files($app, $codon_output, $phylo_dir);
-    }
 }
 
-sub save_output_files
+sub run_codon_tree {
+    my ($app, $params, $work_dir) = $_;
+    print "Run codon tree\n";
+    my $phylo_folder = $params->{output_folder} . '/' . $params->{output_file};
+    my %phylo_fields = (
+        'genome_ids' => $params->{genome_ids},
+        'genome_group' => $params->{genome_groups},
+        'number_of_genes' => '5',
+        'max_genomes_missing' => '3',
+        'max_allowed_dups' => '2',
+        "genome_metadata_fields" => [
+            "collection_year",
+            "host_common_name",
+            "isolation_country",
+            "strain",
+            "genome_name",
+            "genome_id"
+        ], 
+        "output_path" => $phylo_folder,
+        "output_file" => 'codon_tree'
+    );  
+    my $output_json = encode_json(\%phylo_fields);
+    open(my $file, '>', "$work_dir/file.json") or die "Couldn't open file.json: $!";
+    print $file $output_json;
+    close($file);
+
+    my $codon_app = "CodonTree";
+    my $app_spec = $self->find_app_spec($codon_app);
+    my @phylo_cmd = ("App-CodonTree"); 
+    push(@phylo_cmd,"https://p3.theseed.org/services/app_service");
+    push(@phylo_cmd,$app_spec,"$work_dir/file.json");
+
+    print STDERR "inline phylotree: @phylo_cmd\n";
+
+}
+
+sub find_app_spec
 {
-    my($app, $codon_output, $phylo_dir) = @_;
-    
-    my %suffix_map = (fastq => 'reads',
-              phyloxml => 'phyloxml',
-              xml => 'phyloxml',
-              txt => 'txt',
-              png => 'png',
-              svg => 'svg',
-              nwk => 'nwk',
-              out => 'txt',
-              err => 'txt',
-              html => 'html');
+    my($self, $app) = @_;
 
-    my @suffix_map = map { ("--map-suffix", "$_=$suffix_map{$_}") } keys %suffix_map;
 
-    if (opendir(my $dh, $phylo_dir))
-    {
-    while (my $p = readdir($dh))
-    {
-        next if $p =~ /^\./;
-        
-        my @cmd = ("p3-cp", "-r", @suffix_map, "$phylo_dir/$p", "ws:" . "$codon_output/$p");
-        print "@cmd\n";
-        my $ok = IPC::Run::run(\@cmd);
-        if (!$ok)
-        {
-        warn "Error $? copying phylo_dir with @cmd\n";
-        }
-    }
-    closedir($dh);
-    }
-    else
-    {
-    warn "Output directory $phylo_dir does not exist\n";
-    }
+    my $specs = Bio::KBase::AppService::AppSpecs->new;
 
-    my $files = $app->workspace->ls({ paths => [ $codon_output ], recursive => 1});
+    my($spec, $spec_file) = $specs->find($app);
 
-    print Dumper($files);
- 
-    #my $job_obj = {
-    #    id => $app->task_id,
-    #    app => $app->app_definition,
-    #    parameters => {},
-    #    hostname => $app->host,
-    #    output_files => [ map { [ $_->[2] . $_->[0], $_->[4] ] } @{$files->{$phylo_dir}}],
-    #    job_output => $job_output,
-    #};
-    #
-    #
-    #my $file = $self->params->{output_path} . "/" . $self->params->{output_file};
-    #my $meta = { task_data => {
-    #    success => ($success ? 1 : 0),
-    #    task_id => $self->task_id,
-    #    start_time => $start_time,
-    #    end_time => $end_time,
-    #    elapsed_time => $elap,
-    #    app_id => $self->app_definition->{id},
-    #}};
+    return $spec_file;
 
 }
