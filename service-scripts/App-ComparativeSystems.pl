@@ -197,10 +197,10 @@ sub run_codon_tree {
 
     print STDOUT "inline phylotree: @phylo_cmd\n";
 
-    #my $phylo_ok = run(\@phylo_cmd);
-    #if (!$phylo_ok) {
-    #    warn "codon tree failed with error $!";
-    #}
+    my $phylo_ok = run(\@phylo_cmd);
+    if (!$phylo_ok) {
+        warn "codon tree failed with error $!";
+    }
 }
 
 sub find_app_spec
