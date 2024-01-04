@@ -223,6 +223,9 @@ sub process_compsystems
     if ($run_codon_tree) {
        my $phylo_dir = "$work_dir/phylotree"; 
        my $codon_output = "$output_dir/.codon_tree";
+       eval {
+        $app->workspace->create( { objects => [[$codon_output, 'job_result']] } );
+       };
        save_output_files($codon_output, $phylo_dir);
     }
 }
@@ -250,7 +253,7 @@ sub save_output_files
     {
         next if $p =~ /^\./;
         
-        my @cmd = ("p3-cp", "-r", @suffix_map, "$phylo_dir/$p", "ws:" . $codon_output);
+        my @cmd = ("p3-cp", "-r", @suffix_map, "$phylo_dir/$p", "ws:" . "$codon_output/$p");
         print "@cmd\n";
         my $ok = IPC::Run::run(\@cmd);
         if (!$ok)
