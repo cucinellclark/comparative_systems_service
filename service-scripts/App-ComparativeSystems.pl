@@ -188,7 +188,7 @@ sub run_codon_tree {
     open(my $file, '>', "$dir/file.json") or die "Couldn't open $dir/file.json: $!";
     print $file $output_json;
     close($file);
-
+    print "here\n";
     die Dumper("$dir/file.json")."\n";
 
     my $codon_app = "CodonTree";
