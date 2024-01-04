@@ -93,7 +93,7 @@ sub process_compsystems
     # my $cwd = getcwd();
     # my $cwd = File::Temp->newdir( CLEANUP => 1 ); 
     my $cwd = File::Temp->newdir( CLEANUP => 0 ); 
-    my $work_dir = "$cwd/work";
+    our $work_dir = "$cwd/work";
     my $stage_dir = "$cwd/stage";
 
     -d $work_dir or mkdir $work_dir or die "Cannot mkdir $work_dir: $!";
