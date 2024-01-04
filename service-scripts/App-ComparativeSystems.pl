@@ -183,7 +183,7 @@ sub run_codon_tree {
     );  
     #print $tmp encode_json(\%phylo_fields);
     #close($tmp);
-
+    print STDOUT "work_dir = $work_dir\n";
     my $output_json = encode_json(\%phylo_fields);
     open(my $file, '>', "$work_dir/file.json") or die "Couldn't open $work_dir/file.json: $!";
     print $file $output_json;
