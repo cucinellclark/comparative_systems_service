@@ -953,11 +953,16 @@ def run_compare_systems(job_data, output_dir):
             o.write(report_text)
         sys.exit(0)
 
-    # TODO: add chunking
-    # TODO: add recipe
     # TODO: add multithreading
-    pathway_success = run_pathways(genome_ids, query_dict, output_file, output_dir, genome_data, s)
-    subsystems_success = run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, s)
-    proteinfams_success = run_families(genome_ids, query_dict, output_file, output_dir, genome_data, genome_group_dict, s)
+    pool = multiprocessing.Pool(processes=3)
+    pathway_result = pool.apply_async(run_pathways, args = (genome_ids, query_dict, output_file, output_dir, genome_data, s))
+    subsystems_result = pool.apply_async(run_subsystems, args = (genome_ids, query_dict, output_file, output_dir, genome_data, s))
+    proteinfams_result = pool.apply_async(run_families, args = (genome_ids, query_dict, output_file, output_dir, genome_data, genome_group_dict, s))
+
+    pathway_success = pathway_result.get()
+    subsystems_success = subsystems_result.get()
+    proteinfams_success = proteinfams_result.get()
+    pool.close()
+    pool.join()
 
     generate_report(genome_ids,pathway_success,subsystems_success,proteinfams_success,output_dir)
