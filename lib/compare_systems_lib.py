@@ -76,6 +76,7 @@ def return_columns_to_remove(system,columns):
         return [] 
 
 def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, genome_group_dict, session):
+    print('starting protein families')
     data_dict = {} 
     data_dict['plfam'] = {}
     data_dict['pgfam'] = {}
@@ -308,7 +309,7 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, g
     return ({ 'success': True, 'genomes': present_genome_ids })
 
 def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, session):
-
+    print('starting subsystems')
     subsystems_file = os.path.join(output_dir,output_file+'_subsystems.tsv')
     subsystem_line_list = []
     subsystem_header = 'superclass\tclass\tsubclass\tsubsystem_name\tgene_count\trole_count'
@@ -578,7 +579,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
     return ({ 'success': True, 'genomes': list(subsystem_genomes_found) })
 
 def run_pathways(genome_ids, query_dict, output_file, output_dir, genome_data, session):
-    
+    print('starting pathways') 
     pathways_file = os.path.join(output_dir,output_file+'_pathways.tsv')
     #pathway_df = query_dict['pathway']
     #pathway_df.to_csv(pathways_file,sep='\t',index=False)
