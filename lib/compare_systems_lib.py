@@ -76,6 +76,7 @@ def return_columns_to_remove(system,columns):
         return [] 
 
 def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, genome_group_dict, session):
+    print('starting protein families')
     data_dict = {} 
     data_dict['plfam'] = {}
     data_dict['pgfam'] = {}
@@ -308,7 +309,7 @@ def run_families(genome_ids, query_dict, output_file, output_dir, genome_data, g
     return ({ 'success': True, 'genomes': present_genome_ids })
 
 def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, session):
-
+    print('starting subsystems')
     subsystems_file = os.path.join(output_dir,output_file+'_subsystems.tsv')
     subsystem_line_list = []
     subsystem_header = 'superclass\tclass\tsubclass\tsubsystem_name\tgene_count\trole_count'
@@ -578,7 +579,7 @@ def run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data,
     return ({ 'success': True, 'genomes': list(subsystem_genomes_found) })
 
 def run_pathways(genome_ids, query_dict, output_file, output_dir, genome_data, session):
-    
+    print('starting pathways') 
     pathways_file = os.path.join(output_dir,output_file+'_pathways.tsv')
     #pathway_df = query_dict['pathway']
     #pathway_df.to_csv(pathways_file,sep='\t',index=False)
@@ -953,11 +954,16 @@ def run_compare_systems(job_data, output_dir):
             o.write(report_text)
         sys.exit(0)
 
-    # TODO: add chunking
-    # TODO: add recipe
     # TODO: add multithreading
-    pathway_success = run_pathways(genome_ids, query_dict, output_file, output_dir, genome_data, s)
-    subsystems_success = run_subsystems(genome_ids, query_dict, output_file, output_dir, genome_data, s)
-    proteinfams_success = run_families(genome_ids, query_dict, output_file, output_dir, genome_data, genome_group_dict, s)
+    pool = multiprocessing.Pool(processes=3)
+    pathway_result = pool.apply_async(run_pathways, args = (genome_ids, query_dict, output_file, output_dir, genome_data, s))
+    subsystems_result = pool.apply_async(run_subsystems, args = (genome_ids, query_dict, output_file, output_dir, genome_data, s))
+    proteinfams_result = pool.apply_async(run_families, args = (genome_ids, query_dict, output_file, output_dir, genome_data, genome_group_dict, s))
+
+    pathway_success = pathway_result.get()
+    subsystems_success = subsystems_result.get()
+    proteinfams_success = proteinfams_result.get()
+    pool.close()
+    pool.join()
 
     generate_report(genome_ids,pathway_success,subsystems_success,proteinfams_success,output_dir)
