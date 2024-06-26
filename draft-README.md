@@ -18,6 +18,7 @@ This module provides the following application specfication(s):
 
 ## See also
 
+* [Comparative Systems Service Quick Reference](https://www.bv-brc.org/docs/quick_references/services/comparative_systems.html)
   * [Comparative Systems Service](https://www.bv-brc.org/docs/https://www.bv-brc.org/app/ComparativeSystems.html)
   * [Comparative Systems Service Tutorial](https://www.bv-brc.org/docs//tutorial/comparative_systems/comparative_systems.html)
   * [Pathway Comparison Tool Quick Reference Guide](https://www.bv-brc.org/docs//quick_references/other/pathway_comparison_tool.html)
